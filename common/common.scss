@@ -130,6 +130,57 @@
       }
     }
 
+      // Event date in header title suffix (Discourse Events plugin)
+      // Scope within topic-cards to avoid global leakage
+      .header-topic-title-suffix-outlet {
+        margin-left: auto; // push to right edge of title row
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .header-topic-title-suffix-outlet.event-date-container .event-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35em;
+        padding: 0.25em 0.5em;
+        border: 1px solid var(--primary-low);
+        background: var(--primary-very-low);
+        border-radius: var(--d-border-radius);
+        color: var(--primary-high);
+        line-height: 1.1;
+        text-decoration: none;
+      }
+
+      // Prevent underline from title row hover
+      .link-top-line:hover .header-topic-title-suffix-outlet,
+      .link-top-line:hover .header-topic-title-suffix-outlet * {
+        text-decoration: none;
+      }
+
+      .header-topic-title-suffix-outlet.event-date-container .event-date .indicator {
+        width: 0.5em;
+        height: 0.5em;
+        border-radius: 50%;
+        background: var(--success);
+        flex: 0 0 auto;
+      }
+
+      .header-topic-title-suffix-outlet.event-date-container .event-date .text {
+        font-size: var(--font-down-1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 16ch;
+        display: inline-block;
+      }
+
+      @media (max-width: 480px) {
+        .topic-cards-list .main-link .link-top-line .header-topic-title-suffix-outlet.event-date-container .event-date .text {
+          max-width: 12ch;
+        }
+      }
+
+
     .title {
       color: var(--title-color);
       font-weight: var(--topic-title-font-weight);
@@ -239,14 +290,17 @@
         .right-aligned {
           margin-left: auto;
           display: flex;
-          justify-content: space-between;
           align-items: center;
+          gap: var(--space-4);
+          flex-wrap: nowrap;
+        }
 
-          .item {
-            flex-grow: 0;
-            flex-shrink: 1;
-            margin-left: var(--space-4);
-          }
+        .item {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          flex: 0 0 auto;
+          white-space: nowrap;
         }
 
         .topic__like-button {
@@ -295,6 +349,10 @@
       &__publish-date {
         font-size: var(--font-down-1);
         color: var(--metadata-color);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        white-space: nowrap;
       }
 
       &__excerpt {
