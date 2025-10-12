@@ -16,8 +16,9 @@
   }
 
   .pull-left,
-  .topic-item-stats {
-    display: none;
+  .topic-item-stats,
+  .topic-item-metadata {
+    display: none !important;
   }
 
   .topic-list-data {
@@ -38,7 +39,10 @@
 
   &__tags {
     display: block;
-    margin: 0 var(--space-2) var(--space-2);
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 var(--space-2);
+    padding: 0 var(--space-2);
   }
 
   .main-link {
@@ -63,17 +67,7 @@
     }
 
     .link-bottom-line {
-      display: flex;
-      margin-bottom: var(--space-1);
-
-      // Limit tags to single line on mobile
-      .discourse-tags {
-        max-height: calc(var(--line-height-large) * 1em);
-
-        &::after {
-          height: 1.4em;
-        }
-      }
+      display: none !important; // avoid duplicate tags/meta on mobile
     }
   }
 }
