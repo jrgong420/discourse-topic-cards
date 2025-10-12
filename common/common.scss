@@ -144,6 +144,21 @@
         gap: 0.35em;
         padding: 0.25em 0.5em;
         border: 1px solid var(--primary-low);
+
+      // Prevent width overflow: allow title to shrink and keep suffix inside
+      .topic-cards-list .main-link .link-top-line {
+        width: 100%;
+        min-width: 0; // critical for flex children to not overflow
+      }
+      .topic-cards-list .main-link .link-top-line .title {
+        flex: 1 1 auto;
+        min-width: 0; // allow ellipsis to take effect
+      }
+      .topic-cards-list .main-link .link-top-line .header-topic-title-suffix-outlet {
+        flex: 0 0 auto; // don’t let badge stretch or push container width
+        margin-left: var(--space-2);
+      }
+
         background: var(--primary-very-low);
         border-radius: var(--d-border-radius);
         color: var(--primary-high);
