@@ -46,6 +46,13 @@
     }
   }
 
+  // Focus state for accessibility
+  &:focus-within {
+    outline: 2px solid var(--tertiary);
+    outline-offset: 2px;
+    box-shadow: var(--shadow-card);
+  }
+
   &.selected {
     .title {
       color: var(--quaternary) !important;
@@ -84,7 +91,14 @@
       object-fit: cover;
       border-top-left-radius: var(--d-border-radius-large);
       border-bottom-left-radius: var(--d-border-radius-large);
+      background: var(--primary-low); // Placeholder while loading
     }
+  }
+
+  // Normalize thumbnail aspect ratio in max-height mode
+  &.has-max-height &__thumbnail .main-thumbnail {
+    aspect-ratio: 16 / 9;
+    object-position: center;
   }
 
   .main-link {
@@ -97,7 +111,8 @@
       "metadata metadata";
     grid-template-rows: auto auto 1fr auto auto;
     flex-grow: 1;
-    padding: var(--space-4) var(--space-6) var(--space-4) 0 !important;
+    padding: var(--space-3) var(--space-5) var(--space-3) 0 !important;
+    gap: var(--space-2) 0;
     box-sizing: border-box;
     box-shadow: none !important;
 
@@ -118,6 +133,7 @@
     .title {
       color: var(--title-color);
       font-weight: var(--topic-title-font-weight);
+      font-size: var(--d-topic-list-title-font-size);
 
       // limit title to 2 lines
       line-height: var(--line-height-large);
@@ -137,12 +153,47 @@
 
     .link-bottom-line {
       grid-area: tags;
-      margin-bottom: var(--space-3);
+      margin-bottom: var(--space-2);
       gap: 0 var(--space-2);
       line-height: var(--line-height-large);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
 
-      .badge-wrapper {
+      // Show category badges with core styles
+      .badge-category__wrapper {
+        display: inline-flex;
+        margin-right: var(--space-2);
+      }
+
+      // Hide only the redundant badge wrapper, not categories
+      .badge-wrapper:not(.badge-category__wrapper) {
         display: none;
+      }
+
+      // Tags with 2-line limit and fade
+      .discourse-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-1);
+        max-height: calc(2 * var(--line-height-large) * 1em);
+        overflow: hidden;
+        position: relative;
+
+        &::after {
+          content: "";
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: 3em;
+          height: 1.4em;
+          background: linear-gradient(
+            to right,
+            transparent,
+            var(--secondary) 70%
+          );
+          pointer-events: none;
+        }
       }
 
       .discourse-tag.box {
@@ -169,8 +220,16 @@
         gap: 0 var(--space-2);
         line-height: var(--line-height-large);
 
-        .number,
-        .d-icon,
+        .number {
+          font-weight: bold;
+          font-size: var(--font-down-1);
+          color: var(--metadata-color);
+        }
+
+        .d-icon {
+          color: var(--primary-medium);
+        }
+
         .activity a {
           font-weight: bold;
           font-size: var(--font-down-1);
@@ -193,7 +252,7 @@
         .topic__like-button {
           background-color: transparent;
           border: none;
-          border-radius: 4px;
+          border-radius: var(--d-border-radius);
           transition: all 200ms ease-in-out;
 
           .d-icon {
@@ -243,7 +302,7 @@
       }
 
       &__excerpt-text {
-        margin-block: var(--space-2) var(--space-4);
+        margin-block: var(--space-1) var(--space-3);
         font-size: var(--font-down-1);
         color: var(--excerpt-color);
         line-height: var(--line-height-large);

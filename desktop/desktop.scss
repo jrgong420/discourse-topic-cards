@@ -1,3 +1,21 @@
 .topic-card:has(.topic-card__thumbnail).has-max-height {
   max-height: #{$card-max-height}px;
+  overflow: hidden;
+
+  // Ensure grid layout handles overflow gracefully
+  .main-link {
+    min-height: 0; // Allow grid items to shrink below content size
+    overflow: hidden;
+  }
+
+  // Excerpt is the flex region that absorbs overflow
+  .topic-card__excerpt {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topic-card__excerpt-text {
+    // Ensure excerpt doesn't force card to grow beyond max-height
+    overflow: hidden;
+  }
 }
