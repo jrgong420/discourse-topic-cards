@@ -2,7 +2,7 @@
 
 RSpec.describe "Card style configurations", type: :system do
   fab!(:theme) { upload_theme_component }
-  fab!(:category) { Fabricate(:category) }
+  fab!(:category)
   fab!(:topic1) { Fabricate(:topic, category: category) }
   fab!(:topic2) { Fabricate(:topic, category: category) }
 
@@ -80,6 +80,87 @@ RSpec.describe "Card style configurations", type: :system do
 
     it "renders topic title" do
       expect(page).to have_css(".link-top-line")
+    end
+  end
+
+  context "max-height for landscape cards" do
+    let(:desktop_style) { "landscape" }
+    let(:mobile_style) { "landscape" }
+
+    before do
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        show_on_categories: ""
+        card_style_desktop: landscape
+        card_style_mobile: landscape
+        set_card_max_height: true
+        card_max_height: 275
+      YAML
+      theme.save!
+      page.driver.browser.manage.window.resize_to(1280, 800)
+      visit "/c/#{category.slug}/#{category.id}"
+    end
+
+    it "applies has-max-height class to landscape cards" do
+      expect(page).to have_css(".topic-card--landscape.has-max-height")
+    end
+
+    it "does not apply has-max-height to portrait cards" do
+      expect(page).not_to have_css(".topic-card--portrait.has-max-height")
+    end
+  end
+
+  context "max-width for portrait cards" do
+    let(:desktop_style) { "portrait" }
+    let(:mobile_style) { "portrait" }
+
+    before do
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        show_on_categories: ""
+        card_style_desktop: portrait
+        card_style_mobile: portrait
+        set_card_max_width: true
+        card_max_width: 360
+      YAML
+      theme.save!
+      page.driver.browser.manage.window.resize_to(1280, 800)
+      visit "/c/#{category.slug}/#{category.id}"
+    end
+
+    it "applies has-max-width class to portrait cards" do
+      expect(page).to have_css(".topic-card--portrait.has-max-width")
+    end
+
+    it "does not apply has-max-width to landscape cards" do
+      expect(page).not_to have_css(".topic-card--landscape.has-max-width")
+    end
+  end
+
+  context "independent max-dimension settings" do
+    before do
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        show_on_categories: ""
+        card_style_desktop: landscape
+        card_style_mobile: portrait
+        set_card_max_height: true
+        card_max_height: 275
+        set_card_max_width: true
+        card_max_width: 360
+      YAML
+      theme.save!
+    end
+
+    it "applies max-height to landscape cards on desktop" do
+      page.driver.browser.manage.window.resize_to(1280, 800)
+      visit "/c/#{category.slug}/#{category.id}"
+      expect(page).to have_css(".topic-card--landscape.has-max-height")
+      expect(page).not_to have_css(".topic-card--landscape.has-max-width")
+    end
+
+    it "applies max-width to portrait cards on mobile" do
+      page.driver.browser.manage.window.resize_to(375, 667)
+      visit "/c/#{category.slug}/#{category.id}"
+      expect(page).to have_css(".topic-card--portrait.has-max-width")
+      expect(page).not_to have_css(".topic-card--portrait.has-max-height")
     end
   end
 end
