@@ -26,3 +26,21 @@ show_on_categories:
 show_for_suggested_topics:
   type: bool
   default: true
+card_style_desktop:
+  type: enum
+  default: landscape
+  choices:
+    - landscape
+    - portrait
+card_style_mobile:
+  type: enum
+  default: portrait
+  choices:
+    - landscape
+    - portrait
+set_card_max_width:
+  type: bool
+  default: false
+card_max_width:
+  type: integer
+  default: 360

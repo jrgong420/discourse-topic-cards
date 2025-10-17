@@ -50,22 +50,37 @@ export default apiInitializer((api) => {
     ({ value: additionalClasses }) => {
       if (enableCards()) {
         additionalClasses.push("topic-cards-list");
+
+        // Add card style modifier based on viewport
+        const cardStyle = site.mobileView
+          ? settings.card_style_mobile
+          : settings.card_style_desktop;
+        additionalClasses.push(`topic-cards-list--${cardStyle}`);
       }
       return additionalClasses;
     }
   );
 
-  const classNames = ["topic-card"];
-
-  if (settings.set_card_max_height) {
-    classNames.push("has-max-height");
-  }
-
   api.registerValueTransformer(
     "topic-list-item-class",
     ({ value: additionalClasses }) => {
       if (enableCards()) {
-        return [...additionalClasses, ...classNames];
+        // Add card style modifier based on viewport
+        const cardStyle = site.mobileView
+          ? settings.card_style_mobile
+          : settings.card_style_desktop;
+
+        const itemClasses = ["topic-card", `topic-card--${cardStyle}`];
+
+        // Add orientation-specific max-dimension classes
+        if (cardStyle === "landscape" && settings.set_card_max_height) {
+          itemClasses.push("has-max-height");
+        }
+        if (cardStyle === "portrait" && settings.set_card_max_width) {
+          itemClasses.push("has-max-width");
+        }
+
+        return [...additionalClasses, ...itemClasses];
       } else {
         return additionalClasses;
       }
