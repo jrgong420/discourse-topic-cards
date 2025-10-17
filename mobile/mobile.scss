@@ -31,7 +31,6 @@
 
   .topic-list-data {
     max-width: none;
-    padding-left: var(--space-2);
   }
 
   &__thumbnail {
@@ -66,7 +65,7 @@
       "metadata metadata";
     grid-template-rows: auto auto auto 1fr auto;
     width: 100%;
-    padding: 0 var(--space-2) !important;
+    padding: var(--space-3) var(--space-5) !important;
     gap: var(--space-2) 0;
 
     &:first-child {
