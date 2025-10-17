@@ -89,10 +89,14 @@
       height: 100%;
       width: 100%;
       object-fit: cover;
-      border-top-left-radius: var(--d-border-radius-large);
-      border-bottom-left-radius: var(--d-border-radius-large);
       background: var(--primary-low); // Placeholder while loading
     }
+  }
+
+  // Landscape: thumbnail on left, round left corners only
+  &--landscape &__thumbnail .main-thumbnail {
+    border-top-left-radius: var(--d-border-radius-large);
+    border-bottom-left-radius: var(--d-border-radius-large);
   }
 
   // Normalize thumbnail aspect ratio in max-height mode (landscape only)

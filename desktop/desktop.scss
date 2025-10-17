@@ -24,8 +24,9 @@
       width: 100%;
       max-height: 250px;
       object-fit: cover;
-      border-radius: var(--d-border-radius-large);
-      border-bottom-left-radius: var(--d-border-radius-large);
+      // Portrait: thumbnail on top, round top corners only
+      border-top-left-radius: var(--d-border-radius-large);
+      border-top-right-radius: var(--d-border-radius-large);
     }
   }
 
