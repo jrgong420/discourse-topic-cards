@@ -38,3 +38,9 @@ card_style_mobile:
   choices:
     - landscape
     - portrait
+set_card_max_width:
+  type: bool
+  default: false
+card_max_width:
+  type: integer
+  default: 360
