@@ -1,5 +1,5 @@
-// Portrait card style for desktop: stacked layout in responsive grid
-.topic-cards-list--portrait {
+// Grid layout for desktop: stacked layout in responsive grid
+.topic-cards-list--grid {
   .topic-list-body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 28vw, 360px), 1fr));
@@ -7,7 +7,7 @@
   }
 }
 
-.topic-card--portrait {
+.topic-card--grid {
   flex-direction: column;
   max-height: none;
   max-width: none;
@@ -23,10 +23,12 @@
     .main-thumbnail {
       width: 100%;
       max-height: 250px;
+      height: 100%;
       object-fit: cover;
-      // Portrait: thumbnail on top, round top corners only
-      border-top-left-radius: var(--d-border-radius-large);
-      border-top-right-radius: var(--d-border-radius-large);
+
+      // Grid: thumbnail on top, round top corners only
+      border-top-left-radius: var(--topic-cards-border-radius);
+      border-top-right-radius: var(--topic-cards-border-radius);
     }
   }
 
@@ -45,13 +47,39 @@
   }
 }
 
-// Landscape card style for desktop: default row layout (already in common.scss)
-// No additional styles needed; common.scss handles landscape by default
+// List layout for desktop: row layout with thumbnail on left
+.topic-card--list {
+  gap: var(--space-6);
 
-// Max-height handling for landscape cards only
-.topic-card--landscape:has(.topic-card__thumbnail).has-max-height {
+  .topic-card__thumbnail {
+    flex: 0 0 30%;
+    max-width: 450px;
+    max-height: 100%;
+
+    .main-thumbnail {
+      height: 100%;
+
+      // List: thumbnail on left, round left corners only
+      border-top-left-radius: var(--topic-cards-border-radius);
+      border-bottom-left-radius: var(--topic-cards-border-radius);
+    }
+  }
+
+  .main-link {
+    padding: var(--space-3) var(--space-5) var(--space-3);
+  }
+}
+
+// Max-height handling for list cards only
+.topic-card--list:has(.topic-card__thumbnail).has-max-height {
   max-height: #{$card-max-height}px;
   overflow: hidden;
+
+  // Normalize thumbnail aspect ratio in max-height mode
+  .topic-card__thumbnail .main-thumbnail {
+    aspect-ratio: 16 / 9;
+    object-position: center;
+  }
 
   // Ensure grid layout handles overflow gracefully
   .main-link {
@@ -71,8 +99,8 @@
   }
 }
 
-// Max-width handling for portrait cards only
-.topic-card--portrait.has-max-width {
+// Max-width handling for grid cards only
+.topic-card--grid.has-max-width {
   max-width: #{$card-max-width}px;
   margin-left: auto;
   margin-right: auto;
@@ -80,5 +108,43 @@
   // Ensure content doesn't overflow max-width
   .main-link {
     max-width: 100%;
+  }
+}
+
+// Uniform height for grid cards (desktop only)
+.topic-card--grid.has-grid-height {
+  height: #{$card-grid-height}px;
+  overflow: hidden;
+
+  .topic-card__thumbnail {
+    flex: 0 0 auto;
+    height: 250px; // Fixed thumbnail height
+    overflow: hidden;
+
+    .main-thumbnail {
+      height: 100%;
+      max-height: none;
+      object-fit: cover;
+    }
+  }
+
+  .main-link {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+  }
+
+  .topic-card__excerpt {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topic-card__excerpt-text {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4; // Limit excerpt to 4 lines
   }
 }

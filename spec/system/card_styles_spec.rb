@@ -30,41 +30,41 @@ RSpec.describe "Card style configurations", type: :system do
     end
   end
 
-  context "when desktop: landscape, mobile: landscape" do
-    let(:desktop_style) { "landscape" }
-    let(:mobile_style) { "landscape" }
+  context "when desktop: list, mobile: list" do
+    let(:desktop_style) { "list" }
+    let(:mobile_style) { "list" }
 
-    include_examples "applies correct card style classes", :desktop, "landscape"
-    include_examples "applies correct card style classes", :mobile, "landscape"
+    include_examples "applies correct card style classes", :desktop, "list"
+    include_examples "applies correct card style classes", :mobile, "list"
   end
 
-  context "when desktop: landscape, mobile: portrait" do
-    let(:desktop_style) { "landscape" }
-    let(:mobile_style) { "portrait" }
+  context "when desktop: list, mobile: grid" do
+    let(:desktop_style) { "list" }
+    let(:mobile_style) { "grid" }
 
-    include_examples "applies correct card style classes", :desktop, "landscape"
-    include_examples "applies correct card style classes", :mobile, "portrait"
+    include_examples "applies correct card style classes", :desktop, "list"
+    include_examples "applies correct card style classes", :mobile, "grid"
   end
 
-  context "when desktop: portrait, mobile: landscape" do
-    let(:desktop_style) { "portrait" }
-    let(:mobile_style) { "landscape" }
+  context "when desktop: grid, mobile: list" do
+    let(:desktop_style) { "grid" }
+    let(:mobile_style) { "list" }
 
-    include_examples "applies correct card style classes", :desktop, "portrait"
-    include_examples "applies correct card style classes", :mobile, "landscape"
+    include_examples "applies correct card style classes", :desktop, "grid"
+    include_examples "applies correct card style classes", :mobile, "list"
   end
 
-  context "when desktop: portrait, mobile: portrait" do
-    let(:desktop_style) { "portrait" }
-    let(:mobile_style) { "portrait" }
+  context "when desktop: grid, mobile: grid" do
+    let(:desktop_style) { "grid" }
+    let(:mobile_style) { "grid" }
 
-    include_examples "applies correct card style classes", :desktop, "portrait"
-    include_examples "applies correct card style classes", :mobile, "portrait"
+    include_examples "applies correct card style classes", :desktop, "grid"
+    include_examples "applies correct card style classes", :mobile, "grid"
   end
 
   context "card content rendering" do
-    let(:desktop_style) { "portrait" }
-    let(:mobile_style) { "landscape" }
+    let(:desktop_style) { "grid" }
+    let(:mobile_style) { "list" }
 
     before do
       visit "/c/#{category.slug}/#{category.id}"
@@ -83,15 +83,15 @@ RSpec.describe "Card style configurations", type: :system do
     end
   end
 
-  context "max-height for landscape cards" do
-    let(:desktop_style) { "landscape" }
-    let(:mobile_style) { "landscape" }
+  context "max-height for list cards" do
+    let(:desktop_style) { "list" }
+    let(:mobile_style) { "list" }
 
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
         show_on_categories: ""
-        card_style_desktop: landscape
-        card_style_mobile: landscape
+        card_style_desktop: list
+        card_style_mobile: list
         set_card_max_height: true
         card_max_height: 275
       YAML
@@ -100,24 +100,24 @@ RSpec.describe "Card style configurations", type: :system do
       visit "/c/#{category.slug}/#{category.id}"
     end
 
-    it "applies has-max-height class to landscape cards" do
-      expect(page).to have_css(".topic-card--landscape.has-max-height")
+    it "applies has-max-height class to list cards" do
+      expect(page).to have_css(".topic-card--list.has-max-height")
     end
 
-    it "does not apply has-max-height to portrait cards" do
-      expect(page).not_to have_css(".topic-card--portrait.has-max-height")
+    it "does not apply has-max-height to grid cards" do
+      expect(page).not_to have_css(".topic-card--grid.has-max-height")
     end
   end
 
-  context "max-width for portrait cards" do
-    let(:desktop_style) { "portrait" }
-    let(:mobile_style) { "portrait" }
+  context "max-width for grid cards" do
+    let(:desktop_style) { "grid" }
+    let(:mobile_style) { "grid" }
 
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
         show_on_categories: ""
-        card_style_desktop: portrait
-        card_style_mobile: portrait
+        card_style_desktop: grid
+        card_style_mobile: grid
         set_card_max_width: true
         card_max_width: 360
       YAML
@@ -126,12 +126,40 @@ RSpec.describe "Card style configurations", type: :system do
       visit "/c/#{category.slug}/#{category.id}"
     end
 
-    it "applies has-max-width class to portrait cards" do
-      expect(page).to have_css(".topic-card--portrait.has-max-width")
+    it "applies has-max-width class to grid cards" do
+      expect(page).to have_css(".topic-card--grid.has-max-width")
     end
 
-    it "does not apply has-max-width to landscape cards" do
-      expect(page).not_to have_css(".topic-card--landscape.has-max-width")
+    it "does not apply has-max-width to list cards" do
+      expect(page).not_to have_css(".topic-card--list.has-max-width")
+    end
+  end
+
+  context "grid height for grid cards on desktop" do
+    let(:desktop_style) { "grid" }
+    let(:mobile_style) { "grid" }
+
+    before do
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        show_on_categories: ""
+        card_style_desktop: grid
+        card_style_mobile: grid
+        set_card_grid_height: true
+        card_grid_height: 420
+      YAML
+      theme.save!
+    end
+
+    it "applies has-grid-height class to grid cards on desktop" do
+      page.driver.browser.manage.window.resize_to(1280, 800)
+      visit "/c/#{category.slug}/#{category.id}"
+      expect(page).to have_css(".topic-card--grid.has-grid-height")
+    end
+
+    it "does not apply has-grid-height to grid cards on mobile" do
+      page.driver.browser.manage.window.resize_to(375, 667)
+      visit "/c/#{category.slug}/#{category.id}"
+      expect(page).not_to have_css(".topic-card--grid.has-grid-height")
     end
   end
 
@@ -139,8 +167,8 @@ RSpec.describe "Card style configurations", type: :system do
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
         show_on_categories: ""
-        card_style_desktop: landscape
-        card_style_mobile: portrait
+        card_style_desktop: list
+        card_style_mobile: grid
         set_card_max_height: true
         card_max_height: 275
         set_card_max_width: true
@@ -149,18 +177,18 @@ RSpec.describe "Card style configurations", type: :system do
       theme.save!
     end
 
-    it "applies max-height to landscape cards on desktop" do
+    it "applies max-height to list cards on desktop" do
       page.driver.browser.manage.window.resize_to(1280, 800)
       visit "/c/#{category.slug}/#{category.id}"
-      expect(page).to have_css(".topic-card--landscape.has-max-height")
-      expect(page).not_to have_css(".topic-card--landscape.has-max-width")
+      expect(page).to have_css(".topic-card--list.has-max-height")
+      expect(page).not_to have_css(".topic-card--list.has-max-width")
     end
 
-    it "applies max-width to portrait cards on mobile" do
+    it "applies max-width to grid cards on mobile" do
       page.driver.browser.manage.window.resize_to(375, 667)
       visit "/c/#{category.slug}/#{category.id}"
-      expect(page).to have_css(".topic-card--portrait.has-max-width")
-      expect(page).not_to have_css(".topic-card--portrait.has-max-height")
+      expect(page).to have_css(".topic-card--grid.has-max-width")
+      expect(page).not_to have_css(".topic-card--grid.has-max-height")
     end
   end
 end

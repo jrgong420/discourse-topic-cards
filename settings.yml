@@ -28,19 +28,34 @@ show_for_suggested_topics:
   default: true
 card_style_desktop:
   type: enum
-  default: landscape
+  default: list
   choices:
-    - landscape
-    - portrait
+    - list
+    - grid
 card_style_mobile:
   type: enum
-  default: portrait
+  default: grid
   choices:
-    - landscape
-    - portrait
+    - list
+    - grid
 set_card_max_width:
   type: bool
   default: false
 card_max_width:
   type: integer
   default: 360
+set_card_grid_height:
+  type: bool
+  default: true
+card_grid_height:
+  type: integer
+  default: 420
+card_border_radius:
+  type: enum
+  default: large
+  choices:
+    - none
+    - small
+    - medium
+    - large
+    - extra_large

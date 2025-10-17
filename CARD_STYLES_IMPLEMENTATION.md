@@ -1,10 +1,10 @@
 # Card Styles Implementation Summary
 
 ## Overview
-Implemented configurable card layout system allowing independent selection of "landscape" and "portrait" card styles for desktop and mobile viewports.
+Implemented configurable card layout system allowing independent selection of "list" and "grid" card layouts for desktop and mobile viewports, with comprehensive border radius theming and uniform grid height support.
 
 ## Branch
-`feat/card-styles-config` (based on `feat/core-style`)
+`feat/css-refactor` (refactored from `feat/card-styles-config`)
 
 ## Commits
 1. `a656be3` - Add card_style_desktop and card_style_mobile theme settings
@@ -20,63 +20,97 @@ Implemented configurable card layout system allowing independent selection of "l
 ## Changes Made
 
 ### 1. Theme Settings (settings.yml)
-**Card Style Settings:**
-- `card_style_desktop`: landscape (default) | portrait
-- `card_style_mobile`: portrait (default) | landscape
+**Card Layout Settings:**
+- `card_style_desktop`: list (default) | grid
+- `card_style_mobile`: grid (default) | list
 
-**Max-Dimension Settings (Orientation-Specific):**
-- `set_card_max_height`: boolean (default: true) - Applies to **landscape cards only**
-- `card_max_height`: integer (default: 275) - Max height in pixels for landscape cards
-- `set_card_max_width`: boolean (default: false) - Applies to **portrait cards only**
-- `card_max_width`: integer (default: 360) - Max width in pixels for portrait cards
+**Max-Dimension Settings (Layout-Specific):**
+- `set_card_max_height`: boolean (default: true) - Applies to **list cards only**
+- `card_max_height`: integer (default: 275) - Max height in pixels for list cards
+- `set_card_max_width`: boolean (default: false) - Applies to **grid cards only**
+- `card_max_width`: integer (default: 360) - Max width in pixels for grid cards
+- `set_card_grid_height`: boolean (default: true) - Applies to **grid cards on desktop only**
+- `card_grid_height`: integer (default: 420) - Uniform height in pixels for grid cards on desktop
 
-Defaults preserve current behavior:
-- Desktop: landscape (image left, content right)
-- Mobile: portrait (image top, content below)
-- Max-height enabled by default for landscape cards
-- Max-width disabled by default for portrait cards
+**Border Radius Setting:**
+- `card_border_radius`: none | small | medium | large (default) | extra_large
+  - Maps to Discourse core CSS variables for consistency
+
+Defaults:
+- Desktop: list (image left, content right)
+- Mobile: grid (image top, content below)
+- Max-height enabled by default for list cards
+- Max-width disabled by default for grid cards
+- Grid height enabled by default for desktop grid cards
 
 ### 2. Runtime Wiring (discourse-topic-list-cards.gjs)
 Modified two value transformers to apply BEM modifier classes:
 
+**Backward Compatibility:**
+- `normalizeCardStyle()` function maps legacy values (portrait→grid, landscape→list)
+- Ensures existing sites continue to work during migration
+
 **topic-list-class transformer:**
-- Adds `topic-cards-list--landscape` or `topic-cards-list--portrait`
+- Adds `topic-cards-list--list` or `topic-cards-list--grid`
 - Based on viewport (site.mobileView) and corresponding setting
 
 **topic-list-item-class transformer:**
-- Adds `topic-card--landscape` or `topic-card--portrait`
-- Conditionally adds `has-max-height` when card style is landscape AND `set_card_max_height` is true
-- Conditionally adds `has-max-width` when card style is portrait AND `set_card_max_width` is true
-- Ensures max-dimension classes are orientation-specific and mutually exclusive
+- Adds `topic-card--list` or `topic-card--grid`
+- Conditionally adds `has-max-height` when card layout is list AND `set_card_max_height` is true
+- Conditionally adds `has-max-width` when card layout is grid AND `set_card_max_width` is true
+- Conditionally adds `has-grid-height` when card layout is grid AND `set_card_grid_height` is true AND desktop viewport
+- Ensures max-dimension classes are layout-specific and mutually exclusive
 
-### 3. Desktop Styles (desktop/desktop.scss)
-**Portrait style (.topic-card--portrait):**
+### 3. CSS Architecture (common/common.scss)
+**Border Radius Mapping:**
+- Component-scoped CSS variable `--topic-cards-border-radius` set on `.topic-cards-list`
+- Maps `$card_border_radius` setting to Discourse core variables:
+  - none → 0
+  - small → var(--d-border-radius)
+  - medium → calc(var(--d-border-radius) * 1.5)
+  - large → var(--d-border-radius-large)
+  - extra_large → calc(var(--d-border-radius-large) * 1.5)
+
+**Shared Card Styles:**
+- Base card container styles (flex, background, shadow, border)
+- Uses `--topic-cards-border-radius` for consistent corner rounding
+- Shared thumbnail base styles
+
+### 4. Desktop Styles (desktop/desktop.scss)
+**Grid layout (.topic-card--grid):**
 - Responsive grid container: `repeat(auto-fit, minmax(clamp(260px, 28vw, 360px), 1fr))`
 - Automatically flows between 2-4 columns based on viewport width
 - Stacked layout: thumbnail above content
-- Reuses mobile layout pattern with desktop-appropriate spacing
 - Max-height: 250px for thumbnails
-- Full-width cards with border-radius on all corners
+- Thumbnail corners: top-left and top-right rounded with `--topic-cards-border-radius`
 
-**Landscape style:**
-- No changes needed; common.scss handles default landscape layout
+**List layout (.topic-card--list):**
+- Row layout with thumbnail on left (30% flex-basis, max 450px)
+- Thumbnail corners: left side rounded with `--topic-cards-border-radius`
+- Horizontal gap between thumbnail and content
 
-**Max-Height (Landscape Only):**
-- `.topic-card--landscape.has-max-height`: Applies max-height constraint
+**Max-Height (List Only):**
+- `.topic-card--list.has-max-height`: Applies max-height constraint
 - Uses `$card-max-height` SCSS variable from settings
-- Includes overflow handling for grid layout and excerpt text
 - Thumbnail aspect-ratio normalization (16:9) in max-height mode
+- Overflow handling for content regions
 
-**Max-Width (Portrait Only):**
-- `.topic-card--portrait.has-max-width`: Applies max-width constraint
+**Max-Width (Grid Only):**
+- `.topic-card--grid.has-max-width`: Applies max-width constraint
 - Uses `$card-max-width` SCSS variable from settings
 - Centers cards within grid cells using `margin: auto`
-- Ensures content doesn't overflow max-width
 
-### 4. Mobile Styles (mobile/mobile.scss)
-**Portrait style (.topic-card--portrait):**
-- Existing mobile styles preserved
+**Uniform Grid Height (Grid Desktop Only):**
+- `.topic-card--grid.has-grid-height`: Enforces uniform card height
+- Uses `$card-grid-height` SCSS variable from settings (default 420px)
+- Fixed thumbnail height (250px) with overflow handling
+- Content region uses flex with min-height: 0 for proper overflow
+- Excerpt clamped to 4 lines with -webkit-line-clamp
+
+### 5. Mobile Styles (mobile/mobile.scss)
+**Grid layout (.topic-card--grid):**
 - Stacked layout with full-width thumbnail
+- Thumbnail corners: top-left and top-right rounded with `--topic-cards-border-radius`
 
 **Landscape style (.topic-card--landscape):**
 - Row layout adapted for mobile

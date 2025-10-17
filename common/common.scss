@@ -1,8 +1,17 @@
-// list
+// Topic cards list container
 .topic-cards-list {
-  // Scope border-radius override to this component only
-  --d-border-radius-large: 20px;
-
+  // Map border radius setting to component-scoped CSS variable
+  @if $card_border_radius == "none" {
+    --topic-cards-border-radius: 0;
+  } @else if $card_border_radius == "small" {
+    --topic-cards-border-radius: var(--d-border-radius);
+  } @else if $card_border_radius == "medium" {
+    --topic-cards-border-radius: calc(var(--d-border-radius) * 1.5);
+  } @else if $card_border_radius == "large" {
+    --topic-cards-border-radius: var(--d-border-radius-large);
+  } @else if $card_border_radius == "extra_large" {
+    --topic-cards-border-radius: calc(var(--d-border-radius-large) * 1.5);
+  }
   display: block;
   margin-top: var(--space-6);
 
@@ -27,11 +36,10 @@
   }
 }
 
-// card
+// Shared card styles (common to all layouts and viewports)
 .topic-card {
   display: flex;
-  gap: var(--space-6);
-  border-radius: var(--d-border-radius-large);
+  border-radius: var(--topic-cards-border-radius);
   background-color: var(--secondary);
   box-shadow: var(--shadow-card);
   border: 1px solid transparent;
@@ -79,30 +87,13 @@
     display: none;
   }
 
-  // new elements styling
+  // Thumbnail (shared base styles)
   &__thumbnail {
-    flex: 0 0 30%;
-    max-width: 450px;
-    max-height: 100%;
-
     .main-thumbnail {
-      height: 100%;
       width: 100%;
       object-fit: cover;
       background: var(--primary-low); // Placeholder while loading
     }
-  }
-
-  // Landscape: thumbnail on left, round left corners only
-  &--landscape &__thumbnail .main-thumbnail {
-    border-top-left-radius: var(--d-border-radius-large);
-    border-bottom-left-radius: var(--d-border-radius-large);
-  }
-
-  // Normalize thumbnail aspect ratio in max-height mode (landscape only)
-  &--landscape.has-max-height &__thumbnail .main-thumbnail {
-    aspect-ratio: 16 / 9;
-    object-position: center;
   }
 
   .main-link {

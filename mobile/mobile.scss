@@ -1,18 +1,18 @@
-// Portrait card style for mobile: default stacked layout
-.topic-cards-list--portrait {
+// Grid layout for mobile: stacked layout
+.topic-cards-list--grid {
   .topic-list-body {
     gap: var(--space-4);
   }
 }
 
-// Landscape card style for mobile: row layout adapted for mobile
-.topic-cards-list--landscape {
+// List layout for mobile: row layout adapted for mobile
+.topic-cards-list--list {
   .topic-list-body {
     gap: var(--space-3);
   }
 }
 
-.topic-card--portrait {
+.topic-card--grid {
   flex-direction: column;
   max-height: none;
   max-width: none;
@@ -40,9 +40,10 @@
     .main-thumbnail {
       width: 100%;
       max-height: 250px;
-      // Portrait: thumbnail on top, round top corners only
-      border-top-left-radius: var(--d-border-radius-large);
-      border-top-right-radius: var(--d-border-radius-large);
+
+      // Grid: thumbnail on top, round top corners only
+      border-top-left-radius: var(--topic-cards-border-radius);
+      border-top-right-radius: var(--topic-cards-border-radius);
       background: var(--primary-low);
     }
   }
@@ -82,8 +83,8 @@
   }
 }
 
-// Landscape card style for mobile: row layout with compact spacing
-.topic-card--landscape {
+// List layout for mobile: row layout with compact spacing
+.topic-card--list {
   flex-direction: row;
   max-height: none;
   padding: var(--space-2);
@@ -114,9 +115,10 @@
       height: 100%;
       max-height: 120px;
       object-fit: cover;
-      // Landscape: thumbnail on left, round left corners only
-      border-top-left-radius: var(--d-border-radius);
-      border-bottom-left-radius: var(--d-border-radius);
+
+      // List: thumbnail on left, round left corners only
+      border-top-left-radius: var(--topic-cards-border-radius);
+      border-bottom-left-radius: var(--topic-cards-border-radius);
       background: var(--primary-low);
     }
   }

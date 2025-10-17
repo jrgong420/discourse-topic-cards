@@ -11,6 +11,15 @@ export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
   const router = api.container.lookup("service:router");
 
+  // Backward compatibility: map legacy setting values to new layout names
+  function normalizeCardStyle(style) {
+    const legacyMap = {
+      portrait: "grid",
+      landscape: "list",
+    };
+    return legacyMap[style] || style;
+  }
+
   function enableCards() {
     if (router.currentRouteName === "topic.fromParamsNear") {
       return settings.show_for_suggested_topics;
@@ -51,10 +60,11 @@ export default apiInitializer((api) => {
       if (enableCards()) {
         additionalClasses.push("topic-cards-list");
 
-        // Add card style modifier based on viewport
-        const cardStyle = site.mobileView
+        // Add card layout modifier based on viewport
+        const rawStyle = site.mobileView
           ? settings.card_style_mobile
           : settings.card_style_desktop;
+        const cardStyle = normalizeCardStyle(rawStyle);
         additionalClasses.push(`topic-cards-list--${cardStyle}`);
       }
       return additionalClasses;
@@ -65,19 +75,23 @@ export default apiInitializer((api) => {
     "topic-list-item-class",
     ({ value: additionalClasses }) => {
       if (enableCards()) {
-        // Add card style modifier based on viewport
-        const cardStyle = site.mobileView
+        // Add card layout modifier based on viewport
+        const rawStyle = site.mobileView
           ? settings.card_style_mobile
           : settings.card_style_desktop;
+        const cardStyle = normalizeCardStyle(rawStyle);
 
         const itemClasses = ["topic-card", `topic-card--${cardStyle}`];
 
-        // Add orientation-specific max-dimension classes
-        if (cardStyle === "landscape" && settings.set_card_max_height) {
+        // Add layout-specific max-dimension classes
+        if (cardStyle === "list" && settings.set_card_max_height) {
           itemClasses.push("has-max-height");
         }
-        if (cardStyle === "portrait" && settings.set_card_max_width) {
+        if (cardStyle === "grid" && settings.set_card_max_width) {
           itemClasses.push("has-max-width");
+        }
+        if (cardStyle === "grid" && settings.set_card_grid_height && !site.mobileView) {
+          itemClasses.push("has-grid-height");
         }
 
         return [...additionalClasses, ...itemClasses];
