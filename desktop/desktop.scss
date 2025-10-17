@@ -46,8 +46,8 @@
 // Landscape card style for desktop: default row layout (already in common.scss)
 // No additional styles needed; common.scss handles landscape by default
 
-// Max-height handling for both styles
-.topic-card:has(.topic-card__thumbnail).has-max-height {
+// Max-height handling for landscape cards only
+.topic-card--landscape:has(.topic-card__thumbnail).has-max-height {
   max-height: #{$card-max-height}px;
   overflow: hidden;
 
@@ -66,5 +66,17 @@
   .topic-card__excerpt-text {
     // Ensure excerpt doesn't force card to grow beyond max-height
     overflow: hidden;
+  }
+}
+
+// Max-width handling for portrait cards only
+.topic-card--portrait.has-max-width {
+  max-width: #{$card-max-width}px;
+  margin-left: auto;
+  margin-right: auto;
+
+  // Ensure content doesn't overflow max-width
+  .main-link {
+    max-width: 100%;
   }
 }
