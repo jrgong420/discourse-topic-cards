@@ -1,8 +1,16 @@
 // Grid layout for desktop: stacked layout in responsive grid
-.topic-cards-list--grid {
+.topic-cards-list.topic-cards-list--grid {
+  /* Default column min width driven by setting */
+  --tc-grid-col-min: #{$grid-card-min-width}px;
+
+  /* When max-width is enabled (class present), use that as the column basis */
+  &:has(.topic-card--grid.has-max-width) {
+    --tc-grid-col-min: #{$grid-card-max-width}px;
+  }
+
   .topic-list-body {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 28vw, 360px), 1fr));
+    display: grid; /* higher specificity selector beats common flex rule */
+    grid-template-columns: repeat(auto-fill, minmax(var(--tc-grid-col-min), 1fr));
     gap: var(--space-4);
   }
 }
@@ -27,6 +35,14 @@
       object-fit: cover;
 
       // Grid: thumbnail on top, round top corners only
+      border-top-left-radius: var(--topic-cards-border-radius);
+      border-top-right-radius: var(--topic-cards-border-radius);
+    }
+
+    .thumbnail-placeholder {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 250px;
       border-top-left-radius: var(--topic-cards-border-radius);
       border-top-right-radius: var(--topic-cards-border-radius);
     }
@@ -60,6 +76,13 @@
       height: 100%;
 
       // List: thumbnail on left, round left corners only
+      border-top-left-radius: var(--topic-cards-border-radius);
+      border-bottom-left-radius: var(--topic-cards-border-radius);
+    }
+
+    .thumbnail-placeholder {
+      height: 100%;
+      aspect-ratio: 16 / 9;
       border-top-left-radius: var(--topic-cards-border-radius);
       border-bottom-left-radius: var(--topic-cards-border-radius);
     }
@@ -99,9 +122,9 @@
   }
 }
 
-// Max-width handling for grid cards only
+// Max-width handling for grid cards only (class gated)
 .topic-card--grid.has-max-width {
-  max-width: #{$card-max-width}px;
+  max-width: #{$grid-card-max-width}px;
   margin-left: auto;
   margin-right: auto;
 
@@ -113,7 +136,6 @@
 
 // Uniform height for grid cards (desktop only)
 .topic-card--grid.has-grid-height {
-  height: #{$card-grid-height}px;
   overflow: hidden;
 
   .topic-card__thumbnail {
@@ -125,6 +147,11 @@
       height: 100%;
       max-height: none;
       object-fit: cover;
+    }
+
+    .thumbnail-placeholder {
+      height: 100%;
+      max-height: none;
     }
   }
 

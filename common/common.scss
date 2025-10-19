@@ -34,6 +34,21 @@
   .topic-list-item-separator td {
     display: block;
   }
+
+  // In grid layout, make the core separator span all columns and behave as a full-width row
+  &.topic-cards-list--grid {
+    .topic-list-item-separator {
+      grid-column: 1 / -1; // span all grid tracks
+      display: block; // tr as block for grid context
+      margin-block: var(--space-2);
+
+      td.topic-list-data {
+        display: block; // ensure full width
+        width: 100%;
+      }
+    }
+  }
+
 }
 
 // Shared card styles (common to all layouts and viewports)
@@ -94,6 +109,12 @@
       object-fit: cover;
       background: var(--primary-low); // Placeholder while loading
     }
+
+    .thumbnail-placeholder {
+      width: 100%;
+      background: var(--primary-low);
+      display: block;
+    }
   }
 
   .main-link {
@@ -110,6 +131,8 @@
     gap: var(--space-2) 0;
     box-sizing: border-box;
     box-shadow: none !important;
+    // Allow this grid item to shrink inside the flex card without forcing overflow
+    min-width: 0;
 
     .topic-excerpt {
       display: none; // hide default excerpt from pinned topics
@@ -117,18 +140,43 @@
 
     .link-top-line {
       grid-area: title;
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        "title statuses"
+        "event event";
       align-items: center;
+      gap: var(--space-1);
 
       &:hover {
         text-decoration: underline;
+      }
+
+      // Title and statuses on first row
+      .title {
+        grid-area: title;
+      }
+
+      .topic-statuses {
+        grid-area: statuses;
+        align-self: center;
+      }
+
+      // Event date on its own row below
+      .header-topic-title-suffix-outlet {
+        grid-area: event;
+        margin-top: var(--space-1);
       }
     }
 
     .title {
       color: var(--title-color);
       font-weight: var(--topic-title-font-weight);
-      font-size: var(--d-topic-list-title-font-size);
+      font-size: var(--font-up-1-rem);
+
+      // Better long-word handling
+      word-break: break-word;
+      overflow-wrap: anywhere;
 
       // limit title to 2 lines
       line-height: var(--line-height-large);
@@ -166,31 +214,6 @@
         display: none;
       }
 
-      // Tags with 2-line limit and fade
-      .discourse-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-1);
-        max-height: calc(2 * var(--line-height-large) * 1em);
-        overflow: hidden;
-        position: relative;
-
-        &::after {
-          content: "";
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          width: 3em;
-          height: 1.4em;
-          background: linear-gradient(
-            to right,
-            transparent,
-            var(--secondary) 70%
-          );
-          pointer-events: none;
-        }
-      }
-
       .discourse-tag.box {
         margin-right: var(--space-1);
       }
@@ -215,6 +238,8 @@
         line-height: var(--line-height-large);
         flex-wrap: wrap;
         align-items: center;
+        // Allow shrink inside grid area to avoid horizontal overflow
+        min-width: 0;
 
         .number {
           font-weight: bold;
@@ -237,6 +262,7 @@
           align-items: center;
           gap: var(--space-4);
           flex-wrap: nowrap;
+          min-width: 0;
         }
 
         .item {
@@ -245,6 +271,7 @@
           gap: var(--space-1);
           flex: 0 0 auto;
           white-space: nowrap;
+          min-width: 0;
         }
 
         .topic__like-button {
@@ -308,6 +335,9 @@
         font-size: var(--font-down-1);
         color: var(--excerpt-color);
         line-height: var(--line-height-large);
+        // Better long-word handling inside excerpts
+        word-break: break-word;
+        overflow-wrap: anywhere;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;

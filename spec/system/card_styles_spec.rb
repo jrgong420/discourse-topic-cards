@@ -118,8 +118,8 @@ RSpec.describe "Card style configurations", type: :system do
         show_on_categories: ""
         card_style_desktop: grid
         card_style_mobile: grid
-        set_card_max_width: true
-        card_max_width: 360
+        set_grid_card_max_width: true
+        grid_card_max_width: 360
       YAML
       theme.save!
       page.driver.browser.manage.window.resize_to(1280, 800)
@@ -171,8 +171,8 @@ RSpec.describe "Card style configurations", type: :system do
         card_style_mobile: grid
         set_card_max_height: true
         card_max_height: 275
-        set_card_max_width: true
-        card_max_width: 360
+        set_grid_card_max_width: true
+        grid_card_max_width: 360
       YAML
       theme.save!
     end
@@ -189,6 +189,37 @@ RSpec.describe "Card style configurations", type: :system do
       visit "/c/#{category.slug}/#{category.id}"
       expect(page).to have_css(".topic-card--grid.has-max-width")
       expect(page).not_to have_css(".topic-card--grid.has-max-height")
+    end
+  end
+
+  context "separator visibility across routes" do
+    let(:desktop_style) { "grid" }
+    let(:mobile_style) { "list" }
+
+    before do
+      # Create a pinned topic to trigger separator
+      Fabricate(:topic, category: category, pinned_at: Time.zone.now)
+    end
+
+    it "maintains separator visibility in grid layout" do
+      page.driver.browser.manage.window.resize_to(1280, 800)
+      visit "/c/#{category.slug}/#{category.id}"
+
+      # Check separator is present and visible
+      expect(page).to have_css(".topic-list-item-separator")
+      expect(page).to have_css(".topic-list-item-separator td.topic-list-data")
+    end
+
+    it "maintains separator visibility in list layout after navigation" do
+      page.driver.browser.manage.window.resize_to(1280, 800)
+      visit "/c/#{category.slug}/#{category.id}"
+
+      # Navigate to latest and back
+      visit "/latest"
+      visit "/c/#{category.slug}/#{category.id}"
+
+      # Separator should still be visible
+      expect(page).to have_css(".topic-list-item-separator")
     end
   end
 end

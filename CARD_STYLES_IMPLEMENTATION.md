@@ -27,10 +27,13 @@ Implemented configurable card layout system allowing independent selection of "l
 **Max-Dimension Settings (Layout-Specific):**
 - `set_card_max_height`: boolean (default: true) - Applies to **list cards only**
 - `card_max_height`: integer (default: 275) - Max height in pixels for list cards
-- `set_card_max_width`: boolean (default: false) - Applies to **grid cards only**
-- `card_max_width`: integer (default: 360) - Max width in pixels for grid cards
+- `set_grid_card_max_width`: boolean (default: false) - Applies to **grid cards on desktop/tablet only** (no effect on smartphones)
+- `grid_card_max_width`: integer (default: 360) - Max width in pixels for grid cards on desktop/tablet. Set to 0 to disable max-width constraint (no effect on smartphones)
+- `grid_card_min_width`: integer (default: 260) - Minimum column width in pixels for desktop/tablet grid. Grid auto-fits as many cards as fit per row (no effect on smartphones)
 - `set_card_grid_height`: boolean (default: true) - Applies to **grid cards on desktop only**
 - `card_grid_height`: integer (default: 420) - Uniform height in pixels for grid cards on desktop
+- `grid_thumbnail_max_height`: integer (default: 150) - Maximum thumbnail height in pixels for smartphone grid only (no effect on desktop/tablet)
+
 
 **Border Radius Setting:**
 - `card_border_radius`: none | small | medium | large (default) | extra_large
@@ -57,7 +60,7 @@ Modified two value transformers to apply BEM modifier classes:
 **topic-list-item-class transformer:**
 - Adds `topic-card--list` or `topic-card--grid`
 - Conditionally adds `has-max-height` when card layout is list AND `set_card_max_height` is true
-- Conditionally adds `has-max-width` when card layout is grid AND `set_card_max_width` is true
+- Conditionally adds `has-max-width` when card layout is grid AND `set_grid_card_max_width` is true AND `grid_card_max_width` > 0
 - Conditionally adds `has-grid-height` when card layout is grid AND `set_card_grid_height` is true AND desktop viewport
 - Ensures max-dimension classes are layout-specific and mutually exclusive
 
@@ -78,8 +81,8 @@ Modified two value transformers to apply BEM modifier classes:
 
 ### 4. Desktop Styles (desktop/desktop.scss)
 **Grid layout (.topic-card--grid):**
-- Responsive grid container: `repeat(auto-fit, minmax(clamp(260px, 28vw, 360px), 1fr))`
-- Automatically flows between 2-4 columns based on viewport width
+- Responsive grid container: `repeat(auto-fill, minmax(#{$grid-card-min-width}px, 1fr))`
+- Automatically fits as many columns as possible based on `grid_card_min_width` setting and available container width
 - Stacked layout: thumbnail above content
 - Max-height: 250px for thumbnails
 - Thumbnail corners: top-left and top-right rounded with `--topic-cards-border-radius`
@@ -95,10 +98,8 @@ Modified two value transformers to apply BEM modifier classes:
 - Thumbnail aspect-ratio normalization (16:9) in max-height mode
 - Overflow handling for content regions
 
-**Max-Width (Grid Only):**
-- `.topic-card--grid.has-max-width`: Applies max-width constraint
-- Uses `$card-max-width` SCSS variable from settings
-- Centers cards within grid cells using `margin: auto`
+**Max-Width (Grid, Desktop/Tablet Only):**
+- `.topic-card--grid.has-max-width
 
 **Uniform Grid Height (Grid Desktop Only):**
 - `.topic-card--grid.has-grid-height`: Enforces uniform card height
@@ -244,7 +245,7 @@ This implementation introduces a key architectural improvement: **max-dimension 
 
 **After:**
 - `set_card_max_height` applies **only to landscape cards** (horizontal layout)
-- `set_card_max_width` applies **only to portrait cards** (vertical layout in grid)
+- `set_grid_card_max_width` applies **only to portrait cards** (vertical layout in grid)
 - Each orientation gets the constraint that makes sense for its layout
 - Settings work independently and can be mixed (e.g., desktop landscape with max-height + mobile portrait with max-width)
 
@@ -253,4 +254,67 @@ This implementation introduces a key architectural improvement: **max-dimension 
 - Better control over card dimensions in different orientations
 - Prevents awkward constraints (e.g., max-height on stacked portrait cards)
 - Maintains backward compatibility with existing max-height behavior for landscape cards
+
+---
+
+## Recent Improvements (2025)
+
+### Placeholder Thumbnails
+**Implementation:** Always render `.topic-card__thumbnail` cell, even when no image exists.
+
+**Behavior:**
+- Topics without thumbnails display a placeholder element (`.thumbnail-placeholder`)
+- Placeholder maintains consistent aspect ratio (16:9) across layouts
+- Matches border radius of actual thumbnails (top corners for grid, left corners for list)
+- Background: `var(--primary-low)` for visual consistency
+- Marked as decorative (`aria-hidden="true"`)
+
+**Benefits:**
+- Uniform card layout regardless of thumbnail presence
+- No layout shift when images load
+- Grid/list alignment remains consistent across mixed content
+
+### Title and Status Ordering
+**Implementation:** CSS-only ordering within `.link-top-line` using flexbox `order` property.
+
+**Behavior:**
+- Topic title always appears first (order: 1)
+- Topic statuses appear after the title (order: 2)
+- No DOM manipulation required
+
+**Benefits:**
+- Predictable, accessible reading order
+- Clean visual hierarchy
+- Maintains click target behavior
+
+### Calendar Event Date Positioning
+**Implementation:** CSS Grid layout for `.link-top-line` with dedicated row for event dates.
+
+**Behavior:**
+- Title and statuses on first row (grid areas: "title" and "statuses")
+- Calendar event date (`.header-topic-title-suffix-outlet`) on second row (grid area: "event")
+- Spans full width below title
+- Small top margin for visual separation
+
+**Benefits:**
+- Event dates never inline with title (prevents wrapping issues)
+- Clean, predictable layout
+- No collision with tags or excerpt areas
+
+### Separator Stability
+**Implementation:** Explicit CSS rules ensure separators remain visible across routes.
+
+**Behavior:**
+- Grid layout: separators span full width (`grid-column: 1 / -1`)
+- List layout: separators display as block elements
+- Visibility maintained across navigation and route changes
+
+**Testing:**
+- System specs verify separator presence after navigation
+- Covers both grid and list layouts
+
+**Benefits:**
+- Reliable visual separation between topic groups
+- No accidental hiding via cascade
+- Consistent behavior across SPA navigation
 

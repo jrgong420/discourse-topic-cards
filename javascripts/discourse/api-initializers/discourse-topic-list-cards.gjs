@@ -87,7 +87,7 @@ export default apiInitializer((api) => {
         if (cardStyle === "list" && settings.set_card_max_height) {
           itemClasses.push("has-max-height");
         }
-        if (cardStyle === "grid" && settings.set_card_max_width) {
+        if (cardStyle === "grid" && settings.set_grid_card_max_width && settings.grid_card_max_width > 0) {
           itemClasses.push("has-max-width");
         }
         if (cardStyle === "grid" && settings.set_card_grid_height && !site.mobileView) {

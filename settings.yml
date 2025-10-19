@@ -38,12 +38,23 @@ card_style_mobile:
   choices:
     - list
     - grid
-set_card_max_width:
+set_grid_card_max_width:
   type: bool
   default: false
-card_max_width:
+  description: "Desktop grid only: cap each grid card's width. No effect on smartphone grid."
+grid_card_max_width:
   type: integer
   default: 360
+  description: "Desktop grid only: maximum card width in px. Set to 0 to disable max-width constraint. Does not affect smartphones."
+grid_card_min_width:
+  type: integer
+  default: 260
+  description: "Desktop/tablet grid: minimum column width (px). Grid auto-fits as many cards as fit per row. No effect on smartphones."
+grid_thumbnail_max_height:
+  type: integer
+  default: 150
+  description: "Smartphone grid only: maximum thumbnail height in px. Desktop grid unaffected."
+
 set_card_grid_height:
   type: bool
   default: true
