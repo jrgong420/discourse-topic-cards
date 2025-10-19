@@ -486,3 +486,70 @@
     transform: translateY(calc(var(--highlight-lift) - 1px));
   }
 }
+
+// ============================================================================
+// In-card accents: Tag badge and title styling for highlighted cards
+// ============================================================================
+
+@if $show-highlight-incard-accents {
+  // Accent badge for matching highlight tags
+  .topic-card--highlight .discourse-tag.is-highlight-tag {
+    color: var(--tertiary);
+    background: color-mix(
+      in oklab,
+      var(--tertiary) 8%,
+      var(--secondary)
+    );
+    border: 1px solid var(--tertiary-low);
+    border-radius: var(--d-border-radius);
+    padding: 2px 8px;
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
+
+    &:hover {
+      background: color-mix(
+        in oklab,
+        var(--tertiary) 12%,
+        var(--secondary)
+      );
+      border-color: var(--tertiary);
+    }
+  }
+
+  // Subtle title color shift toward tertiary
+  .topic-card--highlight .main-link .link-top-line .title {
+    color: color-mix(
+      in oklab,
+      var(--primary) 82%,
+      var(--tertiary) 18%
+    );
+    transition: color 0.15s ease-in-out;
+  }
+
+  .topic-card--highlight .main-link .link-top-line:hover .title,
+  .topic-card--highlight .main-link .link-top-line:focus-within .title {
+    color: color-mix(
+      in oklab,
+      var(--primary) 70%,
+      var(--tertiary) 30%
+    );
+    text-decoration-color: color-mix(
+      in oklab,
+      var(--tertiary) 50%,
+      transparent
+    );
+  }
+
+  // Subtle metadata accents
+  .topic-card--highlight .topic-card__meta-sep {
+    color: var(--tertiary-low);
+  }
+
+  .topic-card--highlight .topic-card__metadata .d-icon {
+    color: color-mix(
+      in oklab,
+      var(--primary-medium) 70%,
+      var(--tertiary) 30%
+    );
+  }
+}

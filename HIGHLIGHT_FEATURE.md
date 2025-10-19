@@ -23,6 +23,16 @@ This unified approach creates a cohesive, accessible highlight that works beauti
 - **Medium**: Balanced prominence (recommended default)
 - **Strong**: Maximum attention-grabbing effect
 
+### Optional In-Card Accents
+
+When enabled, highlighted cards receive additional subtle enhancements:
+
+- **Tag Badge Accent**: Matching highlight tags display with tertiary color, background tint, and border
+- **Title Color Shift**: Topic title subtly shifts toward tertiary color
+- **Metadata Accents**: Icons and separators receive tertiary color hints
+
+These accents work harmoniously with the card-level highlight to create a cohesive, polished appearance.
+
 ## Configuration
 
 ### Theme Settings
@@ -52,6 +62,16 @@ Navigate to **Admin → Customize → Themes → [Your Theme] → Settings**
   - `strong` - Maximum prominence
 - **Recommendation**: Use `medium` for most cases, `strong` for campaigns
 
+#### `show_highlight_incard_accents`
+- **Type**: Boolean (checkbox)
+- **Default**: `true` (enabled)
+- **Description**: Show in-card accents for highlighted topics
+- **What it does**:
+  - Displays an accented badge for matching tag(s) within the card
+  - Subtly adjusts topic title color toward tertiary
+  - Adds tertiary color hints to metadata icons and separators
+- **Recommendation**: Keep enabled for a polished, cohesive look
+
 ## Usage Examples
 
 ### Example 1: Highlight Featured Content (Recommended)
@@ -59,24 +79,36 @@ Navigate to **Admin → Customize → Themes → [Your Theme] → Settings**
 highlight_tags: featured
 highlight_style: tertiary_accent
 highlight_intensity: medium
+show_highlight_incard_accents: true
 ```
-Result: Topics tagged with "featured" will have a unified highlight with border, tint, and shadow.
+Result: Topics tagged with "featured" will have a unified highlight with border, tint, shadow, plus accented tag badges and subtle title color shift.
 
 ### Example 2: Multiple Tags with Subtle Emphasis
 ```
 highlight_tags: featured|important|announcement
 highlight_style: tertiary_accent
 highlight_intensity: subtle
+show_highlight_incard_accents: true
 ```
-Result: Topics with any of these tags will have a gentle, harmonious highlight.
+Result: Topics with any of these tags will have a gentle, harmonious highlight with in-card accents.
 
 ### Example 3: Strong Emphasis for Urgent Topics
 ```
 highlight_tags: urgent|breaking
 highlight_style: tertiary_accent
 highlight_intensity: strong
+show_highlight_incard_accents: true
 ```
-Result: Urgent topics will have a prominent, attention-grabbing highlight.
+Result: Urgent topics will have a prominent, attention-grabbing highlight with enhanced in-card styling.
+
+### Example 4: Card-Level Highlight Only (No In-Card Accents)
+```
+highlight_tags: featured
+highlight_style: tertiary_accent
+highlight_intensity: medium
+show_highlight_incard_accents: false
+```
+Result: Topics receive only the card-level highlight (border, tint, shadow) without tag badges or title adjustments.
 
 ## Testing Checklist
 
@@ -89,6 +121,10 @@ Result: Urgent topics will have a prominent, attention-grabbing highlight.
 - [ ] Test with dark color scheme
 - [ ] Test cards with thumbnails
 - [ ] Test cards without thumbnails (placeholder icon)
+- [ ] Test with in-card accents enabled
+- [ ] Test with in-card accents disabled
+- [ ] Verify tag badges appear only for matching tags
+- [ ] Check title color shift is subtle and readable
 
 ### Interaction Testing
 - [ ] Verify hover states work correctly
@@ -115,19 +151,26 @@ Result: Urgent topics will have a prominent, attention-grabbing highlight.
 ### Implementation
 
 The highlight system uses:
-- **Value Transformer**: Adds classes at render time (no DOM queries)
+- **Value Transformer**: Adds `.topic-card--highlight` class at render time (no DOM queries)
+- **MutationObserver**: Adds `.is-highlight-tag` class to matching tags when in-card accents enabled
 - **CSS Variables**: Intensity mapped to CSS custom properties
-- **BEM Naming**: `.topic-card--highlight` with style modifiers
+- **BEM Naming**: `.topic-card--highlight` for card-level styles
 - **Discourse Variables**: Uses `var(--tertiary)` for theme compatibility
+- **SPA-Safe**: Observer disconnects on route change, reconnects afterRender
 
 ### CSS Classes Applied
 
-When a topic has a highlight tag:
+**Card-level highlight** (always applied when topic has highlight tag):
 ```
 .topic-card--highlight
 ```
 
-This single class applies the unified tertiary color accent style with all combined effects (border, tint, shadow).
+**Tag-level accent** (applied when `show_highlight_incard_accents` is enabled):
+```
+.discourse-tag.is-highlight-tag
+```
+
+The card class applies the unified tertiary color accent style (border, tint, shadow). The tag class applies the accented badge styling and triggers title/metadata adjustments.
 
 ### Browser Compatibility
 
@@ -156,6 +199,21 @@ This single class applies the unified tertiary color accent style with all combi
 1. Decrease intensity: Change from `strong` to `medium` or `subtle`
 2. Consider using fewer highlight tags to reduce visual noise
 3. Ensure your theme's tertiary color is not too bright or saturated
+4. Disable in-card accents if the combined effect is too much
+
+### Tag Badges Not Showing
+
+1. **Check setting**: Ensure `show_highlight_incard_accents` is enabled (true)
+2. **Verify tags exist**: Confirm topics have the configured highlight tags
+3. **Check tag visibility**: Ensure tags are displayed in your card layout
+4. **Clear cache**: Hard refresh browser to reload JavaScript
+
+### Title Color Not Changing
+
+1. **Check setting**: Ensure `show_highlight_incard_accents` is enabled
+2. **Verify contrast**: Title shift is subtle by design (18-30% tertiary mix)
+3. **Test hover state**: Color shift is more noticeable on hover/focus
+4. **Check theme colors**: Ensure tertiary color differs from primary
 
 ## Best Practices
 
@@ -184,6 +242,8 @@ This single class applies the unified tertiary color accent style with all combi
 4. **Consider context**: Match intensity to content importance
 5. **Monitor performance**: Too many highlights reduce individual impact
 6. **Tertiary color matters**: Ensure your theme's tertiary color has good contrast and visibility
+7. **In-card accents**: Keep enabled for polished look; disable if you prefer minimal styling
+8. **Tag badge clarity**: Ensure highlight tags are meaningful and recognizable to users
 
 ## Accessibility Considerations
 

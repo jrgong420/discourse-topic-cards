@@ -19,9 +19,10 @@ en:
       set_card_grid_height: "Set uniform height for grid-layout topic cards on desktop to ensure proper grid alignment. Recommended for consistent visual appearance."
       card_grid_height: "The uniform height in pixels for grid-layout topic cards on desktop. Only used if set_card_grid_height is true. Default is 420px."
       card_border_radius: "Choose border radius size for topic cards. Maps to Discourse core design tokens for consistency with your theme."
-      highlight_tags: "Tags that trigger visual highlighting on topic cards. Enter tag names separated by pipes (e.g., 'featured|important'). Cards with any of these tags will be visually highlighted to increase visibility."
-      highlight_style: "Tertiary color accent: unified highlight style combining accent border, subtle background tint, and elevation shadow for accessible, harmonious emphasis."
-      highlight_intensity: "Intensity of the highlight effect. Subtle: minimal visual change. Medium: balanced prominence. Strong: maximum attention-grabbing effect."
+      highlight_tags: "Tags that trigger card highlighting — Enter tag names separated by pipes (e.g., 'featured|important'). Any topic with these tags will receive the highlight style to increase visibility and engagement."
+      highlight_style: "Highlight style preset — Tertiary color accent: unified style combining accent border, subtle background tint, and elevation shadow for accessible, harmonious emphasis."
+      highlight_intensity: "Highlight intensity — Controls the prominence of the highlight effect. Subtle (light emphasis), Medium (balanced, recommended), Strong (most prominent)."
+      show_highlight_incard_accents: "Show in-card accents for highlighted topics — When enabled, displays an accented badge for matching tag(s) and subtly adjusts the topic title styling within highlighted cards."
   published: "Published"
   like_toggle:
     like: "Like"

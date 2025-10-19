@@ -94,3 +94,8 @@ highlight_intensity:
     - medium
     - strong
   description: "Intensity of the highlight effect: subtle (minimal), medium (balanced), or strong (prominent)"
+
+show_highlight_incard_accents:
+  type: bool
+  default: true
+  description: "Show in-card accents for highlighted topics: accented badge for matching tag(s) and subtle title color adjustments"

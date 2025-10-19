@@ -1,4 +1,5 @@
 import Component from "@glimmer/component";
+import { schedule } from "@ember/runloop";
 import { apiInitializer } from "discourse/lib/api";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
 import TopicByline from "../components/topic-byline";
@@ -140,6 +141,102 @@ export default apiInitializer((api) => {
       }
     }
     return columns;
+  });
+
+  // ============================================================================
+  // In-card accents: Tag badge highlighting for matching highlight tags
+  // ============================================================================
+  let tagObserver = null;
+
+  function setupTagBadgeAccents() {
+    // Only run if feature is enabled
+    if (!settings.show_highlight_incard_accents || !settings.highlight_tags) {
+      return;
+    }
+
+    const highlightTags = settings.highlight_tags
+      .split("|")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    if (highlightTags.length === 0) {
+      return;
+    }
+
+    // Find topic list containers to observe
+    const containers = document.querySelectorAll(
+      ".topic-list, .latest-topic-list, #list-area"
+    );
+    if (!containers.length) {
+      return;
+    }
+
+    // Process existing tag elements
+    containers.forEach((container) => {
+      const tagElements = container.querySelectorAll(".discourse-tag");
+      tagElements.forEach((tagEl) => {
+        const tagName = tagEl.getAttribute("data-tag-name");
+        if (tagName && highlightTags.includes(tagName)) {
+          tagEl.classList.add("is-highlight-tag");
+        }
+      });
+    });
+
+    // Set up observer for dynamically added tags
+    tagObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== 1) return;
+
+          // Check if the added node itself is a tag
+          if (node.classList?.contains("discourse-tag")) {
+            const tagName = node.getAttribute("data-tag-name");
+            if (tagName && highlightTags.includes(tagName)) {
+              node.classList.add("is-highlight-tag");
+            }
+          }
+
+          // Check for tags within the added node
+          if (node.querySelectorAll) {
+            const tagElements = node.querySelectorAll(".discourse-tag");
+            tagElements.forEach((tagEl) => {
+              const tagName = tagEl.getAttribute("data-tag-name");
+              if (tagName && highlightTags.includes(tagName)) {
+                tagEl.classList.add("is-highlight-tag");
+              }
+            });
+          }
+        });
+      });
+    });
+
+    // Observe each container
+    containers.forEach((container) => {
+      tagObserver.observe(container, { childList: true, subtree: true });
+    });
+  }
+
+  function cleanupTagBadgeAccents() {
+    if (tagObserver) {
+      tagObserver.disconnect();
+      tagObserver = null;
+    }
+
+    // Remove all is-highlight-tag classes
+    document.querySelectorAll(".is-highlight-tag").forEach((el) => {
+      el.classList.remove("is-highlight-tag");
+    });
+  }
+
+  // Set up on page change
+  api.onPageChange(() => {
+    // Always clean up previous observer
+    cleanupTagBadgeAccents();
+
+    // Set up new observer after render
+    schedule("afterRender", () => {
+      setupTagBadgeAccents();
+    });
   });
 
   api.registerBehaviorTransformer(
