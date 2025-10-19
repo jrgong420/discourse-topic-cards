@@ -95,7 +95,7 @@ export default apiInitializer((api) => {
           itemClasses.push("has-grid-height");
         }
 
-        // Add highlight classes if topic has any configured highlight tags
+        // Add highlight class if topic has any configured highlight tags
         if (settings.highlight_tags) {
           const highlightTags = settings.highlight_tags
             .split("|")
@@ -110,7 +110,6 @@ export default apiInitializer((api) => {
 
           if (hasHighlightTag) {
             itemClasses.push("topic-card--highlight");
-            itemClasses.push(`topic-card--highlight--${settings.highlight_style}`);
           }
         }
 

@@ -6,25 +6,16 @@ The highlight system allows you to visually emphasize topic cards that have spec
 
 ## Features
 
-### Three Visual Styles
+### Unified Tertiary Color Accent Style
 
-1. **Border** (Default)
-   - Colored accent border using theme's tertiary color
-   - Soft outer glow/ring effect
-   - Best balance between prominence and harmony
-   - Works well in both light and dark color schemes
+The highlight system uses a **single, unified visual style** that combines the best aspects of multiple emphasis techniques:
 
-2. **Background**
-   - Subtle background tint
-   - Light border accent
-   - Most harmonious with existing design
-   - Minimal visual disruption
+- **Accent Border**: Colored border using your theme's tertiary color
+- **Soft Glow**: Subtle outer ring effect for depth
+- **Background Tint**: Gentle background color wash for harmony
+- **Elevation Shadow**: Enhanced drop shadow with slight lift
 
-3. **Elevation**
-   - Deeper drop shadow
-   - Slight visual lift effect
-   - Non-color dependent prominence
-   - Great for creating depth hierarchy
+This unified approach creates a cohesive, accessible highlight that works beautifully in both light and dark color schemes while maintaining visual harmony with your existing design.
 
 ### Three Intensity Levels
 
@@ -47,12 +38,10 @@ Navigate to **Admin → Customize → Themes → [Your Theme] → Settings**
 
 #### `highlight_style`
 - **Type**: Dropdown
-- **Default**: `border`
-- **Options**: 
-  - `border` - Accent border with glow
-  - `background` - Subtle background tint
-  - `elevation` - Shadow depth emphasis
-- **Recommendation**: Start with `border` for best visibility
+- **Default**: `tertiary_accent`
+- **Options**:
+  - `tertiary_accent` - Unified style combining border, background tint, and elevation
+- **Description**: Single, cohesive highlight style that works across all themes and color schemes
 
 #### `highlight_intensity`
 - **Type**: Dropdown
@@ -65,29 +54,29 @@ Navigate to **Admin → Customize → Themes → [Your Theme] → Settings**
 
 ## Usage Examples
 
-### Example 1: Highlight Featured Content
+### Example 1: Highlight Featured Content (Recommended)
 ```
 highlight_tags: featured
-highlight_style: border
+highlight_style: tertiary_accent
 highlight_intensity: medium
 ```
-Result: Topics tagged with "featured" will have a colored border with a soft glow.
+Result: Topics tagged with "featured" will have a unified highlight with border, tint, and shadow.
 
-### Example 2: Multiple Tags with Background Tint
+### Example 2: Multiple Tags with Subtle Emphasis
 ```
 highlight_tags: featured|important|announcement
-highlight_style: background
+highlight_style: tertiary_accent
 highlight_intensity: subtle
 ```
-Result: Topics with any of these tags will have a subtle background tint.
+Result: Topics with any of these tags will have a gentle, harmonious highlight.
 
 ### Example 3: Strong Emphasis for Urgent Topics
 ```
 highlight_tags: urgent|breaking
-highlight_style: elevation
+highlight_style: tertiary_accent
 highlight_intensity: strong
 ```
-Result: Urgent topics will have a prominent shadow effect.
+Result: Urgent topics will have a prominent, attention-grabbing highlight.
 
 ## Testing Checklist
 
@@ -136,13 +125,9 @@ The highlight system uses:
 When a topic has a highlight tag:
 ```
 .topic-card--highlight
-.topic-card--highlight--{style}
 ```
 
-Examples:
-- `.topic-card--highlight.topic-card--highlight--border`
-- `.topic-card--highlight.topic-card--highlight--background`
-- `.topic-card--highlight.topic-card--highlight--elevation`
+This single class applies the unified tertiary color accent style with all combined effects (border, tint, shadow).
 
 ### Browser Compatibility
 
@@ -163,41 +148,42 @@ Examples:
 ### Highlights Too Subtle
 
 1. Increase intensity: Change from `subtle` to `medium` or `strong`
-2. Try different style: `border` is more prominent than `background`
-3. Check color scheme: Some styles work better in light vs dark mode
+2. Check color scheme: Verify tertiary color has good contrast in your theme
+3. Verify tags are correctly configured and applied to topics
 
 ### Highlights Too Aggressive
 
 1. Decrease intensity: Change from `strong` to `medium` or `subtle`
-2. Try different style: `background` is more subtle than `border`
-3. Consider using fewer highlight tags
+2. Consider using fewer highlight tags to reduce visual noise
+3. Ensure your theme's tertiary color is not too bright or saturated
 
 ## Best Practices
 
 ### Recommended Configurations
 
-**For General Featured Content**
-- Style: `border`
+**For General Featured Content (Recommended)**
+- Style: `tertiary_accent`
 - Intensity: `medium`
 - Tags: `featured`
 
 **For Subtle Emphasis**
-- Style: `background`
+- Style: `tertiary_accent`
 - Intensity: `subtle`
 - Tags: `featured|recommended`
 
 **For Urgent/Important Content**
-- Style: `elevation`
+- Style: `tertiary_accent`
 - Intensity: `strong`
 - Tags: `urgent|breaking`
 
 ### Design Guidelines
 
 1. **Don't overuse**: Limit highlighted tags to 1-3 to maintain effectiveness
-2. **Be consistent**: Use the same style/intensity across your site
+2. **Be consistent**: Use the same intensity across your site
 3. **Test both themes**: Verify in light and dark color schemes
 4. **Consider context**: Match intensity to content importance
 5. **Monitor performance**: Too many highlights reduce individual impact
+6. **Tertiary color matters**: Ensure your theme's tertiary color has good contrast and visibility
 
 ## Accessibility Considerations
 
@@ -210,11 +196,11 @@ Examples:
 ## Future Enhancements
 
 Potential additions (not currently implemented):
-- Custom highlight colors per tag
+- Custom highlight colors per tag (override tertiary color)
 - Animation option (with reduced-motion respect)
 - Badge/ribbon overlay option
-- Gradient background option
-- Multiple style combinations
+- Alternative unified styles (e.g., "primary accent", "success accent")
+- Per-tag intensity overrides
 
 ## Support
 

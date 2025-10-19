@@ -81,12 +81,10 @@ highlight_tags:
 
 highlight_style:
   type: enum
-  default: border
+  default: tertiary_accent
   choices:
-    - border
-    - background
-    - elevation
-  description: "Visual style for highlighted cards: border (accent border + glow), background (subtle tint), or elevation (shadow depth)"
+    - tertiary_accent
+  description: "Visual style for highlighted cards: tertiary color accent combines border, background tint, and elevation for unified emphasis"
 
 highlight_intensity:
   type: enum
