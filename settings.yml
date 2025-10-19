@@ -72,3 +72,27 @@ card_border_radius:
     - medium
     - large
     - extra_large
+
+highlight_tags:
+  type: list
+  list_type: tag
+  default: "featured"
+  description: "Tags that trigger visual highlighting on topic cards (pipe-separated, e.g., 'featured|important')"
+
+highlight_style:
+  type: enum
+  default: border
+  choices:
+    - border
+    - background
+    - elevation
+  description: "Visual style for highlighted cards: border (accent border + glow), background (subtle tint), or elevation (shadow depth)"
+
+highlight_intensity:
+  type: enum
+  default: medium
+  choices:
+    - subtle
+    - medium
+    - strong
+  description: "Intensity of the highlight effect: subtle (minimal), medium (balanced), or strong (prominent)"

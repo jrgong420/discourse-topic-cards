@@ -73,7 +73,7 @@ export default apiInitializer((api) => {
 
   api.registerValueTransformer(
     "topic-list-item-class",
-    ({ value: additionalClasses }) => {
+    ({ value: additionalClasses, context }) => {
       if (enableCards()) {
         // Add card layout modifier based on viewport
         const rawStyle = site.mobileView
@@ -93,6 +93,25 @@ export default apiInitializer((api) => {
           !site.mobileView
         ) {
           itemClasses.push("has-grid-height");
+        }
+
+        // Add highlight classes if topic has any configured highlight tags
+        if (settings.highlight_tags) {
+          const highlightTags = settings.highlight_tags
+            .split("|")
+            .map((tag) => tag.trim())
+            .filter(Boolean);
+
+          const topicTags = context.topic?.tags || [];
+
+          const hasHighlightTag = highlightTags.some((highlightTag) =>
+            topicTags.includes(highlightTag)
+          );
+
+          if (hasHighlightTag) {
+            itemClasses.push("topic-card--highlight");
+            itemClasses.push(`topic-card--highlight--${settings.highlight_style}`);
+          }
         }
 
         return [...additionalClasses, ...itemClasses];

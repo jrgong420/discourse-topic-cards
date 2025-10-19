@@ -406,3 +406,120 @@
     transform: scale(1);
   }
 }
+
+// ============================================================================
+// Highlight System: Visual emphasis for featured/important topic cards
+// ============================================================================
+
+// Map intensity setting to CSS variables for each style
+.topic-cards-list {
+  // Border style intensity variables
+  @if $highlight-intensity == "subtle" {
+    --highlight-border-width: 1px;
+    --highlight-ring-size: 2px;
+    --highlight-ring-opacity: 0.12;
+  } @else if $highlight-intensity == "medium" {
+    --highlight-border-width: 2px;
+    --highlight-ring-size: 3px;
+    --highlight-ring-opacity: 0.20;
+  } @else if $highlight-intensity == "strong" {
+    --highlight-border-width: 3px;
+    --highlight-ring-size: 4px;
+    --highlight-ring-opacity: 0.28;
+  }
+
+  // Background style intensity variables
+  @if $highlight-intensity == "subtle" {
+    --highlight-bg-opacity: 0.03;
+    --highlight-border-opacity: 0.08;
+  } @else if $highlight-intensity == "medium" {
+    --highlight-bg-opacity: 0.05;
+    --highlight-border-opacity: 0.15;
+  } @else if $highlight-intensity == "strong" {
+    --highlight-bg-opacity: 0.08;
+    --highlight-border-opacity: 0.25;
+  }
+
+  // Elevation style intensity variables
+  @if $highlight-intensity == "subtle" {
+    --highlight-shadow-blur: 12px;
+    --highlight-shadow-opacity: 0.12;
+    --highlight-lift: 0px;
+  } @else if $highlight-intensity == "medium" {
+    --highlight-shadow-blur: 18px;
+    --highlight-shadow-opacity: 0.18;
+    --highlight-lift: -1px;
+  } @else if $highlight-intensity == "strong" {
+    --highlight-shadow-blur: 24px;
+    --highlight-shadow-opacity: 0.24;
+    --highlight-lift: -2px;
+  }
+}
+
+// Base highlight class (shared by all styles)
+.topic-card--highlight {
+  // Ensure smooth transitions for hover states
+  transition: all 0.2s ease-in-out;
+}
+
+// Style 1: Border accent with soft outer glow
+.topic-card--highlight--border {
+  border: var(--highlight-border-width) solid var(--tertiary) !important;
+  box-shadow:
+    0 0 0 var(--highlight-ring-size)
+    color-mix(in oklab, var(--tertiary) calc(var(--highlight-ring-opacity) * 100%), transparent),
+    var(--shadow-card); // Preserve original card shadow
+
+  &:hover,
+  &.selected {
+    // Enhance glow on hover
+    box-shadow:
+      0 0 0 calc(var(--highlight-ring-size) + 1px)
+      color-mix(in oklab, var(--tertiary) calc(var(--highlight-ring-opacity) * 120%), transparent),
+      var(--shadow-card);
+  }
+}
+
+// Style 2: Subtle background tint
+.topic-card--highlight--background {
+  background: color-mix(
+    in oklab,
+    var(--tertiary) calc(var(--highlight-bg-opacity) * 100%),
+    var(--secondary)
+  ) !important;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--tertiary) calc(var(--highlight-border-opacity) * 100%),
+      transparent
+    ) !important;
+
+  &:hover,
+  &.selected {
+    // Slightly strengthen tint on hover
+    background: color-mix(
+      in oklab,
+      var(--tertiary) calc(var(--highlight-bg-opacity) * 140%),
+      var(--secondary)
+    ) !important;
+  }
+}
+
+// Style 3: Elevation emphasis with deeper shadow
+.topic-card--highlight--elevation {
+  box-shadow:
+    0 6px var(--highlight-shadow-blur)
+    rgba(0, 0, 0, var(--highlight-shadow-opacity)),
+    0 1px 0 var(--primary-low);
+  transform: translateY(var(--highlight-lift));
+
+  &:hover,
+  &.selected {
+    // Increase elevation on hover
+    box-shadow:
+      0 8px calc(var(--highlight-shadow-blur) + 4px)
+      rgba(0, 0, 0, calc(var(--highlight-shadow-opacity) + 0.04)),
+      0 1px 0 var(--primary-low);
+    transform: translateY(calc(var(--highlight-lift) - 1px));
+  }
+}
