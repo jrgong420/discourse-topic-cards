@@ -13,8 +13,7 @@ en:
       show_for_suggested_topics: "Show topic cards for suggested topics"
       card_style_desktop: "Choose card layout style for desktop viewports (list: image left, content right; grid: image top, content below in responsive grid)"
       card_style_mobile: "Choose card layout style for mobile viewports (list: image left, content right; grid: image top, content below)"
-      set_grid_card_max_width: "Set max width for grid-layout topic cards (desktop only). If unset, grid cards will size based on grid layout."
-      grid_card_max_width: "The maximum width in pixels for grid-layout topic cards (desktop only). Only used if set_grid_card_max_width is true. Set to 0 to disable max-width constraint. Default is 360px."
+      thumbnail_placeholder_icon: "Icon used when a topic has no thumbnail (Font Awesome name, e.g., fa-image, fa-file, fa-newspaper)."
       grid_thumbnail_max_height: "Maximum thumbnail height in pixels for grid-layout topic cards on smartphones (mobile only). Default is 150px."
 
       set_card_grid_height: "Set uniform height for grid-layout topic cards on desktop to ensure proper grid alignment. Recommended for consistent visual appearance."

@@ -1,5 +1,6 @@
 import Component from "@glimmer/component";
 import { computed } from "@ember/object";
+import dIcon from "discourse/helpers/d-icon";
 
 export default class TopicThumbnail extends Component {
   responsiveRatios = [1, 1.5, 2];
@@ -73,6 +74,11 @@ export default class TopicThumbnail extends Component {
       : this.topic.get("lastUnreadUrl");
   }
 
+  get placeholderIconName() {
+    const raw = settings?.thumbnail_placeholder_icon || "fa-image";
+    return raw.replace?.(/^fa-/, "") || "image";
+  }
+
   <template>
     <td class="topic-card__thumbnail">
       <a href={{this.url}}>
@@ -86,7 +92,9 @@ export default class TopicThumbnail extends Component {
             loading="lazy"
           />
         {{else}}
-          <div class="thumbnail-placeholder" aria-hidden="true"></div>
+          <div class="thumbnail-placeholder" aria-hidden="true">
+            {{dIcon this.placeholderIconName}}
+          </div>
         {{/if}}
       </a>
     </td>

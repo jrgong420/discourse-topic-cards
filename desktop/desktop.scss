@@ -3,10 +3,6 @@
   /* Default column min width driven by setting */
   --tc-grid-col-min: #{$grid-card-min-width}px;
 
-  /* When max-width is enabled (class present), use that as the column basis */
-  &:has(.topic-card--grid.has-max-width) {
-    --tc-grid-col-min: #{$grid-card-max-width}px;
-  }
 
   .topic-list-body {
     display: grid; /* higher specificity selector beats common flex rule */
@@ -54,7 +50,7 @@
       "tags tags"
       "title title"
       "excerpt excerpt"
-      "op op"
+      "byline byline"
       "metadata metadata";
     grid-template-rows: auto auto auto 1fr auto;
     width: 100%;
@@ -122,17 +118,6 @@
   }
 }
 
-// Max-width handling for grid cards only (class gated)
-.topic-card--grid.has-max-width {
-  max-width: #{$grid-card-max-width}px;
-  margin-left: auto;
-  margin-right: auto;
-
-  // Ensure content doesn't overflow max-width
-  .main-link {
-    max-width: 100%;
-  }
-}
 
 // Uniform height for grid cards (desktop only)
 .topic-card--grid.has-grid-height {

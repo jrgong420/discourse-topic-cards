@@ -38,14 +38,6 @@ card_style_mobile:
   choices:
     - list
     - grid
-set_grid_card_max_width:
-  type: bool
-  default: false
-  description: "Desktop grid only: cap each grid card's width. No effect on smartphone grid."
-grid_card_max_width:
-  type: integer
-  default: 360
-  description: "Desktop grid only: maximum card width in px. Set to 0 to disable max-width constraint. Does not affect smartphones."
 grid_card_min_width:
   type: integer
   default: 260
@@ -61,6 +53,16 @@ set_card_grid_height:
 card_grid_height:
   type: integer
   default: 420
+
+thumbnail_placeholder_icon:
+  type: enum
+  default: fa-image
+  choices:
+    - fa-image
+    - fa-file
+    - fa-newspaper
+  description: "Icon to display when a topic has no thumbnail image (Font Awesome icon name, e.g., fa-image)."
+
 card_border_radius:
   type: enum
   default: large

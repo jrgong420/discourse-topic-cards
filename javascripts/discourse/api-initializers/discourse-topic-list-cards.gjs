@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
 import { apiInitializer } from "discourse/lib/api";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
+import TopicByline from "../components/topic-byline";
 import TopicExcerpt from "../components/topic-excerpt";
 import TopicMetadata from "../components/topic-metadata";
-import TopicOp from "../components/topic-op";
 import TopicTagsMobile from "../components/topic-tags-mobile";
 import TopicThumbnail from "../components/topic-thumbnail";
 
@@ -47,7 +47,7 @@ export default apiInitializer((api) => {
       }
 
       <template>
-        <TopicOp @topic={{@outletArgs.topic}} />
+        <TopicByline @topic={{@outletArgs.topic}} />
         <TopicExcerpt @topic={{@outletArgs.topic}} />
         <TopicMetadata @topic={{@outletArgs.topic}} />
       </template>
@@ -87,10 +87,11 @@ export default apiInitializer((api) => {
         if (cardStyle === "list" && settings.set_card_max_height) {
           itemClasses.push("has-max-height");
         }
-        if (cardStyle === "grid" && settings.set_grid_card_max_width && settings.grid_card_max_width > 0) {
-          itemClasses.push("has-max-width");
-        }
-        if (cardStyle === "grid" && settings.set_card_grid_height && !site.mobileView) {
+        if (
+          cardStyle === "grid" &&
+          settings.set_card_grid_height &&
+          !site.mobileView
+        ) {
           itemClasses.push("has-grid-height");
         }
 
@@ -138,6 +139,7 @@ export default apiInitializer((api) => {
           "topic-card__excerpt-text",
           "topic-card__metadata",
           "topic-card__likes",
+          "topic-card__byline",
           "topic-card__op",
         ];
 

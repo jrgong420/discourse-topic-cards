@@ -1,5 +1,12 @@
 {
   "private": true,
+  "scripts": {
+    "lint:eslint": "eslint --ext .js,.gjs --no-error-on-unmatched-pattern {test,javascripts}",
+    "lint:templates": "ember-template-lint --no-error-on-unmatched-pattern javascripts",
+    "format:check": "prettier --check --ignore-unknown \"javascripts/**/*.{js,gjs,hbs}\" \"test/**/*.{js,gjs}\"",
+    "format": "prettier --write --ignore-unknown \"javascripts/**/*.{js,gjs,hbs}\" \"test/**/*.{js,gjs}\"",
+    "lint:all": "pnpm run lint:eslint && pnpm run lint:templates && pnpm run format:check"
+  },
   "devDependencies": {
     "@discourse/lint-configs": "2.32.0",
     "ember-template-lint": "7.9.1",
