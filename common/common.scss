@@ -150,12 +150,12 @@
     .link-top-line {
       grid-area: title;
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 1fr auto;
       grid-template-areas:
         "title statuses"
         "event event";
       align-items: center;
-      gap: var(--space-1);
+      gap: var(--space-1) var(--space-2);
 
       &:hover {
         text-decoration: underline;
@@ -164,11 +164,14 @@
       // Title and statuses on first row
       .title {
         grid-area: title;
+        min-width: 0; // Allow truncation
       }
 
-      .topic-statuses {
+      .topic-statuses,
+      .topic-post-badges {
         grid-area: statuses;
         align-self: center;
+        white-space: nowrap; // Keep badges on one line
       }
 
       // Event date on its own row below
