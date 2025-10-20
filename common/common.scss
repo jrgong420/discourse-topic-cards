@@ -138,6 +138,8 @@
     gap: var(--space-2) 0;
     box-sizing: border-box;
     box-shadow: none !important;
+
+
     // Allow this grid item to shrink inside the flex card without forcing overflow
     min-width: 0;
 
@@ -261,6 +263,8 @@
         line-height: var(--line-height-large);
         flex-wrap: wrap;
         align-items: center;
+
+
         // Allow shrink inside grid area to avoid horizontal overflow
         min-width: 0;
 
@@ -358,6 +362,8 @@
         font-size: var(--font-down-1);
         color: var(--excerpt-color);
         line-height: var(--line-height-large);
+
+
         // Better long-word handling inside excerpts
         word-break: break-word;
         overflow-wrap: anywhere;
