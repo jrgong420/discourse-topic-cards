@@ -1,3 +1,7 @@
 .discourse-site
 node_modules
 HELP
+
+
+# Ignore Augment local artifacts
+.augment/
