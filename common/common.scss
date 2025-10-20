@@ -412,3 +412,10 @@
     transform: scale(1);
   }
 }
+
+// Topic Author TC compatibility: hide custom author column when enabled
+@if $hide-topic-author-tc-column {
+  tr.topic-list-item.topic-card td.custom-author-column {
+    display: none;
+  }
+}

@@ -72,3 +72,8 @@ card_border_radius:
     - medium
     - large
     - extra_large
+
+hide_topic_author_tc_column:
+  type: bool
+  default: false
+  description: "When enabled, hides td.custom-author-column in topic cards (for compatibility with Topic Author TC)."
