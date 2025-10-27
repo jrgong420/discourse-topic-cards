@@ -131,6 +131,14 @@ export default apiInitializer((api) => {
         const targetElement = context.event.target;
         const topic = context.topic;
 
+        if (
+          targetElement.closest(
+            "a[href], button, input, textarea, select, label[for]"
+          )
+        ) {
+          return next();
+        }
+
         const clickTargets = [
           "topic-list-data",
           "link-bottom-line",
@@ -148,7 +156,7 @@ export default apiInitializer((api) => {
         }
 
         if (clickTargets.some((t) => targetElement.closest(`.${t}`))) {
-          if (wantsNewWindow(event)) {
+          if (wantsNewWindow(context.event)) {
             return true;
           }
           return context.navigateToTopic(topic, topic.lastUnreadUrl);
