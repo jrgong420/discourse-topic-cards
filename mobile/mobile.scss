@@ -239,5 +239,37 @@
     word-break: break-word;
     overflow-wrap: anywhere;
   }
+
+  // Mobile-specific featured link truncation
+  .link-top-line {
+    .topic-featured-link {
+      max-width: 150px; // Shorter max-width on mobile
+    }
+  }
 }
 
+// Mobile-specific styles for event week labels
+// Optimized for smaller viewports
+.event-date-mod__week-label,
+.topic-event-week,
+.topic-header-event-week {
+  // Slightly smaller font on mobile for better fit
+  font-size: var(--font-down-2);
+
+  // Reduced spacing for compact layout
+  padding: 0.2em 0.4em;
+  margin-inline-start: var(--space-0-5);
+}
+
+// Topic header variant on mobile
+.topic-header-event-week {
+  font-size: var(--font-down-1);
+  padding: 0.25em 0.5em;
+}
+
+
+
+// Event Date Mod: mobile tweaks for wrapper
+.event-date-mod__container {
+  margin-inline-start: var(--space-0-5);
+}

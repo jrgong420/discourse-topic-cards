@@ -149,34 +149,74 @@
 
     .link-top-line {
       grid-area: title;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      grid-template-areas:
-        "title statuses"
-        "event event";
+      // Replace grid with flexbox for better featured link handling
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: var(--space-1) var(--space-2);
+      gap: var(--space-2);
 
       &:hover {
         text-decoration: underline;
       }
 
-      // Title and statuses on first row
-      .title {
-        grid-area: title;
-        min-width: 0; // Allow truncation
+      // Topic statuses (icons like pinned, closed, etc.)
+      .topic-statuses {
+        flex: 0 0 auto;
+        order: 1;
       }
 
-      .topic-statuses,
+      // Title - gets priority space
+      .title {
+        flex: 1 1 auto;
+        min-width: 0; // Allow text truncation
+        order: 2;
+
+        // Ensure title can still truncate if extremely long
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      // Featured link - wraps to new line when space is constrained
+      .topic-featured-link {
+        flex: 0 0 auto;
+        order: 3;
+        font-size: var(--font-down-1);
+        color: var(--primary-medium);
+        margin-left: var(--space-1);
+
+        // Allow wrapping to new line when needed
+        max-width: 100%;
+
+        // Truncate very long URLs
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 200px;
+
+        // Add subtle styling
+        opacity: 0.8;
+        transition: opacity 0.2s;
+
+        &:hover,
+        &:focus {
+          opacity: 1;
+          color: var(--tertiary);
+        }
+      }
+
+      // Post badges (unread count, etc.) - pushed to right
       .topic-post-badges {
-        grid-area: statuses;
-        align-self: center;
+        flex: 0 0 auto;
+        order: 4;
+        margin-left: auto;
         white-space: nowrap; // Keep badges on one line
       }
 
       // Event date on its own row below
       .header-topic-title-suffix-outlet {
-        grid-area: event;
+        flex: 1 0 100%; // Force to new line
+        order: 5;
         margin-top: var(--space-1);
       }
     }
@@ -421,4 +461,78 @@
   tr.topic-list-item.topic-card td.custom-author-column {
     display: none;
   }
+}
+
+// Event week label styling
+// Styled to match Discourse's tag/badge patterns for visual consistency
+.event-date-mod__week-label,
+.topic-event-week,
+.topic-header-event-week {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+
+  // Colors: match tag chip styling (tertiary on tertiary-low)
+  background: var(--tertiary-low);
+  color: var(--tertiary);
+
+  // Typography
+  font-size: var(--font-down-1);
+  font-weight: 500;
+  line-height: var(--line-height-small);
+
+  // Spacing
+  padding: 0.25em 0.5em;
+  margin-inline-start: var(--space-1);
+
+  // Shape
+  border-radius: var(--d-border-radius);
+
+  // Smooth transitions for theme changes
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+// Topic header variant: slightly larger and more prominent
+.topic-header-event-week {
+  font-size: var(--font-0);
+  margin-inline-start: var(--space-2);
+  padding: 0.3em 0.6em;
+}
+
+
+// Decoupled Event Week wrapper: works across layouts (grid/flex/inline)
+.event-date-mod__container {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+  width: auto;
+  max-width: max-content;
+  flex: 0 0 auto;
+  text-decoration: none; // avoid chip underline inside links
+  align-self: start;     // in grid/flex contexts, anchor start
+  justify-self: start;
+}
+
+// Prevent underline on label/wrapper when ancestor link is hovered/focused
+// (independent of topic-cards)
+a:hover .event-date-mod__container,
+a:focus .event-date-mod__container,
+a:hover .topic-event-week,
+a:focus .topic-event-week,
+a:hover .topic-header-event-week,
+a:focus .topic-header-event-week {
+  text-decoration: none;
+}
+
+// Hide core event date when our wrapper/label is present in list views
+.topic-list-item.event-weekify-eligible:not(.topic-card):has(.event-date-mod__container) .event-date.event-relative-date,
+.latest-topic-list-item.event-weekify-eligible:not(.topic-card):has(.event-date-mod__container) .event-date.event-relative-date {
+  display: none;
+}
+
+// Hide in header contexts when our wrapper/label is present
+.extra-info-wrapper:has(.event-date-mod__container) .event-date.event-relative-date,
+.header-topic-title-suffix-outlet:has(.event-date-mod__container) .event-date.event-relative-date {
+  display: none;
 }
