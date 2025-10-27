@@ -94,6 +94,11 @@
 
     .link-top-line {
       grid-area: title;
+
+      // Ensure featured link is properly positioned on mobile
+      a.topic-featured-link {
+        font-size: var(--font-down-2);
+      }
     }
 
     .link-bottom-line {
@@ -188,6 +193,11 @@
     .link-top-line {
       grid-area: title;
       font-size: var(--font-down-1);
+
+      // Ensure featured link is properly positioned on mobile list layout
+      a.topic-featured-link {
+        font-size: var(--font-down-2);
+      }
     }
 
     .link-bottom-line {

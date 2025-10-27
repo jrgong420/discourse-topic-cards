@@ -151,11 +151,21 @@
       grid-area: title;
       display: grid;
       grid-template-columns: 1fr auto;
+      // Default: no event row (collapses when empty)
       grid-template-areas:
         "title statuses"
-        "event event";
+        "featured-link featured-link";
       align-items: center;
-      gap: var(--space-1) var(--space-2);
+      // Remove row gap to prevent spacing for empty rows; keep column gap only
+      gap: 0 var(--space-2);
+
+      // Add event row only when event content exists
+      &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+        grid-template-areas:
+          "title statuses"
+          "event event"
+          "featured-link featured-link";
+      }
 
       &:hover {
         text-decoration: underline;
@@ -174,9 +184,30 @@
         white-space: nowrap; // Keep badges on one line
       }
 
-      // Event date on its own row below
+      // Event date on its own row below title
       .header-topic-title-suffix-outlet {
         grid-area: event;
+        margin-top: var(--space-1);
+      }
+
+      // Featured link appears below event date (or below title if no event)
+      a.topic-featured-link {
+        grid-area: featured-link;
+        // No margin by default (when no event)
+        margin-top: 0;
+        font-size: var(--font-down-1);
+        color: var(--tertiary);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+
+        .d-icon {
+          font-size: 0.9em;
+        }
+      }
+
+      // Add spacing to featured link only when event is present
+      &:has(.header-topic-title-suffix-outlet:not(:empty)) a.topic-featured-link {
         margin-top: var(--space-1);
       }
     }

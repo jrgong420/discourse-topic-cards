@@ -56,6 +56,11 @@
     width: 100%;
     padding: var(--space-3) var(--space-5) !important;
     gap: var(--space-2) 0;
+
+    // Ensure featured link inherits proper styling in grid layout
+    .link-top-line a.topic-featured-link {
+      font-size: var(--font-down-1);
+    }
   }
 }
 
