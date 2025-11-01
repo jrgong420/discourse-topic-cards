@@ -9,10 +9,10 @@ en:
       show_publish_date: "Show publish date on topic card"
       set_card_max_height: "Set max height for landscape-oriented topic cards. If unset, landscape cards will grow to the height of the image rendering."
       card_max_height: "The maximum height in pixels for landscape-oriented topic cards. Only used if set_card_max_height is true. Default is 275px."
-      show_on_categories: "Show topic cards on these categories. If empty, show topic cards everywhere."
+      list_view_categories: "Categories that display topic cards in list style (image left, content right). If both category settings are empty, topic cards are shown everywhere in list style by default."
+      grid_view_categories: "Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both settings, grid style takes priority."
       show_for_suggested_topics: "Show topic cards for suggested topics"
-      card_style_desktop: "Choose card layout style for desktop viewports (list: image left, content right; grid: image top, content below in responsive grid)"
-      card_style_mobile: "Choose card layout style for mobile viewports (list: image left, content right; grid: image top, content below)"
+      card_style_mobile: "Choose card layout style for mobile viewports (list: image left, content right; grid: image top, content below). This applies to all categories where topic cards are enabled, regardless of per-category desktop styles."
       thumbnail_placeholder_icon: "Icon used when a topic has no thumbnail (Font Awesome name, e.g., fa-image, fa-file, fa-newspaper)."
       grid_thumbnail_max_height: "Maximum thumbnail height in pixels for grid-layout topic cards on smartphones (mobile only). Default is 150px."
 

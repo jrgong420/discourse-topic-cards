@@ -19,25 +19,26 @@ set_card_max_height:
 card_max_height:
   type: integer
   default: 275
-show_on_categories:
+list_view_categories:
   type: list
   list_type: category
   default: ""
+  description: "Categories that display topic cards in list style (image left, content right). If both settings are empty, topic cards are shown everywhere in list style by default."
+grid_view_categories:
+  type: list
+  list_type: category
+  default: ""
+  description: "Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both settings, grid style takes priority."
 show_for_suggested_topics:
   type: bool
   default: true
-card_style_desktop:
-  type: enum
-  default: list
-  choices:
-    - list
-    - grid
 card_style_mobile:
   type: enum
   default: grid
   choices:
     - list
     - grid
+  description: "Choose card layout style for mobile viewports. This applies to all categories where topic cards are enabled."
 grid_card_min_width:
   type: integer
   default: 260

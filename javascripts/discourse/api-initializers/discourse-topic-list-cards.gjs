@@ -20,20 +20,56 @@ export default apiInitializer((api) => {
     return legacyMap[style] || style;
   }
 
+  /**
+   * Determines the card style for the current category on desktop.
+   * Returns "list", "grid", or null (no cards).
+   *
+   * Priority:
+   * 1. If category is in grid_view_categories -> "grid"
+   * 2. If category is in list_view_categories -> "list"
+   * 3. If both settings are empty -> "list" (default everywhere)
+   * 4. Otherwise -> null (no cards)
+   */
+  function getCategoryCardStyle() {
+    const currentCat = router.currentRoute?.attributes?.category?.id;
+
+    // Parse category settings
+    const listCategoryIds = settings.list_view_categories?.length > 0
+      ? settings.list_view_categories.split("|").map(Number)
+      : [];
+    const gridCategoryIds = settings.grid_view_categories?.length > 0
+      ? settings.grid_view_categories.split("|").map(Number)
+      : [];
+
+    // If both settings are empty, enable list style everywhere
+    if (listCategoryIds.length === 0 && gridCategoryIds.length === 0) {
+      return "list";
+    }
+
+    // If not in a category context, don't show cards
+    if (currentCat === undefined) {
+      return null;
+    }
+
+    // Grid takes priority if category appears in both settings
+    if (gridCategoryIds.includes(currentCat)) {
+      return "grid";
+    }
+
+    if (listCategoryIds.includes(currentCat)) {
+      return "list";
+    }
+
+    // Category not in either setting
+    return null;
+  }
+
   function enableCards() {
     if (router.currentRouteName === "topic.fromParamsNear") {
       return settings.show_for_suggested_topics;
     }
 
-    if (settings.show_on_categories?.length === 0) {
-      return true; // no categories set, so enable cards by default
-    }
-    const currentCat = router.currentRoute?.attributes?.category?.id;
-    if (currentCat === undefined) {
-      return false; // not in a category
-    }
-    const categoryIds = settings.show_on_categories?.split("|").map(Number);
-    return categoryIds.includes(currentCat);
+    return getCategoryCardStyle() !== null;
   }
 
   api.renderInOutlet(
@@ -60,11 +96,16 @@ export default apiInitializer((api) => {
       if (enableCards()) {
         additionalClasses.push("topic-cards-list");
 
-        // Add card layout modifier based on viewport
-        const rawStyle = site.mobileView
-          ? settings.card_style_mobile
-          : settings.card_style_desktop;
-        const cardStyle = normalizeCardStyle(rawStyle);
+        // Determine card style based on viewport and category
+        let cardStyle;
+        if (site.mobileView) {
+          // Mobile uses the global mobile setting
+          cardStyle = normalizeCardStyle(settings.card_style_mobile);
+        } else {
+          // Desktop uses per-category style
+          cardStyle = getCategoryCardStyle() || "list";
+        }
+
         additionalClasses.push(`topic-cards-list--${cardStyle}`);
       }
       return additionalClasses;
@@ -75,11 +116,15 @@ export default apiInitializer((api) => {
     "topic-list-item-class",
     ({ value: additionalClasses }) => {
       if (enableCards()) {
-        // Add card layout modifier based on viewport
-        const rawStyle = site.mobileView
-          ? settings.card_style_mobile
-          : settings.card_style_desktop;
-        const cardStyle = normalizeCardStyle(rawStyle);
+        // Determine card style based on viewport and category
+        let cardStyle;
+        if (site.mobileView) {
+          // Mobile uses the global mobile setting
+          cardStyle = normalizeCardStyle(settings.card_style_mobile);
+        } else {
+          // Desktop uses per-category style
+          cardStyle = getCategoryCardStyle() || "list";
+        }
 
         const itemClasses = ["topic-card", `topic-card--${cardStyle}`];
 

@@ -7,9 +7,15 @@ RSpec.describe "Card style configurations", type: :system do
   fab!(:topic2) { Fabricate(:topic, category: category) }
 
   before do
+    # Set up category-based styling
+    # For desktop: use list_view_categories or grid_view_categories based on desktop_style
+    # For mobile: use card_style_mobile setting
+    list_categories = desktop_style == "list" ? category.id.to_s : ""
+    grid_categories = desktop_style == "grid" ? category.id.to_s : ""
+
     theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
-      show_on_categories: ""
-      card_style_desktop: #{desktop_style}
+      list_view_categories: "#{list_categories}"
+      grid_view_categories: "#{grid_categories}"
       card_style_mobile: #{mobile_style}
     YAML
     theme.save!
@@ -89,8 +95,8 @@ RSpec.describe "Card style configurations", type: :system do
 
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
-        show_on_categories: ""
-        card_style_desktop: list
+        list_view_categories: "#{category.id}"
+        grid_view_categories: ""
         card_style_mobile: list
         set_card_max_height: true
         card_max_height: 275
@@ -115,8 +121,8 @@ RSpec.describe "Card style configurations", type: :system do
 
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
-        show_on_categories: ""
-        card_style_desktop: grid
+        list_view_categories: ""
+        grid_view_categories: "#{category.id}"
         card_style_mobile: grid
         set_grid_card_max_width: true
         grid_card_max_width: 360
@@ -141,8 +147,8 @@ RSpec.describe "Card style configurations", type: :system do
 
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
-        show_on_categories: ""
-        card_style_desktop: grid
+        list_view_categories: ""
+        grid_view_categories: "#{category.id}"
         card_style_mobile: grid
         set_card_grid_height: true
         card_grid_height: 420
@@ -166,8 +172,8 @@ RSpec.describe "Card style configurations", type: :system do
   context "independent max-dimension settings" do
     before do
       theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
-        show_on_categories: ""
-        card_style_desktop: list
+        list_view_categories: "#{category.id}"
+        grid_view_categories: ""
         card_style_mobile: grid
         set_card_max_height: true
         card_max_height: 275
@@ -220,6 +226,81 @@ RSpec.describe "Card style configurations", type: :system do
 
       # Separator should still be visible
       expect(page).to have_css(".topic-list-item-separator")
+    end
+  end
+
+  context "per-category styling" do
+    fab!(:list_category, :category)
+    fab!(:grid_category, :category)
+    fab!(:unconfigured_category, :category)
+
+    before do
+      Fabricate(:topic, category: list_category)
+      Fabricate(:topic, category: grid_category)
+      Fabricate(:topic, category: unconfigured_category)
+
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        list_view_categories: "#{list_category.id}"
+        grid_view_categories: "#{grid_category.id}"
+        card_style_mobile: grid
+      YAML
+      theme.save!
+      page.driver.browser.manage.window.resize_to(1280, 800)
+    end
+
+    it "applies list style to categories in list_view_categories" do
+      visit "/c/#{list_category.slug}/#{list_category.id}"
+      expect(page).to have_css(".topic-cards-list--list")
+      expect(page).to have_css(".topic-card--list")
+    end
+
+    it "applies grid style to categories in grid_view_categories" do
+      visit "/c/#{grid_category.slug}/#{grid_category.id}"
+      expect(page).to have_css(".topic-cards-list--grid")
+      expect(page).to have_css(".topic-card--grid")
+    end
+
+    it "does not apply topic cards to unconfigured categories" do
+      visit "/c/#{unconfigured_category.slug}/#{unconfigured_category.id}"
+      expect(page).not_to have_css(".topic-cards-list")
+      expect(page).not_to have_css(".topic-card")
+    end
+  end
+
+  context "category appears in both settings (grid priority)" do
+    before do
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        list_view_categories: "#{category.id}"
+        grid_view_categories: "#{category.id}"
+        card_style_mobile: grid
+      YAML
+      theme.save!
+      page.driver.browser.manage.window.resize_to(1280, 800)
+    end
+
+    it "applies grid style when category is in both settings" do
+      visit "/c/#{category.slug}/#{category.id}"
+      expect(page).to have_css(".topic-cards-list--grid")
+      expect(page).to have_css(".topic-card--grid")
+      expect(page).not_to have_css(".topic-card--list")
+    end
+  end
+
+  context "empty category settings (default behavior)" do
+    before do
+      theme.set_field(target: :settings, name: :yaml, value: <<~YAML)
+        list_view_categories: ""
+        grid_view_categories: ""
+        card_style_mobile: grid
+      YAML
+      theme.save!
+      page.driver.browser.manage.window.resize_to(1280, 800)
+    end
+
+    it "applies list style everywhere when both settings are empty" do
+      visit "/c/#{category.slug}/#{category.id}"
+      expect(page).to have_css(".topic-cards-list--list")
+      expect(page).to have_css(".topic-card--list")
     end
   end
 end
