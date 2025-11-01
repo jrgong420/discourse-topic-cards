@@ -244,28 +244,8 @@
     }
 
     .link-bottom-line {
-      grid-area: tags;
-      margin-bottom: var(--space-2);
-      gap: 0 var(--space-2);
-      line-height: var(--line-height-large);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-
-      // Show category badges with core styles
-      .badge-category__wrapper {
-        display: inline-flex;
-        margin-right: var(--space-2);
-      }
-
-      // Hide only the redundant badge wrapper, not categories
-      .badge-wrapper:not(.badge-category__wrapper) {
-        display: none;
-      }
-
-      .discourse-tag.box {
-        margin-right: var(--space-1);
-      }
+      // Hide core tags/categories when our inline tags are rendered to avoid duplicates
+      display: none;
     }
 
     .topic-card {
