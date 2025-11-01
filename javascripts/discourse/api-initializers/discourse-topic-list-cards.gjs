@@ -1,10 +1,11 @@
 import Component from "@glimmer/component";
 import { apiInitializer } from "discourse/lib/api";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
+import TopicActionButtons from "../components/topic-action-buttons";
 import TopicByline from "../components/topic-byline";
 import TopicExcerpt from "../components/topic-excerpt";
 import TopicMetadata from "../components/topic-metadata";
-import TopicTagsMobile from "../components/topic-tags-mobile";
+import TopicTagsInline from "../components/topic-tags-inline";
 import TopicThumbnail from "../components/topic-thumbnail";
 
 export default apiInitializer((api) => {
@@ -83,8 +84,10 @@ export default apiInitializer((api) => {
       }
 
       <template>
-        <TopicByline @topic={{@outletArgs.topic}} />
         <TopicExcerpt @topic={{@outletArgs.topic}} />
+        <TopicTagsInline @topic={{@outletArgs.topic}} />
+        <TopicByline @topic={{@outletArgs.topic}} />
+        <TopicActionButtons @topic={{@outletArgs.topic}} />
         <TopicMetadata @topic={{@outletArgs.topic}} />
       </template>
     }
@@ -157,14 +160,7 @@ export default apiInitializer((api) => {
   api.registerValueTransformer("topic-list-columns", ({ value: columns }) => {
     if (enableCards()) {
       columns.add("thumbnail", { item: TopicThumbnail }, { before: "topic" });
-
-      if (site.mobileView) {
-        columns.add(
-          "tags-mobile",
-          { item: TopicTagsMobile },
-          { before: "thumbnail" }
-        );
-      }
+      // Tags are now rendered inline within the main content area
     }
     return columns;
   });

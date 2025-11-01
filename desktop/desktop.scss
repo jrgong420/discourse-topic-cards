@@ -47,12 +47,13 @@
   .main-link {
     display: grid;
     grid-template-areas:
-      "tags tags"
       "title title"
       "excerpt excerpt"
+      "tags tags"
       "byline byline"
+      "actions actions"
       "metadata metadata";
-    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-rows: auto auto auto auto auto 1fr;
     width: 100%;
     padding: var(--space-3) var(--space-5) !important;
     gap: var(--space-2) 0;

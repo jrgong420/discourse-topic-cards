@@ -1,4 +1,10 @@
 en:
+  js:
+    topic_cards:
+      details_button: "Details"
+      details_button_aria: "Open topic: %{title}"
+      featured_link_button: "Open link"
+      featured_link_button_aria: "Open featured link: %{domain}"
   theme_metadata:
     description: "A Discourse component to display the topic list in card format, with thumbnails where available."
     settings:
