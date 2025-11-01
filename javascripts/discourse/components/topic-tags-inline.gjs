@@ -1,19 +1,17 @@
-import CategoryLink from "discourse/components/category-link";
-import DiscourseTag from "discourse/components/discourse-tag";
+import categoryLink from "discourse/helpers/category-link";
+import discourseTags from "discourse/helpers/discourse-tags";
 
 const TopicTagsInline = <template>
   {{#if @topic.category}}
     <div class="topic-card__tags">
-      <CategoryLink @category={{@topic.category}} />
-      {{#each @topic.tags as |tag|}}
-        <DiscourseTag @tag={{tag}} />
-      {{/each}}
+      {{categoryLink @topic.category}}
+      {{#if @topic.tags}}
+        {{discourseTags @topic mode="list"}}
+      {{/if}}
     </div>
   {{else if @topic.tags}}
     <div class="topic-card__tags">
-      {{#each @topic.tags as |tag|}}
-        <DiscourseTag @tag={{tag}} />
-      {{/each}}
+      {{discourseTags @topic mode="list"}}
     </div>
   {{/if}}
 </template>;
