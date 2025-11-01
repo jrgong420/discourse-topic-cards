@@ -32,18 +32,15 @@ export default class TopicActionButtons extends Component {
   }
 
   <template>
-    <div class="topic-card__actions">
-      {{! Details button - always shown }}
-      <a
-        href={{this.detailsUrl}}
-        class="btn topic-card__details-btn"
-        aria-label={{this.detailsAriaLabel}}
-      >
-        {{i18n (themePrefix "js.topic_cards.details_button")}}
-      </a>
-
-      {{! Featured link CTA - only when featured link exists }}
-      {{#if this.featuredLink}}
+    {{#if this.featuredLink}}
+      <div class="topic-card__actions">
+        <a
+          href={{this.detailsUrl}}
+          class="btn topic-card__details-btn"
+          aria-label={{this.detailsAriaLabel}}
+        >
+          {{i18n (themePrefix "js.topic_cards.details_button")}}
+        </a>
         <a
           href={{this.featuredLink}}
           class="btn btn-primary topic-card__featured-link-btn"
@@ -53,8 +50,8 @@ export default class TopicActionButtons extends Component {
         >
           {{i18n (themePrefix "js.topic_cards.featured_link_button")}}
         </a>
-      {{/if}}
-    </div>
+      </div>
+    {{/if}}
   </template>
 }
 
