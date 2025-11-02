@@ -173,11 +173,11 @@
     .link-top-line {
       grid-area: title;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: auto 1fr auto;
       // Default: no event row (collapses when empty)
       grid-template-areas:
-        "title statuses"
-        "featured-link featured-link";
+        "badges title statuses"
+        "featured-link featured-link featured-link";
       align-items: center;
       // Remove row gap to prevent spacing for empty rows; keep column gap only
       gap: 0 var(--space-2);
@@ -185,26 +185,33 @@
       // Add event row only when event content exists
       &:has(.header-topic-title-suffix-outlet:not(:empty)) {
         grid-template-areas:
-          "title statuses"
-          "event event"
-          "featured-link featured-link";
+          "badges title statuses"
+          "event event event"
+          "featured-link featured-link featured-link";
       }
 
       &:hover {
         text-decoration: underline;
       }
 
-      // Title and statuses on first row
+      // Post badges on the left
+      .topic-post-badges {
+        grid-area: badges;
+        align-self: center;
+        white-space: nowrap; // Keep badges on one line
+      }
+
+      // Title in the center with truncation
       .title {
         grid-area: title;
         min-width: 0; // Allow truncation
       }
 
-      .topic-statuses,
-      .topic-post-badges {
+      // Topic statuses on the right
+      .topic-statuses {
         grid-area: statuses;
         align-self: center;
-        white-space: nowrap; // Keep badges on one line
+        white-space: nowrap; // Keep statuses on one line
       }
 
       // Event date on its own row below title

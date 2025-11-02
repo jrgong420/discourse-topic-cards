@@ -87,10 +87,40 @@
 
     .link-top-line {
       grid-area: title;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: "badges title statuses";
+      gap: 0 var(--space-1);
+
+      .topic-post-badges {
+        grid-area: badges;
+        white-space: nowrap;
+      }
+
+      .title {
+        grid-area: title;
+        min-width: 0;
+      }
+
+      .topic-statuses {
+        grid-area: statuses;
+        white-space: nowrap;
+      }
 
       // Ensure featured link is properly positioned on mobile
       a.topic-featured-link {
         font-size: var(--font-down-2);
+      }
+    }
+
+    // Stack badges and statuses on very narrow screens
+    @media (max-width: 380px) {
+      .link-top-line {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "title title"
+          "badges statuses";
+        row-gap: var(--space-1);
       }
     }
 
@@ -201,10 +231,40 @@
     .link-top-line {
       grid-area: title;
       font-size: var(--font-down-1);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: "badges title statuses";
+      gap: 0 var(--space-1);
+
+      .topic-post-badges {
+        grid-area: badges;
+        white-space: nowrap;
+      }
+
+      .title {
+        grid-area: title;
+        min-width: 0;
+      }
+
+      .topic-statuses {
+        grid-area: statuses;
+        white-space: nowrap;
+      }
 
       // Ensure featured link is properly positioned on mobile list layout
       a.topic-featured-link {
         font-size: var(--font-down-2);
+      }
+    }
+
+    // Stack badges and statuses on very narrow screens
+    @media (max-width: 380px) {
+      .link-top-line {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "title title"
+          "badges statuses";
+        row-gap: var(--space-1);
       }
     }
 

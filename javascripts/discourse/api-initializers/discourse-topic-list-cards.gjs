@@ -25,6 +25,7 @@
  * - .topic-card--list or .topic-card--grid (card variant)
  */
 import Component from "@glimmer/component";
+import { schedule } from "@ember/runloop";
 import { apiInitializer } from "discourse/lib/api";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
 import TopicActionButtons from "../components/topic-action-buttons";
@@ -236,6 +237,78 @@ export default apiInitializer((api) => {
     }
   );
 
-  // No post-render DOM surgery needed - inline featured link is suppressed via CSS in card mode
+  // DOM reordering: Move .topic-post-badges before .title to prevent overlap with .topic-statuses
+  // This is SPA-safe and scoped to card layouts only
+  let observer = null;
+
+  function reorderBadgesAndStatuses() {
+    const topicCards = document.querySelectorAll(
+      ".topic-cards-list .topic-list-item"
+    );
+
+    topicCards.forEach((card) => {
+      const linkTopLine = card.querySelector(".link-top-line");
+      if (!linkTopLine) return;
+
+      const badges = linkTopLine.querySelector(".topic-post-badges");
+      const title = linkTopLine.querySelector(".title");
+
+      // Only reorder if both elements exist and badges is not already before title
+      if (badges && title && badges.nextElementSibling !== title) {
+        // Move badges to be the first child of link-top-line
+        linkTopLine.insertBefore(badges, linkTopLine.firstChild);
+      }
+    });
+  }
+
+  function setupObserver() {
+    const containers = document.querySelectorAll(
+      ".topic-cards-list .topic-list-body"
+    );
+    if (!containers.length) return;
+
+    observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== 1) return;
+          if (
+            node.classList?.contains("topic-list-item") ||
+            node.classList?.contains("topic-card")
+          ) {
+            const linkTopLine = node.querySelector(".link-top-line");
+            if (!linkTopLine) return;
+
+            const badges = linkTopLine.querySelector(".topic-post-badges");
+            const title = linkTopLine.querySelector(".title");
+
+            if (badges && title && badges.nextElementSibling !== title) {
+              linkTopLine.insertBefore(badges, linkTopLine.firstChild);
+            }
+          }
+        });
+      });
+    });
+
+    containers.forEach((container) => {
+      observer.observe(container, { childList: true, subtree: true });
+    });
+  }
+
+  api.onPageChange(() => {
+    // Disconnect previous observer
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+
+    // Only process if cards are enabled
+    if (!enableCards()) return;
+
+    // Use schedule to ensure DOM is ready
+    schedule("afterRender", () => {
+      reorderBadgesAndStatuses();
+      setupObserver();
+    });
+  });
 
 });
