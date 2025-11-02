@@ -221,7 +221,7 @@
     .title {
       color: var(--title-color);
       font-weight: var(--topic-title-font-weight);
-      font-size: var(--font-up-1-rem);
+      font-size: #{$topic-title-font-size};
 
       // Better long-word handling
       word-break: break-word;

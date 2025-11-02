@@ -78,3 +78,15 @@ hide_topic_author_tc_column:
   type: bool
   default: false
   description: "When enabled, hides td.custom-author-column in topic cards (for compatibility with Topic Author TC)."
+
+# Topic title font size for cards
+topic_title_font_size:
+  type: enum
+  default: "var(--font-0)"
+  choices:
+    - "var(--font-down-1)"
+    - "var(--font-0)"
+    - "var(--font-up-1)"
+    - "var(--font-up-2)"
+    - "var(--font-up-3)"
+  description: "Font size for topic titles in topic cards. Uses Discourse's built-in font-size CSS variables."

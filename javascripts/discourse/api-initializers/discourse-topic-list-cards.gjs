@@ -8,6 +8,11 @@ import TopicMetadata from "../components/topic-metadata";
 import TopicTagsInline from "../components/topic-tags-inline";
 import TopicThumbnail from "../components/topic-thumbnail";
 
+import { schedule } from "@ember/runloop";
+
+// Observer to clean stray spaces before featured links on cards
+let topicCardsFeaturedObserver = null;
+
 export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
   const router = api.container.lookup("service:router");
@@ -202,9 +207,85 @@ export default apiInitializer((api) => {
           }
           return context.navigateToTopic(topic, topic.lastUnreadUrl);
         }
+
+
       }
 
       next();
     }
   );
+
+  // Remove redundant \u00A0 (non-breaking space) inserted between title and featured link
+  // Only remove it when the title is a single line to avoid unwanted spacing in cards
+  function processLinkTopLines(root = document) {
+    const containers = root.querySelectorAll(
+      ".topic-list .link-top-line, .latest-topic-list .link-top-line, .topic-cards-list .link-top-line"
+    );
+
+    containers.forEach((container) => {
+      const title = container.querySelector("a.title");
+      const featured = container.querySelector("a.topic-featured-link");
+      if (!title || !featured) return;
+
+      const prev = featured.previousSibling;
+      if (!prev || prev.nodeType !== 3) return; // not a text node
+
+      const text = prev.nodeValue || "";
+      if (!/(\u00A0|\s+)/.test(text)) return; // no nbsp/whitespace to remove
+
+      const cs = getComputedStyle(title);
+      const lineHeight = parseFloat(cs.lineHeight);
+      const height = title.getBoundingClientRect().height;
+      const lines = lineHeight ? Math.round(height / lineHeight) : 1;
+
+      if (lines <= 1) {
+        prev.remove();
+      }
+    });
+  }
+
+  function setupCardsObserver() {
+    const lists = document.querySelectorAll(
+      ".topic-list, .latest-topic-list, .topic-cards-list"
+    );
+    if (!lists.length) return;
+
+    topicCardsFeaturedObserver = new MutationObserver((mutations) => {
+      mutations.forEach((m) => {
+        m.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) return;
+          if (node.matches(".link-top-line")) {
+            processLinkTopLines(node.parentElement || node);
+          } else {
+            const inners = node.querySelectorAll(".link-top-line");
+            if (inners && inners.length) {
+              processLinkTopLines(node);
+            }
+          }
+        });
+      });
+    });
+
+    lists.forEach((el) =>
+      topicCardsFeaturedObserver.observe(el, { childList: true, subtree: true })
+    );
+  }
+
+  api.onPageChange(() => {
+    // Always disconnect any existing observer
+    if (topicCardsFeaturedObserver) {
+      topicCardsFeaturedObserver.disconnect();
+      topicCardsFeaturedObserver = null;
+    }
+
+    if (!enableCards()) {
+      return;
+    }
+
+    schedule("afterRender", () => {
+      processLinkTopLines();
+      setupCardsObserver();
+    });
+  });
+
 });
