@@ -1,4 +1,10 @@
 en:
+  js:
+    topic_cards:
+      details_button: "Details"
+      details_button_aria: "Open topic: %{title}"
+      featured_link_button: "Open link"
+      featured_link_button_aria: "Open featured link: %{domain}"
   theme_metadata:
     description: "A Discourse component to display the topic list in card format, with thumbnails where available."
     settings:
@@ -20,6 +26,7 @@ en:
       card_grid_height: "The uniform height in pixels for grid-layout topic cards on desktop. Only used if set_card_grid_height is true. Default is 420px."
       card_border_radius: "Choose border radius size for topic cards. Maps to Discourse core design tokens for consistency with your theme."
       hide_topic_author_tc_column: "Hide the custom author column in topic cards for compatibility with the Topic Author theme component."
+      topic_title_font_size: "Topic title font size"
   published: "Published"
   like_toggle:
     like: "Like"

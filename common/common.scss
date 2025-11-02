@@ -127,12 +127,13 @@
   .main-link {
     display: grid;
     grid-template-areas:
-      "tags tags"
       "title title"
       "excerpt excerpt"
+      "tags tags"
       "byline byline"
+      "actions actions"
       "metadata metadata";
-    grid-template-rows: auto auto 1fr auto auto;
+    grid-template-rows: auto auto auto auto auto 1fr;
     flex-grow: 1;
     padding: var(--space-3) var(--space-5) var(--space-3) ;
     gap: var(--space-2) 0;
@@ -212,10 +213,15 @@
       }
     }
 
+    // Hide the small featured link anchor when CTA button exists (avoid duplication)
+    &:has(.topic-card__featured-link-btn) .link-top-line a.topic-featured-link {
+      display: none;
+    }
+
     .title {
       color: var(--title-color);
       font-weight: var(--topic-title-font-weight);
-      font-size: var(--font-up-1-rem);
+      font-size: #{$topic-title-font-size};
 
       // Better long-word handling
       word-break: break-word;
@@ -238,33 +244,30 @@
     }
 
     .link-bottom-line {
-      grid-area: tags;
-      margin-bottom: var(--space-2);
-      gap: 0 var(--space-2);
-      line-height: var(--line-height-large);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-
-      // Show category badges with core styles
-      .badge-category__wrapper {
-        display: inline-flex;
-        margin-right: var(--space-2);
-      }
-
-      // Hide only the redundant badge wrapper, not categories
-      .badge-wrapper:not(.badge-category__wrapper) {
-        display: none;
-      }
-
-      .discourse-tag.box {
-        margin-right: var(--space-1);
-      }
+      // Hide core tags/categories when our inline tags are rendered to avoid duplicates
+      display: none;
     }
 
     .topic-card {
       &__category {
         grid-area: category;
+      }
+
+      &__tags {
+        grid-area: tags;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        font-size: var(--font-down-1);
+
+        .badge-category__wrapper {
+          display: inline-flex;
+        }
+
+        .discourse-tag {
+          margin-right: var(--space-1);
+        }
       }
 
       &__byline {
@@ -287,6 +290,27 @@
       &__meta-sep {
         color: var(--primary-medium);
         user-select: none;
+      }
+
+      &__actions {
+        grid-area: actions;
+        display: flex;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        align-items: center;
+
+        .btn {
+          flex: 0 1 auto;
+          min-width: 0;
+        }
+      }
+
+      &__details-btn {
+        // Secondary button styling (default btn)
+      }
+
+      &__featured-link-btn {
+        // Primary button styling (btn-primary)
       }
 
       &__metadata {
@@ -374,6 +398,25 @@
                 color: unset;
               }
             }
+          }
+        }
+
+        &__most-recent {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          font-size: var(--font-down-1);
+          color: var(--primary-medium);
+          margin-left: auto; // Push to the right
+
+          .avatar {
+            width: 20px;
+            height: 20px;
+          }
+
+          .activity a {
+            color: var(--primary-medium);
+            font-weight: normal;
           }
         }
       }
