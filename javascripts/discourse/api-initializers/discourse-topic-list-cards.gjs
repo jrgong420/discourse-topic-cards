@@ -243,7 +243,7 @@ export default apiInitializer((api) => {
 
   function reorderBadgesAndStatuses() {
     const topicCards = document.querySelectorAll(
-      ".topic-cards-list .topic-list-item"
+      ".topic-cards-list .topic-list-item, .topic-cards-list .topic-card"
     );
 
     topicCards.forEach((card) => {

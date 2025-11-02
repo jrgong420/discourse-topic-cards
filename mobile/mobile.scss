@@ -88,9 +88,37 @@
     .link-top-line {
       grid-area: title;
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      grid-template-areas: "badges title statuses";
-      gap: 0 var(--space-1);
+      // Base: title only (when neither badges nor statuses exist)
+      grid-template-columns: 1fr;
+      grid-template-areas: "title";
+      gap: 0;
+
+      // Hide truly empty elements to prevent phantom grid tracks
+      > .topic-post-badges:empty,
+      > .topic-statuses:empty {
+        display: none;
+      }
+
+      // Both badges and statuses present
+      &:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas: "badges title statuses";
+        gap: 0 var(--space-1);
+      }
+
+      // Only badges present (no statuses)
+      &:has(.topic-post-badges:not(:empty)):not(:has(.topic-statuses:not(:empty))) {
+        grid-template-columns: auto 1fr;
+        grid-template-areas: "badges title";
+        gap: 0 var(--space-1);
+      }
+
+      // Only statuses present (no badges)
+      &:has(.topic-statuses:not(:empty)):not(:has(.topic-post-badges:not(:empty))) {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "title statuses";
+        gap: 0 var(--space-1);
+      }
 
       .topic-post-badges {
         grid-area: badges;
@@ -113,9 +141,9 @@
       }
     }
 
-    // Stack badges and statuses on very narrow screens
-    @media (max-width: 380px) {
-      .link-top-line {
+    // Stack badges and statuses on very narrow screens (only when both exist)
+    @media (max-width: 340px) {
+      .link-top-line:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
           "title title"
@@ -232,9 +260,37 @@
       grid-area: title;
       font-size: var(--font-down-1);
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      grid-template-areas: "badges title statuses";
-      gap: 0 var(--space-1);
+      // Base: title only (when neither badges nor statuses exist)
+      grid-template-columns: 1fr;
+      grid-template-areas: "title";
+      gap: 0;
+
+      // Hide truly empty elements to prevent phantom grid tracks
+      > .topic-post-badges:empty,
+      > .topic-statuses:empty {
+        display: none;
+      }
+
+      // Both badges and statuses present
+      &:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas: "badges title statuses";
+        gap: 0 var(--space-1);
+      }
+
+      // Only badges present (no statuses)
+      &:has(.topic-post-badges:not(:empty)):not(:has(.topic-statuses:not(:empty))) {
+        grid-template-columns: auto 1fr;
+        grid-template-areas: "badges title";
+        gap: 0 var(--space-1);
+      }
+
+      // Only statuses present (no badges)
+      &:has(.topic-statuses:not(:empty)):not(:has(.topic-post-badges:not(:empty))) {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "title statuses";
+        gap: 0 var(--space-1);
+      }
 
       .topic-post-badges {
         grid-area: badges;
@@ -257,9 +313,9 @@
       }
     }
 
-    // Stack badges and statuses on very narrow screens
-    @media (max-width: 380px) {
-      .link-top-line {
+    // Stack badges and statuses on very narrow screens (only when both exist)
+    @media (max-width: 340px) {
+      .link-top-line:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
           "title title"

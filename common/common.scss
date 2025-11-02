@@ -173,25 +173,70 @@
     .link-top-line {
       grid-area: title;
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      // Default: no event row (collapses when empty)
+      // Base: title only (when neither badges nor statuses exist)
+      grid-template-columns: 1fr;
       grid-template-areas:
-        "badges title statuses"
-        "featured-link featured-link featured-link";
+        "title"
+        "featured-link";
       align-items: center;
-      // Remove row gap to prevent spacing for empty rows; keep column gap only
-      gap: 0 var(--space-2);
-
-      // Add event row only when event content exists
-      &:has(.header-topic-title-suffix-outlet:not(:empty)) {
-        grid-template-areas:
-          "badges title statuses"
-          "event event event"
-          "featured-link featured-link featured-link";
-      }
+      gap: 0;
 
       &:hover {
         text-decoration: underline;
+      }
+
+      // Hide truly empty elements to prevent phantom grid tracks
+      > .topic-post-badges:empty,
+      > .topic-statuses:empty {
+        display: none;
+      }
+
+      // Both badges and statuses present
+      &:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+          "badges title statuses"
+          "featured-link featured-link featured-link";
+        gap: 0 var(--space-2);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "badges title statuses"
+            "event event event"
+            "featured-link featured-link featured-link";
+        }
+      }
+
+      // Only badges present (no statuses)
+      &:has(.topic-post-badges:not(:empty)):not(:has(.topic-statuses:not(:empty))) {
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+          "badges title"
+          "featured-link featured-link";
+        gap: 0 var(--space-2);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "badges title"
+            "event event"
+            "featured-link featured-link";
+        }
+      }
+
+      // Only statuses present (no badges)
+      &:has(.topic-statuses:not(:empty)):not(:has(.topic-post-badges:not(:empty))) {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "title statuses"
+          "featured-link featured-link";
+        gap: 0 var(--space-2);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "title statuses"
+            "event event"
+            "featured-link featured-link";
+        }
       }
 
       // Post badges on the left
