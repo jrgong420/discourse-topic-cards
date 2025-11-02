@@ -3,9 +3,20 @@ import avatar from "discourse/helpers/avatar";
 import dIcon from "discourse/helpers/d-icon";
 import LikeToggle from "./like-toggle";
 
+/**
+ * TopicMetadata Component
+ *
+ * Renders metadata for topic cards including views, likes, reply count,
+ * activity, and most recent poster. All items are optional based on theme settings.
+ *
+ * BEM Structure:
+ * - .topic-card__metadata (container)
+ *   - .topic-card__metadata-items (flex container for all items)
+ *     - .item (individual metadata items)
+ */
 const TopicMetadata = <template>
   <div class="topic-card__metadata">
-    <div class="right-aligned">
+    <div class="topic-card__metadata-items">
       {{#if settings.show_views}}
         <span class="topic-card__views item">
           {{dIcon "eye"}}

@@ -1,3 +1,29 @@
+/**
+ * Discourse Topic List Cards - Main Initializer
+ *
+ * Transforms standard Discourse topic lists into card-based layouts (list or grid style).
+ * Supports per-category configuration and mobile/desktop responsive behavior.
+ *
+ * Key Features:
+ * - Per-category card style configuration (list/grid/disabled)
+ * - Mobile-specific card styles
+ * - Custom click behavior for card navigation
+ * - BEM-based CSS architecture
+ * - Glimmer component-based rendering
+ *
+ * Component Rendering Order (via topic-list-main-link-bottom outlet):
+ * 1. TopicExcerpt - Topic excerpt text
+ * 2. TopicTagsInline - Category and tags
+ * 3. TopicByline - Author and publish date
+ * 4. TopicActionButtons - Details and featured link buttons
+ * 5. TopicMetadata - Views, likes, replies, activity
+ *
+ * CSS Classes Applied:
+ * - .topic-cards-list (list container)
+ * - .topic-cards-list--list or .topic-cards-list--grid (layout variant)
+ * - .topic-card (individual card)
+ * - .topic-card--list or .topic-card--grid (card variant)
+ */
 import Component from "@glimmer/component";
 import { apiInitializer } from "discourse/lib/api";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
@@ -7,11 +33,6 @@ import TopicExcerpt from "../components/topic-excerpt";
 import TopicMetadata from "../components/topic-metadata";
 import TopicTagsInline from "../components/topic-tags-inline";
 import TopicThumbnail from "../components/topic-thumbnail";
-
-import { schedule } from "@ember/runloop";
-
-// Observer to clean stray spaces before featured links on cards
-let topicCardsFeaturedObserver = null;
 
 export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
@@ -215,77 +236,6 @@ export default apiInitializer((api) => {
     }
   );
 
-  // Remove redundant \u00A0 (non-breaking space) inserted between title and featured link
-  // Only remove it when the title is a single line to avoid unwanted spacing in cards
-  function processLinkTopLines(root = document) {
-    const containers = root.querySelectorAll(
-      ".topic-list .link-top-line, .latest-topic-list .link-top-line, .topic-cards-list .link-top-line"
-    );
-
-    containers.forEach((container) => {
-      const title = container.querySelector("a.title");
-      const featured = container.querySelector("a.topic-featured-link");
-      if (!title || !featured) return;
-
-      const prev = featured.previousSibling;
-      if (!prev || prev.nodeType !== 3) return; // not a text node
-
-      const text = prev.nodeValue || "";
-      if (!/(\u00A0|\s+)/.test(text)) return; // no nbsp/whitespace to remove
-
-      const cs = getComputedStyle(title);
-      const lineHeight = parseFloat(cs.lineHeight);
-      const height = title.getBoundingClientRect().height;
-      const lines = lineHeight ? Math.round(height / lineHeight) : 1;
-
-      if (lines <= 1) {
-        prev.remove();
-      }
-    });
-  }
-
-  function setupCardsObserver() {
-    const lists = document.querySelectorAll(
-      ".topic-list, .latest-topic-list, .topic-cards-list"
-    );
-    if (!lists.length) return;
-
-    topicCardsFeaturedObserver = new MutationObserver((mutations) => {
-      mutations.forEach((m) => {
-        m.addedNodes.forEach((node) => {
-          if (!(node instanceof Element)) return;
-          if (node.matches(".link-top-line")) {
-            processLinkTopLines(node.parentElement || node);
-          } else {
-            const inners = node.querySelectorAll(".link-top-line");
-            if (inners && inners.length) {
-              processLinkTopLines(node);
-            }
-          }
-        });
-      });
-    });
-
-    lists.forEach((el) =>
-      topicCardsFeaturedObserver.observe(el, { childList: true, subtree: true })
-    );
-  }
-
-  api.onPageChange(() => {
-    // Always disconnect any existing observer
-    if (topicCardsFeaturedObserver) {
-      topicCardsFeaturedObserver.disconnect();
-      topicCardsFeaturedObserver = null;
-    }
-
-    if (!enableCards()) {
-      return;
-    }
-
-    schedule("afterRender", () => {
-      processLinkTopLines();
-      setupCardsObserver();
-    });
-  });
+  // No post-render DOM surgery needed - inline featured link is suppressed via CSS in card mode
 
 });

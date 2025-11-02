@@ -1,6 +1,21 @@
 import Component from "@glimmer/component";
 import { i18n } from "discourse-i18n";
 
+/**
+ * TopicActionButtons Component
+ *
+ * Renders action buttons for topic cards when a featured link is present.
+ * Provides "Details" button (navigate to topic) and "Featured Link" button (external link).
+ *
+ * BEM Structure:
+ * - .topic-card__actions (container)
+ *   - .topic-card__details-btn (secondary button)
+ *   - .topic-card__featured-link-btn (primary button)
+ *
+ * Accessibility:
+ * - Both buttons have aria-label attributes
+ * - Featured link opens in new tab with noopener/noreferrer
+ */
 export default class TopicActionButtons extends Component {
   get featuredLink() {
     return this.args.topic?.featuredLink || this.args.topic?.featured_link;

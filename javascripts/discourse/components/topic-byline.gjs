@@ -2,6 +2,17 @@ import UserLink from "discourse/components/user-link";
 import avatar from "discourse/helpers/avatar";
 import formatDate from "discourse/helpers/format-date";
 
+/**
+ * TopicByline Component
+ *
+ * Renders the topic author (OP) with avatar and optional publish date.
+ *
+ * BEM Structure:
+ * - .topic-card__byline (container)
+ *   - .topic-card__op (original poster with avatar)
+ *   - .topic-card__meta-sep (separator bullet)
+ *   - .topic-card__publish-date (creation date)
+ */
 const TopicByline = <template>
   <div class="topic-card__byline">
     <div class="topic-card__op">

@@ -1,3 +1,25 @@
+/**
+ * Topic Cards - Main Stylesheet
+ *
+ * Architecture:
+ * - BEM naming convention throughout
+ * - Mobile-first responsive design
+ * - CSS custom properties for theming
+ * - No JavaScript-dependent styles
+ *
+ * Structure:
+ * .topic-cards-list (container)
+ *   └── .topic-card (individual card)
+ *       ├── .topic-card__thumbnail
+ *       ├── .topic-card__content
+ *       │   ├── .topic-card__title
+ *       │   ├── .topic-card__excerpt
+ *       │   ├── .topic-card__tags
+ *       │   ├── .topic-card__byline
+ *       │   ├── .topic-card__actions
+ *       │   └── .topic-card__metadata
+ */
+
 // Topic cards list container
 .topic-cards-list {
   // Map border radius setting to component-scoped CSS variable
@@ -217,6 +239,37 @@
     &:has(.topic-card__featured-link-btn) .link-top-line a.topic-featured-link {
       display: none;
     }
+  }
+}
+
+// Suppress inline featured link in card mode (rely on CTA button instead)
+// This removes the source of the stray &nbsp; text node without DOM surgery
+// IMPORTANT: Only hide the anchor itself, not the container or plugin outlets
+.topic-cards-list {
+  .link-top-line {
+    // Hide inline featured link anchor in card layouts
+    a.topic-featured-link {
+      display: none;
+    }
+
+    // Preserve all plugin outlet content (e.g., topic-list-after-title)
+    // Outlets remain visible and functional
+  }
+}
+
+// Classic (non-card) lists: keep inline featured link visible with proper spacing
+.topic-list:not(.topic-cards-list) {
+  .link-top-line {
+    a.topic-featured-link {
+      // Core spacing via CSS gap/margin, not text nodes
+      margin-left: var(--space-1);
+    }
+  }
+}
+
+// Restore card-specific featured link styles for when it's shown via outlet
+.topic-cards-list {
+  .main-link {
 
     .title {
       color: var(--title-color);
@@ -342,7 +395,8 @@
           color: var(--metadata-color);
         }
 
-        .right-aligned {
+        // BEM: metadata items container
+        &-items {
           display: flex;
           align-items: center;
           gap: var(--space-4);
