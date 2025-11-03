@@ -181,6 +181,14 @@
       align-items: center;
       gap: 0;
 
+      // If an event/date outlet exists, place it below the title (no badges/statuses case)
+      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+        grid-template-areas:
+          "title"
+          "event"
+          "featured-link";
+      }
+
       &:hover {
         text-decoration: underline;
       }
@@ -195,7 +203,7 @@
       &:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
         grid-template-columns: auto 1fr auto;
         grid-template-areas:
-          "badges title statuses"
+          "statuses title badges"
           "featured-link featured-link featured-link";
         gap: 0 var(--space-2);
 
@@ -209,15 +217,15 @@
 
       // Only badges present (no statuses)
       &:has(.topic-post-badges:not(:empty)):not(:has(.topic-statuses:not(:empty))) {
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 1fr auto;
         grid-template-areas:
-          "badges title"
+          "title badges"
           "featured-link featured-link";
         gap: 0 var(--space-2);
 
         &:has(.header-topic-title-suffix-outlet:not(:empty)) {
           grid-template-areas:
-            "badges title"
+            "title badges"
             "event event"
             "featured-link featured-link";
         }
@@ -225,15 +233,15 @@
 
       // Only statuses present (no badges)
       &:has(.topic-statuses:not(:empty)):not(:has(.topic-post-badges:not(:empty))) {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: auto 1fr;
         grid-template-areas:
-          "title statuses"
+          "statuses title"
           "featured-link featured-link";
         gap: 0 var(--space-2);
 
         &:has(.header-topic-title-suffix-outlet:not(:empty)) {
           grid-template-areas:
-            "title statuses"
+            "statuses title"
             "event event"
             "featured-link featured-link";
         }

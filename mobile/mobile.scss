@@ -93,6 +93,13 @@
       grid-template-areas: "title";
       gap: 0;
 
+      // If an event/date outlet exists, place it below the title (no badges/statuses case)
+      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+        grid-template-areas:
+          "title"
+          "event";
+      }
+
       // Hide truly empty elements to prevent phantom grid tracks
       > .topic-post-badges:empty,
       > .topic-statuses:empty {
@@ -104,20 +111,38 @@
         grid-template-columns: auto 1fr auto;
         grid-template-areas: "badges title statuses";
         gap: 0 var(--space-1);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "badges title statuses"
+            "event event event";
+        }
       }
 
       // Only badges present (no statuses)
       &:has(.topic-post-badges:not(:empty)):not(:has(.topic-statuses:not(:empty))) {
-        grid-template-columns: auto 1fr;
-        grid-template-areas: "badges title";
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "title badges";
         gap: 0 var(--space-1);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "title badges"
+            "event event";
+        }
       }
 
       // Only statuses present (no badges)
       &:has(.topic-statuses:not(:empty)):not(:has(.topic-post-badges:not(:empty))) {
-        grid-template-columns: 1fr auto;
-        grid-template-areas: "title statuses";
+        grid-template-columns: auto 1fr;
+        grid-template-areas: "statuses title";
         gap: 0 var(--space-1);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "statuses title"
+            "event event";
+        }
       }
 
       .topic-post-badges {
@@ -147,6 +172,7 @@
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
           "title title"
+          "event event"
           "badges statuses";
         row-gap: var(--space-1);
       }
@@ -265,6 +291,13 @@
       grid-template-areas: "title";
       gap: 0;
 
+      // If an event/date outlet exists, place it below the title (no badges/statuses case)
+      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+        grid-template-areas:
+          "title"
+          "event";
+      }
+
       // Hide truly empty elements to prevent phantom grid tracks
       > .topic-post-badges:empty,
       > .topic-statuses:empty {
@@ -274,22 +307,40 @@
       // Both badges and statuses present
       &:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
         grid-template-columns: auto 1fr auto;
-        grid-template-areas: "badges title statuses";
+        grid-template-areas: "statuses title badges";
         gap: 0 var(--space-1);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "badges title statuses"
+            "event event event";
+        }
       }
 
       // Only badges present (no statuses)
       &:has(.topic-post-badges:not(:empty)):not(:has(.topic-statuses:not(:empty))) {
-        grid-template-columns: auto 1fr;
-        grid-template-areas: "badges title";
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "title badges";
         gap: 0 var(--space-1);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "title badges"
+            "event event";
+        }
       }
 
       // Only statuses present (no badges)
       &:has(.topic-statuses:not(:empty)):not(:has(.topic-post-badges:not(:empty))) {
-        grid-template-columns: 1fr auto;
-        grid-template-areas: "title statuses";
+        grid-template-columns: auto 1fr;
+        grid-template-areas: "statuses title";
         gap: 0 var(--space-1);
+
+        &:has(.header-topic-title-suffix-outlet:not(:empty)) {
+          grid-template-areas:
+            "statuses title"
+            "event event";
+        }
       }
 
       .topic-post-badges {
@@ -319,6 +370,7 @@
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
           "title title"
+          "event event"
           "badges statuses";
         row-gap: var(--space-1);
       }
