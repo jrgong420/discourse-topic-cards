@@ -12,8 +12,8 @@
  * - Glimmer component-based rendering
  *
  * Component Rendering Order (via topic-list-main-link-bottom outlet):
- * 1. TopicExcerpt - Topic excerpt text
- * 2. TopicTagsInline - Category and tags
+ * 1. TopicTagsInline - Category and tags
+ * 2. TopicExcerpt - Topic excerpt text
  * 3. TopicByline - Author and publish date
  * 4. TopicActionButtons - Details and featured link buttons
  * 5. TopicMetadata - Views, likes, replies, activity
@@ -111,8 +111,8 @@ export default apiInitializer((api) => {
       }
 
       <template>
-        <TopicExcerpt @topic={{@outletArgs.topic}} />
         <TopicTagsInline @topic={{@outletArgs.topic}} />
+        <TopicExcerpt @topic={{@outletArgs.topic}} />
         <TopicByline @topic={{@outletArgs.topic}} />
         <TopicActionButtons @topic={{@outletArgs.topic}} />
         <TopicMetadata @topic={{@outletArgs.topic}} />

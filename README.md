@@ -134,8 +134,8 @@ topic-card
 ├── topic-card__thumbnail (optional)
 ├── topic-card__content
 │   ├── topic-card__title
-│   ├── topic-card__excerpt
 │   ├── topic-card__tags (category + tags)
+│   ├── topic-card__excerpt
 │   ├── topic-card__byline (author + date)
 │   ├── topic-card__actions (featured link buttons)
 │   └── topic-card__metadata (views, likes, replies)

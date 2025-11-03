@@ -13,8 +13,8 @@
  *       ├── .topic-card__thumbnail
  *       ├── .topic-card__content
  *       │   ├── .topic-card__title
- *       │   ├── .topic-card__excerpt
  *       │   ├── .topic-card__tags
+ *       │   ├── .topic-card__excerpt
  *       │   ├── .topic-card__byline
  *       │   ├── .topic-card__actions
  *       │   └── .topic-card__metadata
@@ -150,8 +150,8 @@
     display: grid;
     grid-template-areas:
       "title title"
-      "excerpt excerpt"
       "tags tags"
+      "excerpt excerpt"
       "byline byline"
       "actions actions"
       "metadata metadata";
