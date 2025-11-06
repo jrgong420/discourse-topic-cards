@@ -17,6 +17,52 @@ A modern Discourse theme component that transforms standard topic lists into bea
 - 🎯 **Per-Category Configuration** - Enable cards for specific categories only
 - 🌐 **Fully Localized** - Translations available in 40+ languages
 
+## ⚠️ Breaking Changes (v2.0)
+
+**If you're upgrading from v1.x, please read this section carefully.**
+
+### What Changed
+
+1. **Removed `card_style_mobile` setting**
+   - The global mobile card style setting has been removed
+   - Replaced with per-category mobile settings: `mobile_list_view_categories` and `mobile_grid_view_categories`
+
+2. **Removed `show_for_suggested_topics` setting**
+   - Cards are no longer shown in suggested topics lists
+   - Cards now only appear in category topic lists
+
+3. **Changed default behavior when settings are empty**
+   - **Old behavior**: If both `list_view_categories` and `grid_view_categories` were empty, cards were shown everywhere in list style
+   - **New behavior**: If both settings for a platform are empty, cards are **disabled** on that platform
+
+### Migration Guide
+
+**Before (v1.x):**
+```yaml
+list_view_categories: ""
+grid_view_categories: ""
+card_style_mobile: grid  # Applied to all categories on mobile
+show_for_suggested_topics: true
+```
+
+**After (v2.0):**
+```yaml
+# Desktop: Explicitly assign categories
+list_view_categories: "support|announcements"
+grid_view_categories: "showcase"
+
+# Mobile: Explicitly assign categories
+mobile_list_view_categories: "support|announcements"
+mobile_grid_view_categories: "showcase"
+
+# show_for_suggested_topics removed (no longer supported)
+```
+
+**Action Required:**
+1. If you were relying on the old default behavior (cards everywhere), you must now explicitly assign categories to `list_view_categories` or `grid_view_categories`
+2. Configure mobile layouts using the new `mobile_list_view_categories` and `mobile_grid_view_categories` settings
+3. Remove any references to `card_style_mobile` and `show_for_suggested_topics` from your settings
+
 ## Screenshots
 
 ### List Style Cards
@@ -59,18 +105,33 @@ discourse_theme watch .
 
 2. **Configure card styles per category**
    - Admin → Settings → Theme Settings → Topic Cards
-   - Set `list_view_categories` for list-style cards
-   - Set `grid_view_categories` for grid-style cards
-   - Format: `category-slug|another-slug`
+   - **Desktop**: Set `list_view_categories` or `grid_view_categories`
+   - **Mobile**: Set `mobile_list_view_categories` or `mobile_grid_view_categories`
+   - Format: Select categories from the category picker
+   - **Important**: Cards are only enabled for categories explicitly assigned to a list. If all settings are empty, cards are disabled everywhere.
 
 ### Theme Settings
 
+#### Layout Configuration
+
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `list_view_categories` | list | - | Categories to display as list-style cards |
-| `grid_view_categories` | list | - | Categories to display as grid-style cards |
-| `mobile_list_view_categories` | list | - | Mobile-specific list-style categories |
-| `mobile_grid_view_categories` | list | - | Mobile-specific grid-style categories |
+| `list_view_categories` | list | - | **Desktop**: Categories to display as list-style cards (image left, content right). If a category appears in both list and grid settings, list takes priority. |
+| `grid_view_categories` | list | - | **Desktop**: Categories to display as grid-style cards (image top, content below). If a category appears in both list and grid settings, list takes priority. |
+| `mobile_list_view_categories` | list | - | **Mobile**: Categories to display as list-style cards. If a category appears in both list and grid settings, list takes priority. |
+| `mobile_grid_view_categories` | list | - | **Mobile**: Categories to display as grid-style cards. If a category appears in both list and grid settings, list takes priority. |
+
+**Important Notes:**
+- Desktop and mobile settings are **independent** - you can configure different layouts for each platform
+- Cards are **only enabled** for categories explicitly assigned to one of the four settings above
+- If both desktop settings are empty, cards are **disabled on desktop**
+- If both mobile settings are empty, cards are **disabled on mobile**
+- If a category appears in both list and grid settings for the same platform, **list style takes priority**
+
+#### Display Options
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
 | `show_excerpt` | bool | true | Display topic excerpts |
 | `show_views` | bool | true | Display view count |
 | `show_likes` | bool | true | Display like count |
@@ -94,16 +155,37 @@ See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
 3. Example: `support|feature-requests|announcements`
 4. Save settings
 
-### Mobile-Specific Layouts
+### Independent Mobile and Desktop Layouts
 
-Configure different card styles for mobile devices:
+Desktop and mobile settings are completely independent, allowing you to configure different layouts for each platform:
 
-```
-# Desktop: Grid layout
+**Example 1: Different layouts for the same categories**
+```yaml
+# Desktop: Grid layout for visual impact
 grid_view_categories: announcements|showcase
 
-# Mobile: List layout (easier to scroll)
+# Mobile: List layout for easier scrolling
 mobile_list_view_categories: announcements|showcase
+```
+
+**Example 2: Different categories per platform**
+```yaml
+# Desktop: Cards only in showcase
+grid_view_categories: showcase
+
+# Mobile: Cards in multiple categories
+mobile_list_view_categories: announcements|support|showcase
+```
+
+**Example 3: Desktop only**
+```yaml
+# Desktop: Cards enabled
+list_view_categories: support
+grid_view_categories: showcase
+
+# Mobile: Cards disabled (both settings empty)
+mobile_list_view_categories: ""
+mobile_grid_view_categories: ""
 ```
 
 ### Portfolio Pages

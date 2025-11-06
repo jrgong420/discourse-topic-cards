@@ -2,11 +2,10 @@
  * Discourse Topic List Cards - Main Initializer
  *
  * Transforms standard Discourse topic lists into card-based layouts (list or grid style).
- * Supports per-category configuration and mobile/desktop responsive behavior.
+ * Supports per-category configuration with independent mobile/desktop settings.
  *
  * Key Features:
- * - Per-category card style configuration (list/grid/disabled)
- * - Mobile-specific card styles
+ * - Per-category card style configuration (list/grid/disabled) for desktop and mobile independently
  * - Custom click behavior for card navigation
  * - BEM-based CSS architecture
  * - Glimmer component-based rendering
@@ -39,65 +38,72 @@ export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
   const router = api.container.lookup("service:router");
 
-  // Backward compatibility: map legacy setting values to new layout names
-  function normalizeCardStyle(style) {
-    const legacyMap = {
-      portrait: "grid",
-      landscape: "list",
-    };
-    return legacyMap[style] || style;
-  }
-
   /**
-   * Determines the card style for the current category on desktop.
+   * Determines the card style for the current category and viewport.
    * Returns "list", "grid", or null (no cards).
    *
-   * Priority:
-   * 1. If category is in grid_view_categories -> "grid"
-   * 2. If category is in list_view_categories -> "list"
-   * 3. If both settings are empty -> "list" (default everywhere)
-   * 4. Otherwise -> null (no cards)
+   * Logic:
+   * 1. Parse the appropriate settings based on viewport (mobile vs desktop)
+   * 2. If both settings for the platform are empty -> null (cards disabled)
+   * 3. If category is in both list and grid settings -> "list" (list takes precedence)
+   * 4. If category is in list settings -> "list"
+   * 5. If category is in grid settings -> "grid"
+   * 6. Otherwise -> null (category not assigned, cards disabled)
    */
-  function getCategoryCardStyle() {
-    const currentCat = router.currentRoute?.attributes?.category?.id;
+  function cardStyleFor({ categoryId, isMobile }) {
+    // Parse category settings based on viewport
+    const listSetting = isMobile
+      ? settings.mobile_list_view_categories
+      : settings.list_view_categories;
+    const gridSetting = isMobile
+      ? settings.mobile_grid_view_categories
+      : settings.grid_view_categories;
 
-    // Parse category settings
-    const listCategoryIds = settings.list_view_categories?.length > 0
-      ? settings.list_view_categories.split("|").map(Number)
-      : [];
-    const gridCategoryIds = settings.grid_view_categories?.length > 0
-      ? settings.grid_view_categories.split("|").map(Number)
-      : [];
+    const listCategoryIds =
+      listSetting?.length > 0 ? listSetting.split("|").map(Number) : [];
+    const gridCategoryIds =
+      gridSetting?.length > 0 ? gridSetting.split("|").map(Number) : [];
 
-    // If both settings are empty, enable list style everywhere
+    // If both settings are empty for this platform, cards are disabled
     if (listCategoryIds.length === 0 && gridCategoryIds.length === 0) {
-      return "list";
-    }
-
-    // If not in a category context, don't show cards
-    if (currentCat === undefined) {
       return null;
     }
 
-    // Grid takes priority if category appears in both settings
-    if (gridCategoryIds.includes(currentCat)) {
-      return "grid";
+    // If not in a category context, don't show cards
+    if (categoryId === undefined) {
+      return null;
     }
 
-    if (listCategoryIds.includes(currentCat)) {
+    const inList = listCategoryIds.includes(categoryId);
+    const inGrid = gridCategoryIds.includes(categoryId);
+
+    // List takes precedence over grid when category is in both
+    if (inList && inGrid) {
       return "list";
     }
 
-    // Category not in either setting
+    if (inList) {
+      return "list";
+    }
+
+    if (inGrid) {
+      return "grid";
+    }
+
+    // Category not assigned to either setting
     return null;
   }
 
-  function enableCards() {
-    if (router.currentRouteName === "topic.fromParamsNear") {
-      return settings.show_for_suggested_topics;
-    }
+  function getCardStyle() {
+    const currentCat = router.currentRoute?.attributes?.category?.id;
+    return cardStyleFor({
+      categoryId: currentCat,
+      isMobile: site.mobileView,
+    });
+  }
 
-    return getCategoryCardStyle() !== null;
+  function enableCards() {
+    return getCardStyle() !== null;
   }
 
   api.renderInOutlet(
@@ -123,19 +129,9 @@ export default apiInitializer((api) => {
   api.registerValueTransformer(
     "topic-list-class",
     ({ value: additionalClasses }) => {
-      if (enableCards()) {
+      const cardStyle = getCardStyle();
+      if (cardStyle) {
         additionalClasses.push("topic-cards-list");
-
-        // Determine card style based on viewport and category
-        let cardStyle;
-        if (site.mobileView) {
-          // Mobile uses the global mobile setting
-          cardStyle = normalizeCardStyle(settings.card_style_mobile);
-        } else {
-          // Desktop uses per-category style
-          cardStyle = getCategoryCardStyle() || "list";
-        }
-
         additionalClasses.push(`topic-cards-list--${cardStyle}`);
       }
       return additionalClasses;
@@ -145,17 +141,8 @@ export default apiInitializer((api) => {
   api.registerValueTransformer(
     "topic-list-item-class",
     ({ value: additionalClasses }) => {
-      if (enableCards()) {
-        // Determine card style based on viewport and category
-        let cardStyle;
-        if (site.mobileView) {
-          // Mobile uses the global mobile setting
-          cardStyle = normalizeCardStyle(settings.card_style_mobile);
-        } else {
-          // Desktop uses per-category style
-          cardStyle = getCategoryCardStyle() || "list";
-        }
-
+      const cardStyle = getCardStyle();
+      if (cardStyle) {
         const itemClasses = ["topic-card", `topic-card--${cardStyle}`];
 
         // Add layout-specific max-dimension classes

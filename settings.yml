@@ -23,22 +23,22 @@ list_view_categories:
   type: list
   list_type: category
   default: ""
-  description: "Categories that display topic cards in list style (image left, content right). If both settings are empty, topic cards are shown everywhere in list style by default."
+  description: "Desktop: Categories that display topic cards in list style (image left, content right). If both desktop settings are empty, topic cards are disabled on desktop. If a category appears in both list and grid settings, list style takes priority."
 grid_view_categories:
   type: list
   list_type: category
   default: ""
-  description: "Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both settings, grid style takes priority."
-show_for_suggested_topics:
-  type: bool
-  default: true
-card_style_mobile:
-  type: enum
-  default: grid
-  choices:
-    - list
-    - grid
-  description: "Choose card layout style for mobile viewports. This applies to all categories where topic cards are enabled."
+  description: "Desktop: Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both list and grid settings, list style takes priority."
+mobile_list_view_categories:
+  type: list
+  list_type: category
+  default: ""
+  description: "Mobile: Categories that display topic cards in list style (image left, content right). If both mobile settings are empty, topic cards are disabled on mobile. If a category appears in both list and grid settings, list style takes priority."
+mobile_grid_view_categories:
+  type: list
+  list_type: category
+  default: ""
+  description: "Mobile: Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both list and grid settings, list style takes priority."
 grid_card_min_width:
   type: integer
   default: 260
