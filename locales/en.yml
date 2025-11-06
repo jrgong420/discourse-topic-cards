@@ -5,6 +5,16 @@ en:
       details_button_aria: "Open topic: %{title}"
       featured_link_button: "Open link"
       featured_link_button_aria: "Open featured link: %{domain}"
+    carousel:
+      featured_topics: "Featured Topics"
+      loading: "Loading topics..."
+      error: "Failed to load topics: %{message}"
+      carousel_label: "Featured topics carousel"
+      slide_label: "Slide %{current} of %{total}"
+      previous_slide: "Previous slide"
+      next_slide: "Next slide"
+      go_to_slide: "Go to slide %{number}"
+      empty_state: "No topics found matching the current filters."
   theme_metadata:
     description: "A Discourse component to display the topic list in card format, with thumbnails where available."
     settings:

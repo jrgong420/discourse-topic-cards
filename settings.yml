@@ -90,3 +90,75 @@ topic_title_font_size:
     - "var(--font-up-2)"
     - "var(--font-up-3)"
   description: "Font size for topic titles in topic cards. Uses Discourse's built-in font-size CSS variables."
+
+# ============================================================================
+# Carousel Settings
+# ============================================================================
+# Configure the featured topics carousel that appears on the home page.
+# The carousel displays topic cards in a sliding interface with navigation
+# controls and supports both list and grid layouts.
+
+carousel_display_location:
+  type: enum
+  default: "home"
+  choices:
+    - home
+    - disabled
+  description: "Where to display the carousel. Set to 'home' to show on the home page, or 'disabled' to hide it completely."
+
+carousel_desktop_layout:
+  type: enum
+  default: "list"
+  choices:
+    - list
+    - grid
+  description: "Desktop layout mode. 'list' shows one card per slide (recommended for detailed view); 'grid' shows 3 cards per slide in a grid layout."
+
+carousel_mobile_layout:
+  type: enum
+  default: "list"
+  choices:
+    - list
+    - grid
+  description: "Mobile layout mode. 'list' shows one card per slide; 'grid' shows 2 cards per slide. List mode is recommended for better mobile readability."
+
+carousel_filter_tags:
+  type: list
+  list_type: tag
+  default: ""
+  description: "Filter carousel topics by tags. Enter tag names separated by pipes (|). Example: 'featured|announcement'. Leave empty to show all topics. For multiple tags, topics matching ANY tag will be included."
+
+carousel_max_items:
+  type: integer
+  default: 5
+  min: 1
+  max: 20
+  description: "Maximum number of topics to display in the carousel. Valid range: 1-20. Recommended: 5-10 for optimal performance. Higher values may increase load time."
+
+carousel_order:
+  type: enum
+  default: "latest"
+  choices:
+    - latest
+    - random
+    - popular
+  description: "Topic ordering. 'latest' shows newest topics first; 'random' shuffles topics on each page load (good for variety); 'popular' shows top topics from the past week."
+
+carousel_plugin_outlet:
+  type: string
+  default: "above-main-container"
+  description: "Advanced: Plugin outlet location. Default 'above-main-container' places carousel at the top of the page. Change only if you understand Discourse plugin outlets."
+
+carousel_max_cards_visible:
+  type: integer
+  default: 3
+  min: 1
+  max: 6
+  description: "Maximum number of cards visible per slide in grid mode. The actual number may be less based on viewport width and minimum card width. Valid range: 1-6. Recommended: 3 for desktop, automatically adjusts for mobile."
+
+carousel_grid_min_card_width:
+  type: integer
+  default: 320
+  min: 240
+  max: 480
+  description: "Minimum width (in pixels) for each card in grid mode. The carousel will automatically calculate how many cards fit based on viewport width. Valid range: 240-480px. Recommended: 320px for balanced layout."

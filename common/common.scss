@@ -71,6 +71,263 @@
     }
   }
 
+  // Suppress inline featured link in card mode (rely on CTA button instead)
+  // This removes the source of the stray &nbsp; text node without DOM surgery
+  // IMPORTANT: Only hide the anchor itself, not the container or plugin outlets
+  .link-top-line {
+    // Hide inline featured link anchor in card layouts
+    a.topic-featured-link {
+      display: none;
+    }
+
+    // Preserve all plugin outlet content (e.g., topic-list-after-title)
+    // Outlets remain visible and functional
+  }
+
+  // Card-specific featured link styles for when it's shown via outlet
+  .main-link {
+    .title {
+      color: var(--title-color);
+      font-weight: var(--topic-title-font-weight);
+      font-size: #{$topic-title-font-size};
+
+      // Better long-word handling
+      word-break: break-word;
+      overflow-wrap: anywhere;
+
+      // limit title to 2 lines
+      line-height: var(--line-height-large);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      max-height: calc(var(--line-height-large) * 3em);
+      padding: 0 !important;
+    }
+
+    .title.visited:not(.badge-notification) {
+      color: var(--title-color--read);
+      font-weight: var(--topic-title-font-weight--visited);
+    }
+
+    .link-bottom-line {
+      // Hide core tags/categories when our inline tags are rendered to avoid duplicates
+      display: none;
+    }
+
+    .topic-card {
+      &__category {
+        grid-area: category;
+      }
+
+      &__tags {
+        grid-area: tags;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        font-size: var(--font-down-1);
+
+        .badge-category__wrapper {
+          display: inline-flex;
+        }
+
+        .discourse-tag {
+          margin-right: var(--space-1);
+        }
+      }
+
+      &__byline {
+        grid-area: byline;
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-1);
+        flex-wrap: wrap;
+        font-size: var(--font-down-1);
+        color: var(--metadata-color);
+        align-self: end;
+      }
+
+      &__op {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+      }
+
+      &__meta-sep {
+        color: var(--primary-medium);
+        user-select: none;
+      }
+
+      &__actions {
+        grid-area: actions;
+        display: flex;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        align-items: center;
+
+        .btn {
+          flex: 0 1 auto;
+          min-width: 0;
+        }
+      }
+
+      &__details-btn {
+        // Secondary button styling (default btn)
+      }
+
+      &__featured-link-btn {
+        // Primary button styling (btn-primary)
+      }
+
+      &__metadata {
+        grid-area: metadata;
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-2);
+        line-height: var(--line-height-large);
+        flex-wrap: wrap;
+        align-items: center;
+        min-width: 0;
+
+        .number {
+          font-weight: bold;
+          font-size: var(--font-down-1);
+          color: var(--metadata-color);
+        }
+
+        .d-icon {
+          color: var(--primary-medium);
+        }
+
+        .activity a {
+          font-weight: bold;
+          font-size: var(--font-down-1);
+          color: var(--metadata-color);
+        }
+
+        &-items {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+
+        .item {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          flex: 0 0 auto;
+          white-space: nowrap;
+          min-width: 0;
+        }
+
+        .topic__like-button {
+          background-color: transparent;
+          border: none;
+          border-radius: var(--d-border-radius);
+          transition: all 200ms ease-in-out;
+
+          .d-icon {
+            color: var(--primary-medium);
+          }
+
+          &:hover {
+            background-color: var(--love-low);
+            color: var(--love);
+
+            .d-icon {
+              color: var(--love);
+            }
+          }
+
+          &.--liked {
+            .d-icon {
+              animation: like-toggle 200ms ease-in-out;
+              color: var(--love);
+            }
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+
+            &:hover {
+              background-color: unset;
+              color: unset;
+            }
+
+            &:hover:not(.--liked) {
+              .d-icon {
+                color: unset;
+              }
+            }
+          }
+        }
+
+        &__most-recent {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          font-size: var(--font-down-1);
+          color: var(--primary-medium);
+          margin-left: auto;
+
+          .avatar {
+            width: 20px;
+            height: 20px;
+          }
+
+          .activity a {
+            color: var(--primary-medium);
+            font-weight: normal;
+          }
+        }
+      }
+
+      &__publish-date {
+        font-size: var(--font-down-1);
+        color: var(--metadata-color);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        white-space: nowrap;
+      }
+
+      &__excerpt {
+        grid-area: excerpt;
+      }
+
+      &__excerpt-text {
+        margin-block: var(--space-1) var(--space-3);
+        font-size: var(--font-down-1);
+        color: var(--excerpt-color);
+        line-height: var(--line-height-large);
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-height: calc(var(--line-height-large) * 3em);
+      }
+
+      &__activity {
+        .num.activity {
+          display: block;
+          padding: 0;
+
+          a {
+            padding: 0;
+          }
+        }
+      }
+    }
+  }
 }
 
 // Shared card styles (common to all layouts and viewports)
@@ -173,6 +430,7 @@
     .link-top-line {
       grid-area: title;
       display: grid;
+
       // Base: title only (when neither badges nor statuses exist)
       grid-template-columns: 1fr;
       grid-template-areas:
@@ -182,7 +440,7 @@
       gap: 0;
 
       // If an event/date outlet exists, place it below the title (no badges/statuses case)
-      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+      &:not(:has(.topic-post-badges:not(:empty)), :has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
         grid-template-areas:
           "title"
           "event"
@@ -276,6 +534,7 @@
       // Featured link appears below event date (or below title if no event)
       a.topic-featured-link {
         grid-area: featured-link;
+
         // No margin by default (when no event)
         margin-top: 0;
         font-size: var(--font-down-1);
@@ -302,280 +561,12 @@
   }
 }
 
-// Suppress inline featured link in card mode (rely on CTA button instead)
-// This removes the source of the stray &nbsp; text node without DOM surgery
-// IMPORTANT: Only hide the anchor itself, not the container or plugin outlets
-.topic-cards-list {
-  .link-top-line {
-    // Hide inline featured link anchor in card layouts
-    a.topic-featured-link {
-      display: none;
-    }
-
-    // Preserve all plugin outlet content (e.g., topic-list-after-title)
-    // Outlets remain visible and functional
-  }
-}
-
 // Classic (non-card) lists: keep inline featured link visible with proper spacing
 .topic-list:not(.topic-cards-list) {
   .link-top-line {
     a.topic-featured-link {
       // Core spacing via CSS gap/margin, not text nodes
       margin-left: var(--space-1);
-    }
-  }
-}
-
-// Restore card-specific featured link styles for when it's shown via outlet
-.topic-cards-list {
-  .main-link {
-
-    .title {
-      color: var(--title-color);
-      font-weight: var(--topic-title-font-weight);
-      font-size: #{$topic-title-font-size};
-
-      // Better long-word handling
-      word-break: break-word;
-      overflow-wrap: anywhere;
-
-      // limit title to 2 lines
-      line-height: var(--line-height-large);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      max-height: calc(var(--line-height-large) * 2em);
-      padding: 0 !important;
-    }
-
-    .title.visited:not(.badge-notification) {
-      color: var(--title-color--read);
-      font-weight: var(--topic-title-font-weight--visited);
-    }
-
-    .link-bottom-line {
-      // Hide core tags/categories when our inline tags are rendered to avoid duplicates
-      display: none;
-    }
-
-    .topic-card {
-      &__category {
-        grid-area: category;
-      }
-
-      &__tags {
-        grid-area: tags;
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        font-size: var(--font-down-1);
-
-        .badge-category__wrapper {
-          display: inline-flex;
-        }
-
-        .discourse-tag {
-          margin-right: var(--space-1);
-        }
-      }
-
-      &__byline {
-        grid-area: byline;
-        display: flex;
-        align-items: baseline;
-        gap: var(--space-1);
-        flex-wrap: wrap;
-        font-size: var(--font-down-1);
-        color: var(--metadata-color);
-        align-self: end;
-      }
-
-      &__op {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-1);
-      }
-
-      &__meta-sep {
-        color: var(--primary-medium);
-        user-select: none;
-      }
-
-      &__actions {
-        grid-area: actions;
-        display: flex;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        align-items: center;
-
-        .btn {
-          flex: 0 1 auto;
-          min-width: 0;
-        }
-      }
-
-      &__details-btn {
-        // Secondary button styling (default btn)
-      }
-
-      &__featured-link-btn {
-        // Primary button styling (btn-primary)
-      }
-
-      &__metadata {
-        grid-area: metadata;
-        display: flex;
-        justify-content: space-between;
-        gap: var(--space-2);
-        line-height: var(--line-height-large);
-        flex-wrap: wrap;
-        align-items: center;
-
-
-        // Allow shrink inside grid area to avoid horizontal overflow
-        min-width: 0;
-
-        .number {
-          font-weight: bold;
-          font-size: var(--font-down-1);
-          color: var(--metadata-color);
-        }
-
-        .d-icon {
-          color: var(--primary-medium);
-        }
-
-        .activity a {
-          font-weight: bold;
-          font-size: var(--font-down-1);
-          color: var(--metadata-color);
-        }
-
-        // BEM: metadata items container
-        &-items {
-          display: flex;
-          align-items: center;
-          gap: var(--space-4);
-          flex-wrap: wrap;
-          min-width: 0;
-        }
-
-        .item {
-          display: inline-flex;
-          align-items: center;
-          gap: var(--space-1);
-          flex: 0 0 auto;
-          white-space: nowrap;
-          min-width: 0;
-        }
-
-        .topic__like-button {
-          background-color: transparent;
-          border: none;
-          border-radius: var(--d-border-radius);
-          transition: all 200ms ease-in-out;
-
-          .d-icon {
-            color: var(--primary-medium);
-          }
-
-          &:hover {
-            background-color: var(--love-low);
-            color: var(--love);
-
-            .d-icon {
-              color: var(--love);
-            }
-          }
-
-          &.--liked {
-            .d-icon {
-              animation: like-toggle 200ms ease-in-out;
-              color: var(--love);
-            }
-          }
-
-          &:disabled {
-            cursor: not-allowed;
-
-            &:hover {
-              background-color: unset;
-              color: unset;
-            }
-
-            &:hover:not(.--liked) {
-              .d-icon {
-                color: unset;
-              }
-            }
-          }
-        }
-
-        &__most-recent {
-          display: inline-flex;
-          align-items: center;
-          gap: var(--space-1);
-          font-size: var(--font-down-1);
-          color: var(--primary-medium);
-          margin-left: auto; // Push to the right
-
-          .avatar {
-            width: 20px;
-            height: 20px;
-          }
-
-          .activity a {
-            color: var(--primary-medium);
-            font-weight: normal;
-          }
-        }
-      }
-
-      &__publish-date {
-        font-size: var(--font-down-1);
-        color: var(--metadata-color);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-1);
-        white-space: nowrap;
-      }
-
-      &__excerpt {
-        grid-area: excerpt;
-      }
-
-      &__excerpt-text {
-        margin-block: var(--space-1) var(--space-3);
-        font-size: var(--font-down-1);
-        color: var(--excerpt-color);
-        line-height: var(--line-height-large);
-
-
-        // Better long-word handling inside excerpts
-        word-break: break-word;
-        overflow-wrap: anywhere;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        max-height: calc(var(--line-height-large) * 3em);
-      }
-
-      &__activity {
-        .num.activity {
-          display: block;
-          padding: 0;
-
-          a {
-            padding: 0;
-          }
-        }
-      }
     }
   }
 }
@@ -608,5 +599,467 @@
 @if $hide-topic-author-tc-column {
   tr.topic-list-item.topic-card td.custom-author-column {
     display: none;
+  }
+}
+
+// ============================================================================
+// Topic Cards Carousel Styles (Phase 6-10)
+// ============================================================================
+// Namespace: .topic-cards-carousel (distinct from .topic-cards-list)
+//
+// Compatibility Notes:
+// - .topic-cards-list: Used by discourse-topic-list-cards initializer
+// - .topic-card: Used by individual topic cards in topic lists
+// - .carousel-topic-card: Used by carousel cards (separate namespace)
+//
+// The carousel uses its own BEM namespace to avoid conflicts with the
+// existing topic list card system. Both can coexist on the same page.
+// ============================================================================
+.topic-cards-carousel {
+  margin: var(--space-6) 0;
+  padding: var(--space-5);
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius);
+
+  &__header {
+    margin-bottom: var(--space-5);
+  }
+
+  &__title {
+    font-size: var(--font-up-3);
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0 0 var(--space-2);
+    line-height: var(--line-height-medium);
+  }
+
+  &__subtitle {
+    font-size: var(--font-0);
+    color: var(--primary-medium);
+    margin: 0;
+    line-height: var(--line-height-medium);
+  }
+
+  &__container {
+    position: relative; // For absolute positioning of arrows and gradients
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 calc(var(--space-5) + 24px); // Reserve space for arrows on sides
+
+    @media (width >= 768px) {
+      padding: 0 calc(var(--space-6) + 32px); // More space on desktop
+    }
+
+    // Keyboard focus outline for carousel region
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 4px;
+      border-radius: var(--d-border-radius);
+    }
+
+    // Gradient fade overlays for peek effect
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 5;
+
+      @media (width >= 768px) {
+        width: 120px;
+      }
+    }
+
+    // Left gradient fade
+    &::before {
+      left: 0;
+      background: linear-gradient(
+        to right,
+        var(--secondary) 0%,
+        rgba(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
+        transparent 100%
+      );
+    }
+
+    // Right gradient fade
+    &::after {
+      right: 0;
+      background: linear-gradient(
+        to left,
+        var(--secondary) 0%,
+        rgba(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
+        transparent 100%
+      );
+    }
+
+    // Show left gradient when there's a previous slide
+    &.has-prev::before {
+      opacity: 1;
+    }
+
+    // Show right gradient when there's a next slide
+    &.has-next::after {
+      opacity: 1;
+    }
+
+    // Phase 5: Layout-specific container styles
+    &--list {
+      // List mode: single card per slide
+    }
+
+    &--grid {
+      // Grid mode: multiple cards per slide
+    }
+  }
+
+  &__placeholder {
+    font-size: var(--font-0);
+    color: var(--primary-medium);
+    text-align: center;
+    padding: var(--space-6);
+    background: var(--primary-very-low);
+    border-radius: var(--d-border-radius);
+  }
+
+  &__loading,
+  &__error,
+  &__empty {
+    text-align: center;
+    padding: var(--space-6);
+    font-size: var(--font-0);
+    color: var(--primary-medium);
+
+    // Fade in animation
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  &__error {
+    color: var(--danger);
+    background: var(--danger-low);
+    border-radius: var(--d-border-radius);
+  }
+
+  &__viewport {
+    overflow: hidden;
+    width: 100%;
+    margin: 0 -20px; // Negative margin to show peek
+
+    @media (width >= 768px) {
+      margin: 0 -40px; // More peek on desktop
+    }
+
+    // Enable smooth scrolling for better UX
+    scroll-behavior: smooth;
+  }
+
+  &__slides {
+    display: flex;
+    gap: var(--space-5);
+    padding: 0 20px var(--space-2); // Compensate for negative margin
+
+    @media (width >= 768px) {
+      padding: 0 40px var(--space-2);
+    }
+
+    // Smooth transitions for slide changes
+    transition: transform 0.3s ease-out;
+  }
+
+  &__slide {
+    flex: 0 0 auto;
+    width: 100%;
+
+    // Fade in animation for slides
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Phase 5: Grid layout for slides
+  &__slide-grid {
+    display: grid;
+    gap: var(--space-4);
+    width: 100%;
+    margin: 0 auto;
+
+    // List mode: 1 card per slide
+    .topic-cards-carousel__container--list & {
+      grid-template-columns: 1fr;
+      max-width: 420px;
+
+      @media (width >= 768px) {
+        max-width: 480px;
+      }
+    }
+
+    // Grid mode: Dynamic columns via BEM modifiers
+    // Columns are computed by ResizeObserver in JavaScript
+    &--cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    &--cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &--cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    &--cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    &--cols-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    &--cols-6 {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  &__card-wrapper {
+    // Wrapper for individual cards in grid
+    min-width: 0; // Allow cards to shrink in grid
+  }
+
+  // Navigation arrows - positioned at viewport sides
+  &__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(var(--secondary-rgb, 255, 255, 255), 0.95);
+    backdrop-filter: blur(8px);
+    border: 2px solid var(--primary-medium);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @media (width >= 768px) {
+      width: 48px;
+      height: 48px;
+      font-size: 28px;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--tertiary-low);
+      border-color: var(--tertiary);
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transition: opacity 0.2s ease;
+    }
+
+    &--prev {
+      left: var(--space-2);
+
+      @media (width >= 768px) {
+        left: var(--space-3);
+      }
+    }
+
+    &--next {
+      right: var(--space-2);
+
+      @media (width >= 768px) {
+        right: var(--space-3);
+      }
+    }
+  }
+
+  // Pagination dots - centered below carousel (outside container)
+  &__dots {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    margin-top: var(--space-4);
+    padding: 0;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-low);
+    border: 2px solid var(--primary-medium);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+
+    &:hover {
+      background: var(--primary-medium);
+      transform: scale(1.3);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    &.is-active,
+    &[aria-current="true"] {
+      background: var(--tertiary);
+      border-color: var(--tertiary);
+      width: 12px;
+      height: 12px;
+      transform: scale(1.2);
+    }
+  }
+}
+
+.carousel-topic-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-medium);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--tertiary);
+    outline-offset: 2px;
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+
+    &:focus-visible {
+      outline: none; // Handled by card focus-within
+    }
+  }
+
+  &__thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--primary-very-low);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 767px) {
+      aspect-ratio: 16 / 10;
+    }
+
+    .main-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .thumbnail-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: var(--primary-medium);
+      font-size: 3rem;
+      opacity: 0.5;
+    }
+  }
+
+  &:hover &__thumbnail .main-thumbnail {
+    transform: scale(1.05);
+  }
+
+  &__content {
+    flex: 1;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
+
+    @media (max-width: 767px) {
+      padding: var(--space-3);
+      min-height: 70px;
+    }
+  }
+
+  &__title {
+    font-size: var(--font-up-1);
+    font-weight: 600;
+    color: var(--primary);
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+
+    @media (max-width: 767px) {
+      font-size: var(--font-0);
+      line-height: 1.5;
+    }
+  }
+
+  &:hover &__title {
+    color: var(--tertiary);
   }
 }
