@@ -220,13 +220,13 @@ module("Topic Cards Carousel Component", function (hooks) {
     test("navigation buttons have proper ARIA labels", async function (assert) {
       await render(hbs`<TopicCardsCarousel />`);
 
-      await waitFor(".topic-cards-carousel__controls", { timeout: 2000 });
+      await waitFor("[data-test-prev]", { timeout: 2000 });
 
       assert
-        .dom(".topic-cards-carousel__prev")
+        .dom("[data-test-prev]")
         .hasAttribute("aria-label", /.+/, "Previous button has aria-label");
       assert
-        .dom(".topic-cards-carousel__next")
+        .dom("[data-test-next]")
         .hasAttribute("aria-label", /.+/, "Next button has aria-label");
     });
 
@@ -302,11 +302,9 @@ module("Topic Cards Carousel Component", function (hooks) {
     test("clicking next button navigates forward", async function (assert) {
       await render(hbs`<TopicCardsCarousel />`);
 
-      await waitFor(".topic-cards-carousel__next", { timeout: 2000 });
+      await waitFor("[data-test-next]", { timeout: 2000 });
 
-      const nextButton = this.element.querySelector(
-        ".topic-cards-carousel__next"
-      );
+      const nextButton = this.element.querySelector("[data-test-next]");
 
       await click(nextButton);
 
@@ -316,11 +314,9 @@ module("Topic Cards Carousel Component", function (hooks) {
     test("clicking previous button navigates backward", async function (assert) {
       await render(hbs`<TopicCardsCarousel />`);
 
-      await waitFor(".topic-cards-carousel__prev", { timeout: 2000 });
+      await waitFor("[data-test-prev]", { timeout: 2000 });
 
-      const prevButton = this.element.querySelector(
-        ".topic-cards-carousel__prev"
-      );
+      const prevButton = this.element.querySelector("[data-test-prev]");
 
       await click(prevButton);
 
@@ -344,12 +340,10 @@ module("Topic Cards Carousel Component", function (hooks) {
     test("disabled buttons have disabled attribute", async function (assert) {
       await render(hbs`<TopicCardsCarousel />`);
 
-      await waitFor(".topic-cards-carousel__controls", { timeout: 2000 });
+      await waitFor("[data-test-prev]", { timeout: 2000 });
 
       // Previous button should be disabled on first slide
-      const prevButton = this.element.querySelector(
-        ".topic-cards-carousel__prev"
-      );
+      const prevButton = this.element.querySelector("[data-test-prev]");
       assert.ok(
         prevButton.hasAttribute("disabled"),
         "Previous button is disabled on first slide"

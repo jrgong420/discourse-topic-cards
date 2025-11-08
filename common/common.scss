@@ -615,6 +615,14 @@
 // The carousel uses its own BEM namespace to avoid conflicts with the
 // existing topic list card system. Both can coexist on the same page.
 // ============================================================================
+
+// Expose carousel settings as CSS variables for live preview updates
+:root {
+  --carousel-spv-cap: #{$carousel-slides-per-view};
+  --carousel-min-slide-width: #{$carousel-min-slide-width-px}px;
+  --carousel-slide-gap: #{$carousel-slide-gap-px}px;
+}
+
 .topic-cards-carousel {
   margin: var(--space-6) 0;
   padding: var(--space-5);
@@ -684,7 +692,7 @@
       background: linear-gradient(
         to right,
         var(--secondary) 0%,
-        rgba(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
         transparent 100%
       );
     }
@@ -695,7 +703,7 @@
       background: linear-gradient(
         to left,
         var(--secondary) 0%,
-        rgba(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
         transparent 100%
       );
     }
@@ -762,7 +770,6 @@
 
   &__slides {
     display: flex;
-    gap: var(--space-5);
     padding: 0 20px var(--space-2); // Compensate for negative margin
 
     @media (width >= 768px) {
@@ -775,7 +782,17 @@
 
   &__slide {
     flex: 0 0 auto;
-    width: 100%;
+
+    // Width is computed dynamically via CSS variable --spv (slides per view)
+    // Formula: (100% - (gap * (spv - 1))) / spv
+    // This ensures slides fit exactly with gaps between them
+    width: calc((100% - (var(--carousel-slide-gap) * (var(--spv, var(--carousel-spv-cap)) - 1))) / var(--spv, var(--carousel-spv-cap)));
+    margin-inline-end: var(--carousel-slide-gap);
+
+    // Remove margin from last slide to prevent extra space
+    &:last-child {
+      margin-inline-end: 0;
+    }
 
     // Fade in animation for slides
     animation: fadeIn 0.3s ease-in;
@@ -793,62 +810,13 @@
     }
   }
 
-  // Phase 5: Grid layout for slides
-  &__slide-grid {
-    display: grid;
-    gap: var(--space-4);
-    width: 100%;
-    margin: 0 auto;
-
-    // List mode: 1 card per slide
-    .topic-cards-carousel__container--list & {
-      grid-template-columns: 1fr;
-      max-width: 420px;
-
-      @media (width >= 768px) {
-        max-width: 480px;
-      }
-    }
-
-    // Grid mode: Dynamic columns via BEM modifiers
-    // Columns are computed by ResizeObserver in JavaScript
-    &--cols-1 {
-      grid-template-columns: 1fr;
-    }
-
-    &--cols-2 {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    &--cols-3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    &--cols-4 {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    &--cols-5 {
-      grid-template-columns: repeat(5, 1fr);
-    }
-
-    &--cols-6 {
-      grid-template-columns: repeat(6, 1fr);
-    }
-  }
-
-  &__card-wrapper {
-    // Wrapper for individual cards in grid
-    min-width: 0; // Allow cards to shrink in grid
-  }
-
   // Navigation arrows - positioned at viewport sides
   &__arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
-    background: rgba(var(--secondary-rgb, 255, 255, 255), 0.95);
+    background: rgb(var(--secondary-rgb, 255, 255, 255), 0.95);
     backdrop-filter: blur(8px);
     border: 2px solid var(--primary-medium);
     border-radius: 50%;
@@ -863,7 +831,7 @@
     color: var(--primary);
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
 
     @media (width >= 768px) {
       width: 48px;
@@ -875,7 +843,7 @@
       background: var(--tertiary-low);
       border-color: var(--tertiary);
       transform: translateY(-50%) scale(1.1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
     }
 
     &:active:not(:disabled) {
@@ -959,6 +927,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%; // Ensure card fills slide width
   background: var(--secondary);
   border: 1px solid var(--primary-low);
   border-radius: var(--d-border-radius);
@@ -967,7 +936,7 @@
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 16px rgb(0, 0, 0, 0.12);
     border-color: var(--primary-medium);
   }
 
@@ -998,7 +967,7 @@
     align-items: center;
     justify-content: center;
 
-    @media (max-width: 767px) {
+    @media (width <= 767px) {
       aspect-ratio: 16 / 10;
     }
 
@@ -1033,7 +1002,7 @@
     justify-content: center;
     min-height: 80px;
 
-    @media (max-width: 767px) {
+    @media (width <= 767px) {
       padding: var(--space-3);
       min-height: 70px;
     }
@@ -1053,7 +1022,7 @@
     text-overflow: ellipsis;
     transition: color 0.2s ease;
 
-    @media (max-width: 767px) {
+    @media (width <= 767px) {
       font-size: var(--font-0);
       line-height: 1.5;
     }

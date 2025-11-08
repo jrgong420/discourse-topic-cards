@@ -59,9 +59,6 @@ export default class TopicCardsCarousel extends Component {
   /** @type {boolean} True if viewport is mobile (≤767px) */
   @tracked isMobile = false;
 
-  /** @type {Array<Array<Topic>>} Topics chunked into slides based on layout */
-  @tracked chunkedSlides = [];
-
   /** @type {number} Currently selected slide index (0-based) */
   @tracked selectedIndex = 0;
 
@@ -77,8 +74,8 @@ export default class TopicCardsCarousel extends Component {
   /** @type {boolean} True if carousel is visible in viewport (for lazy loading) */
   @tracked isVisible = false;
 
-  /** @type {number} Number of grid columns computed dynamically based on viewport width */
-  @tracked gridColumns = 3;
+  /** @type {number} Number of slides visible at once (computed) */
+  @tracked slidesPerView = 1;
 
   /** @type {MediaQueryList|null} Media query listener for responsive behavior */
   mediaQueryList = null;
@@ -227,16 +224,19 @@ export default class TopicCardsCarousel extends Component {
       }
       this.destroyEmbla();
       try {
-        // Enable loop only if there are multiple slides
-        const enableLoop = this.chunkedSlides.length > 1;
+        // Map speed setting to duration (frames)
+        const speedMap = { slow: 35, normal: 25, fast: 15 };
+        const duration = speedMap[settings.carousel_speed] || 25;
 
         this.embla = window.EmblaCarousel(viewport, {
-          align: "start",
+          align: settings.carousel_align || "start",
           containScroll: "trimSnaps",
-          loop: enableLoop, // Infinite loop for multiple slides
-          dragFree: false,
-          duration: 25, // Smooth scroll animation (25 frames)
+          loop: settings.carousel_loop,
+          dragFree: settings.carousel_drag_free,
+          duration,
           skipSnaps: false,
+          slidesToScroll:
+            settings.carousel_scroll_by === "1" ? 1 : this.slidesPerView || 1,
         });
         const onSelect = () => {
           try {
@@ -249,6 +249,17 @@ export default class TopicCardsCarousel extends Component {
         };
         this.embla.on("select", onSelect);
         this.embla.on("reInit", onSelect);
+        // Initialize dots from Embla snaps
+        try {
+          const snaps = this.embla.scrollSnapList
+            ? this.embla.scrollSnapList()
+            : [];
+          this.dots = snaps.map((_, i) => ({
+            idx: i,
+            label: i + 1,
+            isActive: i === 0,
+          }));
+        } catch {}
         onSelect();
       } catch {}
     });
@@ -369,13 +380,13 @@ export default class TopicCardsCarousel extends Component {
 
     this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        this.computeGridColumns(entry.contentRect.width);
+        this.computeSlidesPerView(entry.contentRect.width);
       }
     });
 
     this.resizeObserver.observe(viewport);
     // Initial computation
-    this.computeGridColumns(viewport.clientWidth);
+    this.computeSlidesPerView(viewport.clientWidth);
   }
 
   /**
@@ -383,43 +394,53 @@ export default class TopicCardsCarousel extends Component {
    * Formula: min(max_cards_visible, floor((viewportWidth + gap) / (minCardWidth + gap)))
    * @param {number} viewportWidth - Current viewport width in pixels
    */
-  computeGridColumns(viewportWidth) {
-    if (this.currentLayout !== "grid") {
-      this.gridColumns = 1;
+  /**
+   * Reads a numeric CSS custom property from the carousel element.
+   * @param {string} name - CSS variable name, e.g. "--carousel-slide-gap"
+   * @param {number} fallback - Fallback number if var is not set or invalid
+   * @returns {number}
+   */
+  readCssVar(name, fallback) {
+    const el = this.carouselElement;
+    if (!el) {
+      return fallback;
+    }
+    const val = getComputedStyle(el).getPropertyValue(name)?.trim();
+    const num = parseFloat(val);
+    return Number.isFinite(num) ? num : fallback;
+  }
+
+  /**
+   * Computes the number of slides visible (slidesPerView) based on viewport width.
+   * Uses Embla-native sizing where slide width and gap are controlled in CSS.
+   * @param {number} viewportWidth - Current viewport width in pixels
+   */
+  computeSlidesPerView(viewportWidth) {
+    if (!this.carouselElement) {
       return;
     }
 
-    const maxCards = settings.carousel_max_cards_visible || 3;
-    const minCardWidth = settings.carousel_grid_min_card_width || 320;
-    const gap = 16; // var(--space-4) ≈ 16px
+    const cap = this.readCssVar("--carousel-spv-cap", 3);
+    const minSlideWidth = this.readCssVar("--carousel-min-slide-width", 320);
+    const gap = this.readCssVar("--carousel-slide-gap", 16);
 
-    // Calculate how many cards fit
-    const columns = Math.floor((viewportWidth + gap) / (minCardWidth + gap));
-    const cappedColumns = Math.max(1, Math.min(maxCards, columns));
+    const columns = Math.floor((viewportWidth + gap) / (minSlideWidth + gap));
+    const spv = Math.max(1, Math.min(cap, columns));
 
-    if (this.gridColumns !== cappedColumns) {
-      this.gridColumns = cappedColumns;
-      // Re-chunk topics with new column count
-      this.rechunkTopics();
+    if (this.slidesPerView !== spv) {
+      this.slidesPerView = spv;
+      this.carouselElement.style.setProperty("--spv", String(spv));
+      // Re-init Embla to respect slidesToScroll changes etc.
+      schedule("afterRender", () => this.setupEmbla());
     }
   }
 
   /**
    * Re-chunks topics and guards selectedIndex after column changes.
+   * Deprecated under Embla-native layout. Left as no-op.
    */
   rechunkTopics() {
-    const previousSlideCount = this.chunkedSlides.length;
-    this.chunkTopics();
-
-    // Guard selectedIndex to prevent out-of-bounds
-    if (this.selectedIndex >= this.chunkedSlides.length) {
-      this.selectedIndex = Math.max(0, this.chunkedSlides.length - 1);
-    }
-
-    // Reinitialize Embla if slide count changed
-    if (previousSlideCount !== this.chunkedSlides.length) {
-      schedule("afterRender", () => this.setupEmbla());
-    }
+    // no-op under Embla-native layout (one topic per slide)
   }
 
   /**
@@ -435,11 +456,9 @@ export default class TopicCardsCarousel extends Component {
   @action
   handleMediaChange(e) {
     this.isMobile = e.matches;
-    // Recompute grid columns for new viewport
+    // Recompute slides per view for new viewport
     if (this.viewportElement) {
-      this.computeGridColumns(this.viewportElement.clientWidth);
-    } else {
-      this.chunkTopics();
+      this.computeSlidesPerView(this.viewportElement.clientWidth);
     }
   }
 
@@ -467,18 +486,17 @@ export default class TopicCardsCarousel extends Component {
   }
 
   /**
+   * Returns the validated max cards visible setting for grid layout.
+   * Clamps to the allowed range (1-6) and falls back to default when unset.
+   * @returns {number}
+   */
+
+  /**
    * Returns the number of cards to display per slide based on layout.
-   * List mode: 1 card per slide
-   * Grid mode: Uses dynamically computed gridColumns
+   * List mode: Always 1 card per slide for full-width detail view
+   * Grid mode: Uses dynamically computed gridColumns (clamped by setting)
    * @returns {number} Cards per slide
    */
-  get cardsPerSlide() {
-    if (this.currentLayout === "list") {
-      return 1;
-    }
-    // Grid mode: use dynamically computed columns
-    return this.gridColumns;
-  }
 
   /**
    * Helper for slide labels (1-based index for accessibility).
@@ -493,26 +511,6 @@ export default class TopicCardsCarousel extends Component {
    * Chunks topics array into slides based on current layout.
    * Reinitializes Embla carousel after chunking.
    */
-  chunkTopics() {
-    const perSlide = this.cardsPerSlide;
-    const chunks = [];
-
-    for (let i = 0; i < this.topics.length; i += perSlide) {
-      chunks.push(this.topics.slice(i, i + perSlide));
-    }
-
-    this.chunkedSlides = chunks;
-
-    // Create dots with pre-computed metadata for pagination
-    this.dots = this.chunkedSlides.map((_, i) => ({
-      idx: i,
-      label: i + 1,
-      isActive: i === this.selectedIndex,
-    }));
-
-    // Reinitialize Embla when slides change
-    schedule("afterRender", () => this.setupEmbla());
-  }
 
   /**
    * Validates carousel settings and returns sanitized values.
@@ -606,8 +604,8 @@ export default class TopicCardsCarousel extends Component {
       // Limit to max items
       this.topics = fetchedTopics.slice(0, maxItems);
 
-      // Chunk topics based on current layout
-      this.chunkTopics();
+      // Initialize Embla for one-topic-per-slide layout
+      schedule("afterRender", () => this.setupEmbla());
     } catch (err) {
       this.error =
         err.jqXHR?.responseJSON?.errors?.[0] ||
@@ -665,7 +663,7 @@ export default class TopicCardsCarousel extends Component {
               role="group"
               aria-live="polite"
             >
-              {{#each this.chunkedSlides as |slideTopics idx|}}
+              {{#each this.topics as |topic idx|}}
                 <div
                   class="topic-cards-carousel__slide"
                   role="group"
@@ -673,19 +671,10 @@ export default class TopicCardsCarousel extends Component {
                   aria-label={{i18n
                     (themePrefix "js.carousel.slide_label")
                     current=(this.slideNumber idx)
-                    total=this.chunkedSlides.length
+                    total=this.topics.length
                   }}
                 >
-                  <div
-                    class="topic-cards-carousel__slide-grid
-                      topic-cards-carousel__slide-grid--cols-{{this.gridColumns}}"
-                  >
-                    {{#each slideTopics as |topic|}}
-                      <div class="topic-cards-carousel__card-wrapper">
-                        <CarouselTopicCard @topic={{topic}} />
-                      </div>
-                    {{/each}}
-                  </div>
+                  <CarouselTopicCard @topic={{topic}} />
                 </div>
               {{/each}}
             </div>
@@ -695,6 +684,7 @@ export default class TopicCardsCarousel extends Component {
           <button
             type="button"
             class="topic-cards-carousel__arrow topic-cards-carousel__arrow--prev"
+            data-test-prev
             aria-label={{i18n (themePrefix "js.carousel.previous_slide")}}
             disabled={{not this.canScrollPrev}}
             {{on "click" this.prev}}
@@ -704,6 +694,7 @@ export default class TopicCardsCarousel extends Component {
           <button
             type="button"
             class="topic-cards-carousel__arrow topic-cards-carousel__arrow--next"
+            data-test-next
             aria-label={{i18n (themePrefix "js.carousel.next_slide")}}
             disabled={{not this.canScrollNext}}
             {{on "click" this.next}}
@@ -713,13 +704,13 @@ export default class TopicCardsCarousel extends Component {
         </div>
 
         {{! Pagination dots - centered below carousel }}
-        <div class="topic-cards-carousel__dots">
+        <div class="topic-cards-carousel__dots" data-test-dots>
           {{#each this.dots as |dot|}}
             <button
               type="button"
-              class="topic-cards-carousel__dot
-                {{if dot.isActive 'is-active'}}"
+              class="topic-cards-carousel__dot {{if dot.isActive 'is-active'}}"
               data-index={{dot.idx}}
+              data-test-dot
               aria-label={{i18n
                 (themePrefix "js.carousel.go_to_slide")
                 number=dot.label

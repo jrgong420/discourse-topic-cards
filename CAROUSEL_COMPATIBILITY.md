@@ -99,13 +99,29 @@ The carousel reuses existing topic card components:
 ## Settings Compatibility
 
 ### Carousel Settings
-- `carousel_display_location` - Where to show carousel
-- `carousel_desktop_layout` - Desktop layout mode
-- `carousel_mobile_layout` - Mobile layout mode
-- `carousel_filter_tags` - Tag filtering
-- `carousel_max_items` - Maximum topics
-- `carousel_order` - Topic ordering
-- `carousel_plugin_outlet` - Plugin outlet location
+
+The carousel uses a minimal, Embla-aligned settings structure organized into logical groups:
+
+**Display & Layout:**
+- `carousel_display_location` - Where to show carousel (home/disabled)
+- `carousel_desktop_layout` - Desktop layout mode (list/grid)
+- `carousel_mobile_layout` - Mobile layout mode (list/grid)
+- `carousel_plugin_outlet` - Plugin outlet location (advanced)
+
+**Topic Source & Filtering:**
+- `carousel_filter_tags` - Tag filtering (pipe-separated)
+- `carousel_max_items` - Maximum topics to display (1-20)
+- `carousel_order` - Topic ordering (latest/random/popular)
+
+**Grid Layout & Sizing:**
+- `carousel_slides_per_view` - Max cards per slide in grid mode (1-6)
+- `carousel_min_card_width_px` - Min card width for responsive grid (240-480px)
+
+**Embla Carousel Behavior:**
+- `carousel_loop` - Enable infinite looping (bool)
+- `carousel_align` - Slide alignment (start/center)
+- `carousel_drag_free` - Enable free-scroll dragging (bool)
+- `carousel_speed` - Animation speed (slow/normal/fast)
 
 ### Existing Settings
 - `show_likes`, `show_views`, `show_reply_count`, etc. - Shared with carousel cards
@@ -113,6 +129,64 @@ The carousel reuses existing topic card components:
 - `thumbnail_placeholder_icon` - Shared with carousel cards
 
 **Result:** ✅ Compatible - carousel respects shared settings
+
+---
+
+## Embla Configuration Mapping
+
+The carousel settings map to Embla Carousel options as follows:
+
+### User-Configurable (via settings.yml)
+
+| Setting | Embla Option | Values | Default | Description |
+|---------|--------------|--------|---------|-------------|
+| `carousel_loop` | `loop` | true/false | true | Infinite looping |
+| `carousel_align` | `align` | start/center | start | Slide alignment |
+| `carousel_drag_free` | `dragFree` | true/false | false | Free-scroll dragging |
+| `carousel_speed` | `duration` | slow(35)/normal(25)/fast(15) | normal | Animation speed |
+
+### Hardcoded Defaults (sensible defaults)
+
+| Embla Option | Value | Rationale |
+|--------------|-------|-----------|
+| `containScroll` | "trimSnaps" | Best for grouped slides |
+| `skipSnaps` | false | Predictable snapping behavior |
+| `draggable` | true | Always allow dragging |
+| `axis` | "x" | Horizontal carousel |
+| `startIndex` | 0 | Start at first slide |
+
+### Layout-Specific (computed from settings)
+
+- `carousel_slides_per_view` - Controls chunking logic (cards per slide)
+- `carousel_min_card_width_px` - Used in responsive grid calculations
+
+**Note:** These are not direct Embla options but control how topics are chunked into slides and how the grid layout responds to viewport changes.
+
+---
+
+## Migration Guide
+
+### Upgrading from Previous Versions
+
+If you're upgrading from a version with the old carousel settings, here's what changed:
+
+**Renamed Settings:**
+- `carousel_max_cards_visible` → `carousel_slides_per_view`
+- `carousel_grid_min_card_width` → `carousel_min_card_width_px`
+
+**New Settings:**
+- `carousel_loop` - Controls infinite looping (default: true)
+- `carousel_align` - Controls slide alignment (default: start)
+- `carousel_drag_free` - Controls free-scroll dragging (default: false)
+- `carousel_speed` - Controls animation speed (default: normal)
+
+**Changed Defaults:**
+- `carousel_desktop_layout` - Changed from "list" to "grid" for better showcase
+
+**No Action Required:**
+- The component will use sensible defaults if settings are not configured
+- Existing settings will continue to work
+- New settings provide additional control over carousel behavior
 
 ---
 
@@ -214,10 +288,16 @@ The carousel reuses existing topic card components:
 
 ### Settings
 - [ ] Carousel respects display location setting
-- [ ] Layout settings work correctly
+- [ ] Layout settings work correctly (list/grid)
 - [ ] Tag filtering works
 - [ ] Max items setting is respected
 - [ ] Order setting works (latest/random/popular)
+- [ ] Slides per view setting controls grid columns
+- [ ] Min card width setting affects responsive layout
+- [ ] Loop setting enables/disables infinite looping
+- [ ] Align setting changes slide alignment
+- [ ] Drag free setting affects dragging behavior
+- [ ] Speed setting changes animation speed
 
 ---
 

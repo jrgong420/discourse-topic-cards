@@ -98,6 +98,7 @@ topic_title_font_size:
 # The carousel displays topic cards in a sliding interface with navigation
 # controls and supports both list and grid layouts.
 
+# Display & Layout
 carousel_display_location:
   type: enum
   default: "home"
@@ -108,11 +109,11 @@ carousel_display_location:
 
 carousel_desktop_layout:
   type: enum
-  default: "list"
+  default: "grid"
   choices:
     - list
     - grid
-  description: "Desktop layout mode. 'list' shows one card per slide (recommended for detailed view); 'grid' shows 3 cards per slide in a grid layout."
+  description: "Desktop layout mode. 'list' shows one card per slide (recommended for detailed view); 'grid' shows multiple cards per slide in a responsive grid layout."
 
 carousel_mobile_layout:
   type: enum
@@ -120,8 +121,14 @@ carousel_mobile_layout:
   choices:
     - list
     - grid
-  description: "Mobile layout mode. 'list' shows one card per slide; 'grid' shows 2 cards per slide. List mode is recommended for better mobile readability."
+  description: "Mobile layout mode. 'list' shows one card per slide; 'grid' shows multiple cards per slide. List mode is recommended for better mobile readability."
 
+carousel_plugin_outlet:
+  type: string
+  default: "above-main-container"
+  description: "Advanced: Plugin outlet location. Default 'above-main-container' places carousel at the top of the page. Change only if you understand Discourse plugin outlets."
+
+# Topic Source & Filtering
 carousel_filter_tags:
   type: list
   list_type: tag
@@ -144,21 +151,60 @@ carousel_order:
     - popular
   description: "Topic ordering. 'latest' shows newest topics first; 'random' shuffles topics on each page load (good for variety); 'popular' shows top topics from the past week."
 
-carousel_plugin_outlet:
-  type: string
-  default: "above-main-container"
-  description: "Advanced: Plugin outlet location. Default 'above-main-container' places carousel at the top of the page. Change only if you understand Discourse plugin outlets."
-
-carousel_max_cards_visible:
+# Grid Layout & Sizing
+carousel_slides_per_view:
   type: integer
   default: 3
   min: 1
   max: 6
-  description: "Maximum number of cards visible per slide in grid mode. The actual number may be less based on viewport width and minimum card width. Valid range: 1-6. Recommended: 3 for desktop, automatically adjusts for mobile."
+  description: "Maximum number of slides visible at once (cap). Actual count adapts to viewport width and minimum slide width. Valid range: 1-6. Recommended: 3 for desktop."
 
-carousel_grid_min_card_width:
+carousel_min_slide_width_px:
   type: integer
   default: 320
   min: 240
   max: 480
-  description: "Minimum width (in pixels) for each card in grid mode. The carousel will automatically calculate how many cards fit based on viewport width. Valid range: 240-480px. Recommended: 320px for balanced layout."
+  description: "Minimum width (in pixels) per slide. Used to calculate how many slides fit in the viewport. Valid range: 240-480px. Recommended: 320px for balanced layout."
+
+carousel_slide_gap_px:
+  type: integer
+  default: 16
+  min: 0
+  max: 64
+  description: "Gap between slides in pixels. Valid range: 0-64px. Default: 16px (matches Discourse spacing)."
+
+carousel_scroll_by:
+  type: enum
+  default: "slides_per_view"
+  choices:
+    - "1"
+    - slides_per_view
+  description: "Number of slides to scroll per navigation step. '1' scrolls one slide at a time; 'slides_per_view' scrolls by the number of visible slides (page-by-page). Maps to Embla's slidesToScroll option."
+
+# Embla Carousel Behavior
+carousel_loop:
+  type: bool
+  default: true
+  description: "Enable infinite looping. When enabled, the carousel wraps around from the last slide to the first (and vice versa). When disabled, navigation stops at the first and last slides."
+
+carousel_align:
+  type: enum
+  default: "start"
+  choices:
+    - start
+    - center
+  description: "Slide alignment within the viewport. 'start' aligns slides to the left edge; 'center' centers the active slide. Start alignment is recommended for grid layouts."
+
+carousel_drag_free:
+  type: bool
+  default: false
+  description: "Enable free-scroll dragging. When enabled, slides can be dragged freely without snapping. When disabled (recommended), slides snap to positions for predictable navigation."
+
+carousel_speed:
+  type: enum
+  default: "normal"
+  choices:
+    - slow
+    - normal
+    - fast
+  description: "Animation speed for slide transitions. 'slow' provides smooth, leisurely transitions; 'normal' is balanced; 'fast' provides snappy, quick transitions."

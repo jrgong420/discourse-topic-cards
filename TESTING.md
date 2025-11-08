@@ -1,35 +1,331 @@
-# Testing Guide - Topic Cards Refactor
+# Testing Guide
 
-## Automated Tests
+This theme component includes two types of automated tests:
 
-### Running Tests
+1. **QUnit Tests** (JavaScript/client-side) - Fast feedback for component logic
+2. **Rails System Tests** (RSpec/Capybara) - End-to-end testing with full Discourse environment
 
-```bash
-# Run all tests
-pnpm test
+---
 
-# Run specific test file
-pnpm test test/javascripts/topic-cards-test.gjs
+## QUnit Tests (Client-Side)
+
+### Location
+- `test/javascripts/carousel-test.gjs`
+- `test/javascripts/topic-cards-test.gjs`
+
+### What They Test
+- Component rendering states (loading, error, empty, success)
+- ARIA attributes and accessibility
+- Keyboard navigation
+- Navigation controls (arrows, dots)
+- Settings-driven behavior
+- Featured link behavior
+- BEM class structure
+
+### How to Run
+
+#### Option 1: Local Discourse Development Instance
+
+1. Install the theme in your local Discourse instance:
+   ```bash
+   discourse_theme watch .
+   ```
+
+2. Navigate to the theme QUnit test route:
+   ```
+   http://localhost:3000/theme-qunit
+   ```
+
+3. The test runner will execute all theme tests and display results.
+
+#### Option 2: Production/Staging Instance
+
+1. Install the theme on your Discourse instance (Admin → Customize → Themes)
+
+2. Navigate to:
+   ```
+   https://your-discourse-site.com/theme-qunit
+   ```
+
+### Test Structure
+
+Tests use:
+- **QUnit** - Test framework
+- **@ember/test-helpers** - Rendering and DOM utilities
+- **Pretender** - API mocking
+- **data-test attributes** - Stable selectors (e.g., `[data-test-prev]`, `[data-test-next]`)
+
+Example:
+```javascript
+test("displays navigation arrows", async function (assert) {
+  await render(hbs`<TopicCardsCarousel />`);
+  await waitFor("[data-test-prev]", { timeout: 2000 });
+
+  assert.dom("[data-test-prev]").exists();
+  assert.dom("[data-test-next]").exists();
+});
 ```
 
-### Test Coverage
+---
 
-The automated test suite covers:
+## Rails System Tests (End-to-End)
 
-1. **Component Rendering**
-   - ✅ TopicExcerpt renders with BEM classes
-   - ✅ TopicTagsInline renders category and tags
-   - ✅ TopicByline renders author with BEM classes
-   - ✅ TopicMetadata uses BEM-compliant classes (not `right-aligned`)
+### Location
+- `spec/system/carousel_spec.rb`
 
-2. **Featured Link Behavior**
-   - ✅ TopicActionButtons renders when featured link exists
-   - ✅ TopicActionButtons does not render when no featured link
-   - ✅ Featured link button has correct href, target, and rel attributes
+### What They Test
+- Full page rendering with theme installed
+- Route gating (home, latest, top, categories)
+- Theme settings integration
+- User interactions (clicks, keyboard navigation)
+- Accessibility in real browser environment
 
-3. **Accessibility**
-   - ✅ TopicActionButtons has proper ARIA labels
-   - ✅ Featured link button opens in new tab with security attributes
+### Prerequisites
+
+1. **Install Discourse Theme CLI**:
+   ```bash
+   gem install discourse_theme
+   ```
+
+2. **Ensure Ruby ≥ 2.7** (recommended: 3.3.9):
+   ```bash
+   ruby --version
+   ```
+
+### How to Run
+
+#### Run All System Tests
+
+```bash
+discourse_theme rspec .
+```
+
+On first run, you'll be prompted:
+```
+Do you have a local Discourse development environment? (Y/n)
+```
+
+- **Recommended for most users**: Press `n` to use Docker
+  - Automatically sets up a Discourse environment
+  - No manual configuration needed
+  - Slower initial setup, but reliable
+
+- **For experienced developers**: Press `Y` if you have a local Discourse dev setup
+  - Faster test runs
+  - Requires existing Discourse development environment
+
+#### Run Specific Test File
+
+```bash
+discourse_theme rspec spec/system/carousel_spec.rb
+```
+
+#### Run Specific Test (by line number)
+
+```bash
+discourse_theme rspec spec/system/carousel_spec.rb:18
+```
+
+#### Headful Mode (Visual Debugging)
+
+Watch tests run in a real browser:
+
+```bash
+discourse_theme rspec . --headful
+```
+
+Useful for:
+- Debugging test failures
+- Seeing actual UI behavior
+- Inspecting element states
+
+#### Pause Test Execution
+
+Add `pause_test` in your test to inspect the page:
+
+```ruby
+it "displays the carousel" do
+  visit "/"
+  pause_test  # Browser will pause here
+  expect(page).to have_css(".topic-cards-carousel")
+end
+```
+
+### Test Structure
+
+Tests use:
+- **RSpec** - Test framework
+- **Capybara** - Browser automation
+- **Fabrication** - Test data creation
+- **upload_theme_component** - Theme installation helper
+
+Example:
+```ruby
+RSpec.describe "Carousel", system: true do
+  let!(:theme) { upload_theme_component }
+
+  before do
+    theme.update_setting(:carousel_display_location, "home")
+    theme.save!
+  end
+
+  it "renders on home page" do
+    visit "/"
+    expect(page).to have_css(".topic-cards-carousel", wait: 5)
+  end
+end
+```
+
+### Available Helpers
+
+- `upload_theme_component` - Install theme component
+- `Fabricate(:topic)` - Create test topics
+- `Fabricate(:user)` - Create test users
+- `sign_in(user)` - Authenticate as user
+- `theme.update_setting(:key, value)` - Change theme settings
+- `visit("/path")` - Navigate to page
+- `expect(page).to have_css(selector)` - Assert element exists
+
+---
+
+## Continuous Integration (CI)
+
+### GitHub Actions Example
+
+Create `.github/workflows/tests.yml`:
+
+```yaml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  system-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.9
+          bundler-cache: true
+
+      - name: Install Discourse Theme CLI
+        run: gem install discourse_theme
+
+      - name: Run System Tests
+        run: discourse_theme rspec .
+```
+
+**Note**: System tests require a Discourse instance, so CI runs use Docker (slower but reliable).
+
+---
+
+## Writing New Tests
+
+### QUnit Test Template
+
+```javascript
+import { module, test } from "qunit";
+import { render, waitFor } from "@ember/test-helpers";
+import { hbs } from "ember-cli-htmlbars";
+import { setupRenderingTest } from "discourse/tests/helpers/component-test";
+
+module("Component | topic-cards-carousel", function (hooks) {
+  setupRenderingTest(hooks);
+
+  test("your test name", async function (assert) {
+    await render(hbs`<TopicCardsCarousel />`);
+    await waitFor("[data-test-prev]", { timeout: 2000 });
+
+    assert.dom(".topic-cards-carousel").exists();
+  });
+});
+```
+
+### System Test Template
+
+```ruby
+RSpec.describe "Feature Name", system: true do
+  let!(:theme) { upload_theme_component }
+
+  before do
+    theme.update_setting(:some_setting, "value")
+    theme.save!
+  end
+
+  it "does something" do
+    visit "/"
+    expect(page).to have_css(".some-element", wait: 5)
+  end
+end
+```
+
+---
+
+## Troubleshooting
+
+### QUnit Tests
+
+**Tests not appearing**:
+- Ensure theme is installed and active
+- Check browser console for errors
+- Verify test file is in `test/javascripts/`
+
+**Tests failing**:
+- Check data-test attributes match component markup
+- Verify API mocks return expected data
+- Use browser DevTools to inspect DOM
+
+### System Tests
+
+**Docker setup fails**:
+- Ensure Docker is installed and running
+- Check disk space (Docker images are large)
+- Try `docker system prune` to free space
+
+**Tests timeout**:
+- Increase wait time: `expect(page).to have_css(".selector", wait: 10)`
+- Use `pause_test` to inspect state
+- Run with `--headful` to see what's happening
+
+**Theme not loading**:
+- Verify `upload_theme_component` is called
+- Check theme settings are saved: `theme.save!`
+- Ensure Discourse version compatibility
+
+---
+
+## Best Practices
+
+### QUnit
+- Use `data-test` attributes for stable selectors
+- Mock external dependencies (API calls, libraries)
+- Test one behavior per test
+- Use descriptive test names
+
+### System Tests
+- Use `wait: 5` for dynamic content
+- Fabricate minimal test data
+- Clean up state between tests
+- Test user-facing behavior, not implementation
+
+### Both
+- Keep tests fast and focused
+- Test edge cases (empty states, errors)
+- Maintain accessibility tests
+- Update tests when markup changes
+
+---
+
+## Resources
+
+- [Discourse Theme Testing Guide](https://meta.discourse.org/t/end-to-end-system-testing-for-themes-and-theme-components/281579)
+- [QUnit Documentation](https://qunitjs.com/)
+- [RSpec Documentation](https://rspec.info/)
+- [Capybara Documentation](https://github.com/teamcapybara/capybara)
+- [Discourse Theme CLI](https://github.com/discourse/discourse_theme)
 
 ---
 
@@ -44,15 +340,62 @@ The automated test suite covers:
 
 2. Ensure theme is active in Admin → Customize → Themes
 
-3. Configure at least one category to use cards:
-   - Admin → Settings → Theme Settings
-   - Set `list_view_categories` or `grid_view_categories`
+3. Configure carousel and card settings in theme settings
 
 ---
 
-### Test Scenarios
+### Carousel Testing
 
-#### 1. Card Layouts - List Style
+#### Display & Route Gating
+
+**Setup:**
+- Set `carousel_display_location` to "home"
+- Configure `carousel_max_items` to 5
+
+**Verify:**
+- [ ] Carousel appears on `/latest`
+- [ ] Carousel appears on `/top`
+- [ ] Carousel appears on `/categories`
+- [ ] Carousel does not appear when `carousel_display_location` is "disabled"
+- [ ] Carousel respects `carousel_plugin_outlet` setting
+
+#### Navigation Controls
+
+**Verify:**
+- [ ] Previous/Next arrows appear
+- [ ] Arrows have proper ARIA labels
+- [ ] Arrows are keyboard accessible (Tab, Enter, Space)
+- [ ] Pagination dots appear when enabled
+- [ ] Clicking dots navigates to correct slide
+- [ ] Arrow buttons disable/enable based on `carousel_loop` setting
+
+#### Embla Options
+
+**Test each setting:**
+- [ ] `carousel_loop`: true enables infinite looping
+- [ ] `carousel_loop`: false stops at first/last slide
+- [ ] `carousel_align`: "start" aligns slides to left
+- [ ] `carousel_align`: "center" centers active slide
+- [ ] `carousel_drag_free`: true enables free-scroll dragging
+- [ ] `carousel_drag_free`: false snaps slides to positions
+- [ ] `carousel_speed`: "slow" has leisurely transitions
+- [ ] `carousel_speed`: "normal" has balanced transitions
+- [ ] `carousel_speed`: "fast" has snappy transitions
+- [ ] `carousel_scroll_by`: "1" scrolls one slide at a time
+- [ ] `carousel_scroll_by`: "page" scrolls full viewport
+
+#### Responsive Behavior
+
+**Verify:**
+- [ ] Desktop: Grid layout with multiple slides per view
+- [ ] Tablet: Fewer slides per view
+- [ ] Mobile: List layout (one slide per view)
+- [ ] Peek gradients appear when slides overflow
+- [ ] Slides resize smoothly on viewport change
+
+---
+
+### Card Layouts - List Style
 
 **Setup:**
 - Navigate to a category configured for list-style cards
@@ -71,15 +414,11 @@ The automated test suite covers:
 - [ ] Metadata items (views, likes, replies) display correctly
 - [ ] Featured link CTA button appears for topics with featured links
 - [ ] Details button appears for topics with featured links
-- [ ] No visible `&nbsp;` or extra spacing in title area
 - [ ] Hover states work (card border, title underline)
-
-**Known Issue:**
-- `&nbsp;` text node may exist in DOM but should not be visible
 
 ---
 
-#### 2. Card Layouts - Grid Style
+### Card Layouts - Grid Style
 
 **Setup:**
 - Navigate to a category configured for grid-style cards

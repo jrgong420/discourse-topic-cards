@@ -21,14 +21,17 @@ import { apiInitializer } from "discourse/lib/api";
 import TopicCardsCarousel from "../components/topic-cards-carousel";
 
 export default apiInitializer((api) => {
+  // Use configured outlet with safe fallback
+  const outletName = settings.carousel_plugin_outlet || "above-main-container";
+
   api.renderInOutlet(
-    "above-main-container",
+    outletName,
     class extends Component {
       @service router;
 
       /**
        * Determines if carousel should be displayed.
-       * Only shows on home page (discovery.latest route) when enabled.
+       * Shows on home routes (discovery.latest, discovery.top, discovery.categories) when enabled.
        * @returns {boolean}
        */
       get shouldShow() {
@@ -37,9 +40,13 @@ export default apiInitializer((api) => {
           return false;
         }
 
-        // Check route - only show on home page
+        // Check route - show on common home routes
         const name = this.router?.currentRouteName;
-        return name === "discovery.latest";
+        return (
+          name === "discovery.latest" ||
+          name === "discovery.top" ||
+          name === "discovery.categories"
+        );
       }
 
       <template>

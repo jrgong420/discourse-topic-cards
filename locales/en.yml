@@ -37,6 +37,23 @@ en:
       card_border_radius: "Choose border radius size for topic cards. Maps to Discourse core design tokens for consistency with your theme."
       hide_topic_author_tc_column: "Hide the custom author column in topic cards for compatibility with the Topic Author theme component."
       topic_title_font_size: "Topic title font size"
+
+      # Carousel Settings
+      carousel_display_location: "Where to display the featured topics carousel. Choose 'home' to show on the home page, or 'disabled' to hide it completely."
+      carousel_desktop_layout: "Desktop carousel layout mode. 'list' shows one card per slide for detailed viewing; 'grid' shows multiple cards per slide in a responsive grid."
+      carousel_mobile_layout: "Mobile carousel layout mode. 'list' shows one card per slide; 'grid' shows multiple cards per slide. List mode is recommended for better mobile readability."
+      carousel_plugin_outlet: "Advanced: Plugin outlet location for the carousel. Default 'above-main-container' places it at the top of the page. Only change if you understand Discourse plugin outlets."
+      carousel_filter_tags: "Filter carousel topics by tags. Enter tag names separated by pipes (|). Example: 'featured|announcement'. Leave empty to show all topics. Topics matching ANY tag will be included."
+      carousel_max_items: "Maximum number of topics to display in the carousel. Valid range: 1-20. Recommended: 5-10 for optimal performance. Higher values may increase load time."
+      carousel_order: "Topic ordering for the carousel. 'latest' shows newest topics first; 'random' shuffles topics on each page load; 'popular' shows top topics from the past week."
+      carousel_slides_per_view: "Maximum number of slides visible at once (cap). Actual count adapts to viewport width and minimum slide width. Valid range: 1-6. Recommended: 3 for desktop."
+      carousel_min_slide_width_px: "Minimum width (in pixels) per slide. Used to calculate how many slides fit in the viewport. Valid range: 240-480px. Recommended: 320px."
+      carousel_slide_gap_px: "Gap between slides in pixels. Valid range: 0-64px. Default: 16px (matches Discourse spacing)."
+      carousel_scroll_by: "Number of slides to scroll per navigation step. '1' scrolls one slide at a time; 'slides_per_view' scrolls by the number of visible slides (page-by-page)."
+      carousel_loop: "Enable infinite looping. When enabled, the carousel wraps around from the last slide to the first (and vice versa). When disabled, navigation stops at the first and last slides."
+      carousel_align: "Slide alignment within the viewport. 'start' aligns slides to the left edge; 'center' centers the active slide. Start alignment is recommended for grid layouts."
+      carousel_drag_free: "Enable free-scroll dragging. When enabled, slides can be dragged freely without snapping. When disabled (recommended), slides snap to positions for predictable navigation."
+      carousel_speed: "Animation speed for slide transitions. 'slow' provides smooth, leisurely transitions; 'normal' is balanced; 'fast' provides snappy, quick transitions."
   published: "Published"
   like_toggle:
     like: "Like"
