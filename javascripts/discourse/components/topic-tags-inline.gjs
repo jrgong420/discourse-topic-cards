@@ -1,6 +1,8 @@
 import PluginOutlet from "discourse/components/plugin-outlet";
 import categoryLink from "discourse/helpers/category-link";
 import discourseTags from "discourse/helpers/discourse-tags";
+import { hash } from "@ember/helper";
+
 
 /**
  * TopicTagsInline Component
