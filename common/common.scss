@@ -647,7 +647,7 @@
   --carousel-card-border-hover: 1px solid var(--primary-low);
   --carousel-card-shadow: var(--shadow-card);
   --carousel-card-bg: var(--secondary);
-  --carousel-title-size: var(--d-topic-list-title-font-size);
+  --carousel-title-size: var(--font-up-2);
   --carousel-title-color: var(--title-color);
   --carousel-title-color-visited: var(--title-color--read);
   --carousel-title-color-hover: var(--tertiary);
@@ -1076,10 +1076,10 @@
 
   &__title {
     font-size: var(--carousel-title-size);
-    font-weight: var(--carousel-title-weight);
+    font-weight: 700;
     color: var(--carousel-title-color);
     margin: 0 0 var(--space-2) 0; // Add bottom margin for spacing before category
-    line-height: var(--line-height-large);
+    line-height: var(--line-height-medium);
     display: -webkit-box;
     -webkit-line-clamp: var(--carousel-title-lines);
     line-clamp: var(--carousel-title-lines);
@@ -1089,8 +1089,8 @@
     transition: color 0.2s ease;
 
     @media (width <= 767px) {
-      font-size: var(--font-0);
-      line-height: 1.5;
+      font-size: var(--font-up-1);
+      line-height: var(--line-height-medium);
       margin-bottom: var(--space-1); // Tighter spacing on mobile
     }
   }
@@ -1100,7 +1100,7 @@
     align-items: center;
     gap: var(--space-2);
     flex-wrap: wrap;
-    font-size: var(--font-down-1);
+    font-size: var(--font-0);
     margin-top: var(--space-1);
 
     .badge-category__wrapper {
@@ -1108,7 +1108,7 @@
     }
 
     @media (width <= 767px) {
-      font-size: var(--font-down-2);
+      font-size: var(--font-0);
       gap: var(--space-1);
     }
   }
