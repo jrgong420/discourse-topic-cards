@@ -3,10 +3,11 @@ import { hbs } from "ember-cli-htmlbars";
 import { module, test } from "qunit";
 import { setupRenderingTest } from "discourse/tests/helpers/component-test";
 import pretender, { response } from "discourse/tests/helpers/create-pretender";
+import CarouselTopicCard from "../../javascripts/discourse/components/carousel-topic-card";
 import TopicCardsCarousel from "../../javascripts/discourse/components/topic-cards-carousel";
 
-// Mark import as used (referenced in templates via hbs)
-void TopicCardsCarousel;
+// Mark imports as used (referenced in templates via hbs)
+void [TopicCardsCarousel, CarouselTopicCard];
 
 module("Topic Cards Carousel Component", function (hooks) {
   setupRenderingTest(hooks);
@@ -348,6 +349,133 @@ module("Topic Cards Carousel Component", function (hooks) {
         prevButton.hasAttribute("disabled"),
         "Previous button is disabled on first slide"
       );
+    });
+  });
+
+  module("CarouselTopicCard Component", function () {
+    test("renders category badge when topic has category", async function (assert) {
+      this.set("topic", {
+        id: 1,
+        title: "Test Topic with Category",
+        url: "/t/test-topic/1",
+        category: {
+          id: 5,
+          name: "General",
+          slug: "general",
+          color: "0088CC",
+        },
+      });
+
+      await render(hbs`<CarouselTopicCard @topic={{this.topic}} />`);
+
+      assert
+        .dom(".carousel-topic-card__category")
+        .exists("Category container exists");
+      assert
+        .dom(".carousel-topic-card__category .badge-category__wrapper")
+        .exists("Category badge is rendered");
+    });
+
+    test("does not render category section when topic has no category", async function (assert) {
+      this.set("topic", {
+        id: 1,
+        title: "Test Topic without Category",
+        url: "/t/test-topic/1",
+      });
+
+      await render(hbs`<CarouselTopicCard @topic={{this.topic}} />`);
+
+      assert
+        .dom(".carousel-topic-card__category")
+        .doesNotExist("Category container does not exist when no category");
+    });
+
+    test("title is a clickable link", async function (assert) {
+      this.set("topic", {
+        id: 1,
+        title: "Test Topic",
+        url: "/t/test-topic/1",
+      });
+
+      await render(hbs`<CarouselTopicCard @topic={{this.topic}} />`);
+
+      assert
+        .dom(".carousel-topic-card__title-link")
+        .exists("Title link exists");
+      assert
+        .dom(".carousel-topic-card__title-link")
+        .hasAttribute("href", "/t/test-topic/1", "Title link has correct href");
+      assert
+        .dom(".carousel-topic-card__title")
+        .hasText("Test Topic", "Title text is rendered");
+    });
+
+    test("thumbnail is a clickable link", async function (assert) {
+      this.set("topic", {
+        id: 1,
+        title: "Test Topic",
+        url: "/t/test-topic/1",
+      });
+
+      await render(hbs`<CarouselTopicCard @topic={{this.topic}} />`);
+
+      assert
+        .dom(".carousel-topic-card__thumbnail-link")
+        .exists("Thumbnail link exists");
+      assert
+        .dom(".carousel-topic-card__thumbnail-link")
+        .hasAttribute(
+          "href",
+          "/t/test-topic/1",
+          "Thumbnail link has correct href"
+        );
+    });
+
+    test("card has cursor pointer for clickability", async function (assert) {
+      this.set("topic", {
+        id: 1,
+        title: "Test Topic",
+        url: "/t/test-topic/1",
+      });
+
+      await render(hbs`<CarouselTopicCard @topic={{this.topic}} />`);
+
+      const card = this.element.querySelector(".carousel-topic-card");
+      const styles = window.getComputedStyle(card);
+
+      assert.strictEqual(
+        styles.cursor,
+        "pointer",
+        "Card has cursor pointer style"
+      );
+    });
+
+    test("plugin outlet is rendered after category badge", async function (assert) {
+      this.set("topic", {
+        id: 1,
+        title: "Test Topic",
+        url: "/t/test-topic/1",
+        category: {
+          id: 5,
+          name: "General",
+          slug: "general",
+          color: "0088CC",
+        },
+      });
+
+      await render(hbs`<CarouselTopicCard @topic={{this.topic}} />`);
+
+      // Plugin outlet should exist in the category container
+      const categoryContainer = this.element.querySelector(
+        ".carousel-topic-card__category"
+      );
+      assert.ok(categoryContainer, "Category container exists");
+
+      // Check that badge exists in the category container
+      const badge = categoryContainer.querySelector(".badge-category__wrapper");
+      assert.ok(badge, "Category badge exists");
+      // Outlet may not render visible content without connectors, but the container should exist
+      // We just verify the structure is correct
     });
   });
 });

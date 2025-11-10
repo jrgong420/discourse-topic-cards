@@ -4,18 +4,30 @@
  * Renders a single topic card for the carousel using the existing
  * topic card components (thumbnail, excerpt, byline, metadata, tags).
  *
- * Phase 4: Integrate existing card rendering (no slider yet)
+ * Features:
+ * - Entire card is clickable (navigates to topic)
+ * - Category badge with independent link to category page
+ * - Plugin outlet support (topic-list-after-category)
+ * - Keyboard accessible with proper focus states
  *
  * BEM Structure:
  * - .carousel-topic-card (wrapper)
- *   - .carousel-topic-card__thumbnail
+ *   - .carousel-topic-card__thumbnail-link
+ *     - .carousel-topic-card__thumbnail
  *   - .carousel-topic-card__content
- *     - .carousel-topic-card__title
- *     - (existing topic card components)
+ *     - .carousel-topic-card__title-link
+ *       - .carousel-topic-card__title
+ *     - .carousel-topic-card__category (category badge + outlet)
  */
 import Component from "@glimmer/component";
+import { on } from "@ember/modifier";
+import { action } from "@ember/object";
 import { service } from "@ember/service";
+import PluginOutlet from "discourse/components/plugin-outlet";
+import categoryLink from "discourse/helpers/category-link";
 import dIcon from "discourse/helpers/d-icon";
+import lazyHash from "discourse/helpers/lazy-hash";
+import { wantsNewWindow } from "discourse/lib/intercept-click";
 
 export default class CarouselTopicCard extends Component {
   @service site;
@@ -98,9 +110,33 @@ export default class CarouselTopicCard extends Component {
     return raw.replace?.(/^fa-/, "") || "image";
   }
 
+  /**
+   * Handles clicks on the card container.
+   * Navigates to topic URL unless the click was on an anchor or inside one.
+   * Respects Cmd/Ctrl+click for opening in new tab.
+   * @param {MouseEvent} event - Click event
+   */
+  @action
+  handleCardClick(event) {
+    // Check if click target is an anchor or inside an anchor
+    const target = event.target.closest("a");
+    if (target) {
+      // Let the anchor handle the click
+      return;
+    }
+
+    // Handle card-level navigation
+    if (wantsNewWindow(event)) {
+      window.open(this.topicUrl, "_blank");
+    } else {
+      window.location.href = this.topicUrl;
+    }
+  }
+
   <template>
-    <div class="carousel-topic-card">
-      <a href={{this.topicUrl}} class="carousel-topic-card__link">
+    {{! template-lint-disable no-invalid-interactive }}
+    <div class="carousel-topic-card" {{on "click" this.handleCardClick}}>
+      <a href={{this.topicUrl}} class="carousel-topic-card__thumbnail-link">
         <div class="carousel-topic-card__thumbnail">
           {{#if this.hasThumbnail}}
             <img
@@ -118,11 +154,26 @@ export default class CarouselTopicCard extends Component {
             </div>
           {{/if}}
         </div>
-
-        <div class="carousel-topic-card__content">
-          <h3 class="carousel-topic-card__title">{{this.topic.title}}</h3>
-        </div>
       </a>
+
+      <div class="carousel-topic-card__content">
+        <a href={{this.topicUrl}} class="carousel-topic-card__title-link">
+          <h3 class="carousel-topic-card__title">{{this.topic.title}}</h3>
+        </a>
+
+        {{#if this.topic.category}}
+          <div class="carousel-topic-card__category">
+            {{categoryLink this.topic.category}}
+            <PluginOutlet
+              @name="topic-list-after-category"
+              @outletArgs={{lazyHash
+                topic=this.topic
+                category=this.topic.category
+              }}
+            />
+          </div>
+        {{/if}}
+      </div>
     </div>
   </template>
 }

@@ -385,7 +385,7 @@
   &__thumbnail {
     .main-thumbnail {
       width: 100%;
-      object-fit: cover;
+      object-fit: #{$thumbnail_object_fit};
       background: var(--primary-low); // Placeholder while loading
     }
 
@@ -625,10 +625,15 @@
 
 .topic-cards-carousel {
   margin: var(--space-6) 0;
-  padding: var(--space-5);
+  padding: var(--space-4); // Reduced from var(--space-5) to maximize card space
   background: var(--secondary);
-  border: 1px solid var(--primary-low);
+  border: none; // Removed border for cleaner look
   border-radius: var(--d-border-radius);
+
+  // Peek shows a full gap + a sliver of the next slide
+  // edge = portion of next slide to reveal; peek-right = gap + edge
+  --carousel-peek-edge: 8px;
+  --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
 
   &__header {
     margin-bottom: var(--space-5);
@@ -650,16 +655,12 @@
   }
 
   &__container {
-    position: relative; // For absolute positioning of arrows and gradients
     min-height: 200px;
     display: flex;
-    align-items: center;
+    flex-direction: column; // Stack viewport and controls vertically
+    align-items: stretch;
     justify-content: center;
-    padding: 0 calc(var(--space-5) + 24px); // Reserve space for arrows on sides
-
-    @media (width >= 768px) {
-      padding: 0 calc(var(--space-6) + 32px); // More space on desktop
-    }
+    padding: 0; // No side padding - arrows moved to bottom control bar
 
     // Keyboard focus outline for carousel region
     &:focus-visible {
@@ -668,64 +669,6 @@
       border-radius: var(--d-border-radius);
     }
 
-    // Gradient fade overlays for peek effect
-    &::before,
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 80px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      z-index: 5;
-
-      @media (width >= 768px) {
-        width: 120px;
-      }
-    }
-
-    // Left gradient fade
-    &::before {
-      left: 0;
-      background: linear-gradient(
-        to right,
-        var(--secondary) 0%,
-        rgb(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
-        transparent 100%
-      );
-    }
-
-    // Right gradient fade
-    &::after {
-      right: 0;
-      background: linear-gradient(
-        to left,
-        var(--secondary) 0%,
-        rgb(var(--secondary-rgb, 255, 255, 255), 0.85) 30%,
-        transparent 100%
-      );
-    }
-
-    // Show left gradient when there's a previous slide
-    &.has-prev::before {
-      opacity: 1;
-    }
-
-    // Show right gradient when there's a next slide
-    &.has-next::after {
-      opacity: 1;
-    }
-
-    // Phase 5: Layout-specific container styles
-    &--list {
-      // List mode: single card per slide
-    }
-
-    &--grid {
-      // Grid mode: multiple cards per slide
-    }
   }
 
   &__placeholder {
@@ -756,43 +699,76 @@
   }
 
   &__viewport {
+    position: relative; // For gradient overlays
     overflow: hidden;
     width: 100%;
-    margin: 0 -20px; // Negative margin to show peek
+    margin: 0;
 
-    @media (width >= 768px) {
-      margin: 0 -40px; // More peek on desktop
+
+    // Gradient fade overlays (desktop default: no width, only mobile shows a thin hint)
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 0px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 5;
     }
 
-    // Enable smooth scrolling for better UX
-    scroll-behavior: smooth;
+    // Left gradient fade
+    &::before {
+      left: 0;
+      background: linear-gradient(
+        to right,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.10) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.18) 40%,
+        transparent 100%
+      );
+    }
+
+    // Right gradient fade
+    &::after {
+      right: 0;
+      background: linear-gradient(
+        to left,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.10) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.18) 40%,
+        transparent 100%
+      );
+    }
+
+    // Show left gradient when there's a previous slide
+    &.has-prev::before {
+      opacity: 1;
+    }
+
+    // Show right gradient when there's a next slide
+    &.has-next::after {
+      opacity: 1;
+    }
   }
 
   &__slides {
     display: flex;
-    padding: 0 20px var(--space-2); // Compensate for negative margin
+    gap: var(--carousel-slide-gap); // Use flex gap for consistent spacing, including clones
+    padding: var(--space-2);
 
-    @media (width >= 768px) {
-      padding: 0 40px var(--space-2);
-    }
-
-    // Smooth transitions for slide changes
-    transition: transform 0.3s ease-out;
   }
 
   &__slide {
     flex: 0 0 auto;
 
     // Width is computed dynamically via CSS variable --spv (slides per view)
-    // Formula: (100% - (gap * (spv - 1))) / spv
-    // This ensures slides fit exactly with gaps between them
-    width: calc((100% - (var(--carousel-slide-gap) * (var(--spv, var(--carousel-spv-cap)) - 1))) / var(--spv, var(--carousel-spv-cap)));
-    margin-inline-end: var(--carousel-slide-gap);
-
-    // Remove margin from last slide to prevent extra space
-    &:last-child {
-      margin-inline-end: 0;
-    }
+    // Leave a small spare width (peek) so the next view's first slide is visible
+    // Formula: (100% - (gap * (spv - 1)) - peek) / spv
+    width: calc(
+      (100% - (var(--carousel-slide-gap) * (var(--spv, var(--carousel-spv-cap)) - 1)) - var(--carousel-peek-right, 24px)) /
+      var(--spv, var(--carousel-spv-cap))
+    );
 
     // Fade in animation for slides
     animation: fadeIn 0.3s ease-in;
@@ -810,44 +786,64 @@
     }
   }
 
-  // Navigation arrows - positioned at viewport sides
+  // Bottom control bar: navigation arrows (left, stacked) + pagination dots (right)
+  &__controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding: 0 var(--space-2);
+
+    @media (width >= 768px) {
+      gap: var(--space-4);
+      padding: 0 var(--space-3);
+    }
+  }
+
+  // Navigation arrows container - horizontal layout on the left
+  &__nav {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-2);
+  }
+
+  // Navigation arrows - static positioning in bottom control bar
   &__arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
     background: rgb(var(--secondary-rgb, 255, 255, 255), 0.95);
     backdrop-filter: blur(8px);
     border: 2px solid var(--primary-medium);
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 300;
     line-height: 1;
     color: var(--primary);
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
+    padding: 0;
+    flex-shrink: 0;
 
     @media (width >= 768px) {
-      width: 48px;
-      height: 48px;
-      font-size: 28px;
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
     }
 
     &:hover:not(:disabled) {
       background: var(--tertiary-low);
       border-color: var(--tertiary);
-      transform: translateY(-50%) scale(1.1);
+      transform: scale(1.1);
       box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
     }
 
     &:active:not(:disabled) {
-      transform: translateY(-50%) scale(0.95);
+      transform: scale(0.95);
     }
 
     &:focus-visible {
@@ -860,31 +856,15 @@
       cursor: not-allowed;
       transition: opacity 0.2s ease;
     }
-
-    &--prev {
-      left: var(--space-2);
-
-      @media (width >= 768px) {
-        left: var(--space-3);
-      }
-    }
-
-    &--next {
-      right: var(--space-2);
-
-      @media (width >= 768px) {
-        right: var(--space-3);
-      }
-    }
   }
 
-  // Pagination dots - centered below carousel (outside container)
+  // Pagination dots - aligned to the right in control bar
   &__dots {
     display: flex;
     gap: var(--space-2);
     align-items: center;
-    justify-content: center;
-    margin-top: var(--space-4);
+    justify-content: flex-end;
+    flex-wrap: wrap;
     padding: 0;
   }
 
@@ -921,6 +901,49 @@
       transform: scale(1.2);
     }
   }
+  // Mobile edge-peek layout (Embla pattern): show next slide's left edge
+  @media (width <= 767px) {
+    // Mobile: smaller edge reveal, peek = gap + edge
+    --carousel-peek-edge: 6px;
+    --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
+
+    &__slides {
+      margin-left: calc(var(--carousel-slide-gap) * -1);
+      gap: 0; // use slide padding instead of flex gap
+    }
+
+    &__slide {
+      width: auto; // override desktop width calc
+      flex: 0 0 var(--carousel-mobile-slide-size, 88%);
+      padding-left: var(--carousel-slide-gap);
+      min-width: 0;
+    }
+
+    // Super-weak gradients on mobile (keep subtle edge hint)
+    &__viewport::before,
+    &__viewport::after {
+      width: 12px;
+    }
+
+    &__viewport::before {
+      background: linear-gradient(
+        to right,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.06) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.12) 40%,
+        transparent 100%
+      );
+    }
+
+    &__viewport::after {
+      background: linear-gradient(
+        to left,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.06) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.12) 40%,
+        transparent 100%
+      );
+    }
+  }
+
 }
 
 .carousel-topic-card {
@@ -933,6 +956,7 @@
   border-radius: var(--d-border-radius);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer; // Entire card is clickable
 
   &:hover {
     transform: translateY(-3px);
@@ -945,15 +969,28 @@
     outline-offset: 2px;
   }
 
-  &__link {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  &__thumbnail-link {
+    display: block;
     text-decoration: none;
     color: inherit;
 
     &:focus-visible {
       outline: none; // Handled by card focus-within
+    }
+  }
+
+  &__title-link {
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+      border-radius: 2px;
     }
   }
 
@@ -974,7 +1011,7 @@
     .main-thumbnail {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: #{$thumbnail_object_fit};
       transition: transform 0.3s ease;
     }
 
@@ -1012,7 +1049,7 @@
     font-size: var(--font-up-1);
     font-weight: 600;
     color: var(--primary);
-    margin: 0;
+    margin: 0 0 var(--space-2) 0; // Add bottom margin for spacing before category
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -1025,10 +1062,29 @@
     @media (width <= 767px) {
       font-size: var(--font-0);
       line-height: 1.5;
+      margin-bottom: var(--space-1); // Tighter spacing on mobile
     }
   }
 
   &:hover &__title {
     color: var(--tertiary);
+  }
+
+  &__category {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    font-size: var(--font-down-1);
+    margin-top: var(--space-1);
+
+    .badge-category__wrapper {
+      display: inline-flex;
+    }
+
+    @media (width <= 767px) {
+      font-size: var(--font-down-2);
+      gap: var(--space-1);
+    }
   }
 }
