@@ -36,4 +36,3 @@ const TopicTagsInline = <template>
 </template>;
 
 export default TopicTagsInline;
-

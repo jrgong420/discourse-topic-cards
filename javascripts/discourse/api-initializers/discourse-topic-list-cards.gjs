@@ -216,8 +216,6 @@ export default apiInitializer((api) => {
           }
           return context.navigateToTopic(topic, topic.lastUnreadUrl);
         }
-
-
       }
 
       next();
@@ -235,7 +233,9 @@ export default apiInitializer((api) => {
 
     topicCards.forEach((card) => {
       const linkTopLine = card.querySelector(".link-top-line");
-      if (!linkTopLine) return;
+      if (!linkTopLine) {
+        return;
+      }
 
       const badges = linkTopLine.querySelector(".topic-post-badges");
       const title = linkTopLine.querySelector(".title");
@@ -252,18 +252,24 @@ export default apiInitializer((api) => {
     const containers = document.querySelectorAll(
       ".topic-cards-list .topic-list-body"
     );
-    if (!containers.length) return;
+    if (!containers.length) {
+      return;
+    }
 
     observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType !== 1) return;
+          if (node.nodeType !== 1) {
+            return;
+          }
           if (
             node.classList?.contains("topic-list-item") ||
             node.classList?.contains("topic-card")
           ) {
             const linkTopLine = node.querySelector(".link-top-line");
-            if (!linkTopLine) return;
+            if (!linkTopLine) {
+              return;
+            }
 
             const badges = linkTopLine.querySelector(".topic-post-badges");
             const title = linkTopLine.querySelector(".title");
@@ -289,7 +295,9 @@ export default apiInitializer((api) => {
     }
 
     // Only process if cards are enabled
-    if (!enableCards()) return;
+    if (!enableCards()) {
+      return;
+    }
 
     // Use schedule to ensure DOM is ready
     schedule("afterRender", () => {
@@ -297,5 +305,4 @@ export default apiInitializer((api) => {
       setupObserver();
     });
   });
-
 });

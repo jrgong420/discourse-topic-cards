@@ -88,13 +88,14 @@
     .link-top-line {
       grid-area: title;
       display: grid;
+
       // Base: title only (when neither badges nor statuses exist)
       grid-template-columns: 1fr;
       grid-template-areas: "title";
       gap: 0;
 
       // If an event/date outlet exists, place it below the title (no badges/statuses case)
-      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+      &:not(:has(.topic-post-badges:not(:empty)), :has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
         grid-template-areas:
           "title"
           "event";
@@ -167,7 +168,7 @@
     }
 
     // Stack badges and statuses on very narrow screens (only when both exist)
-    @media (max-width: 340px) {
+    @media (width <= 340px) {
       .link-top-line:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
@@ -286,13 +287,14 @@
       grid-area: title;
       font-size: var(--font-down-1);
       display: grid;
+
       // Base: title only (when neither badges nor statuses exist)
       grid-template-columns: 1fr;
       grid-template-areas: "title";
       gap: 0;
 
       // If an event/date outlet exists, place it below the title (no badges/statuses case)
-      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+      &:not(:has(.topic-post-badges:not(:empty)), :has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
         grid-template-areas:
           "title"
           "event";
@@ -365,7 +367,7 @@
     }
 
     // Stack badges and statuses on very narrow screens (only when both exist)
-    @media (max-width: 340px) {
+    @media (width <= 340px) {
       .link-top-line:has(.topic-post-badges:not(:empty)):has(.topic-statuses:not(:empty)) {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:

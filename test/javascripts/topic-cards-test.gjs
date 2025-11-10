@@ -1,12 +1,21 @@
-import { module, test } from "qunit";
-import { setupRenderingTest } from "discourse/tests/helpers/component-test";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import TopicExcerpt from "../../javascripts/discourse/components/topic-excerpt";
-import TopicTagsInline from "../../javascripts/discourse/components/topic-tags-inline";
-import TopicByline from "../../javascripts/discourse/components/topic-byline";
-import TopicMetadata from "../../javascripts/discourse/components/topic-metadata";
+import { module, test } from "qunit";
+import { setupRenderingTest } from "discourse/tests/helpers/component-test";
 import TopicActionButtons from "../../javascripts/discourse/components/topic-action-buttons";
+import TopicByline from "../../javascripts/discourse/components/topic-byline";
+import TopicExcerpt from "../../javascripts/discourse/components/topic-excerpt";
+import TopicMetadata from "../../javascripts/discourse/components/topic-metadata";
+import TopicTagsInline from "../../javascripts/discourse/components/topic-tags-inline";
+
+// Mark imports as used (referenced in templates via hbs)
+void [
+  TopicExcerpt,
+  TopicTagsInline,
+  TopicByline,
+  TopicMetadata,
+  TopicActionButtons,
+];
 
 module("Topic Cards Theme Component", function (hooks) {
   setupRenderingTest(hooks);
@@ -135,7 +144,9 @@ module("Topic Cards Theme Component", function (hooks) {
 
       assert
         .dom(".topic-card__actions")
-        .doesNotExist("Actions container does not render without featured link");
+        .doesNotExist(
+          "Actions container does not render without featured link"
+        );
     });
   });
 
@@ -156,7 +167,11 @@ module("Topic Cards Theme Component", function (hooks) {
         .hasAttribute("aria-label", /.+/, "Details button has aria-label");
       assert
         .dom(".topic-card__featured-link-btn")
-        .hasAttribute("aria-label", /.+/, "Featured link button has aria-label");
+        .hasAttribute(
+          "aria-label",
+          /.+/,
+          "Featured link button has aria-label"
+        );
     });
   });
 });

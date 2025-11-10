@@ -23,16 +23,17 @@
 // Topic cards list container
 .topic-cards-list {
   // Map border radius setting to component-scoped CSS variable
+  // Increased by one step for more modern, rounded appearance
   @if $card_border_radius == "none" {
     --topic-cards-border-radius: 0;
   } @else if $card_border_radius == "small" {
-    --topic-cards-border-radius: var(--d-border-radius);
-  } @else if $card_border_radius == "medium" {
     --topic-cards-border-radius: calc(var(--d-border-radius) * 1.5);
-  } @else if $card_border_radius == "large" {
+  } @else if $card_border_radius == "medium" {
     --topic-cards-border-radius: var(--d-border-radius-large);
-  } @else if $card_border_radius == "extra_large" {
+  } @else if $card_border_radius == "large" {
     --topic-cards-border-radius: calc(var(--d-border-radius-large) * 1.5);
+  } @else if $card_border_radius == "extra_large" {
+    --topic-cards-border-radius: calc(var(--d-border-radius-large) * 2);
   }
   display: block;
   margin-top: var(--space-6);
@@ -71,6 +72,263 @@
     }
   }
 
+  // Suppress inline featured link in card mode (rely on CTA button instead)
+  // This removes the source of the stray &nbsp; text node without DOM surgery
+  // IMPORTANT: Only hide the anchor itself, not the container or plugin outlets
+  .link-top-line {
+    // Hide inline featured link anchor in card layouts
+    a.topic-featured-link {
+      display: none;
+    }
+
+    // Preserve all plugin outlet content (e.g., topic-list-after-title)
+    // Outlets remain visible and functional
+  }
+
+  // Card-specific featured link styles for when it's shown via outlet
+  .main-link {
+    .title {
+      color: var(--title-color);
+      font-weight: var(--topic-title-font-weight);
+      font-size: #{$topic-title-font-size};
+
+      // Better long-word handling
+      word-break: break-word;
+      overflow-wrap: anywhere;
+
+      // limit title to 2 lines
+      line-height: var(--line-height-large);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      max-height: calc(var(--line-height-large) * 3em);
+      padding: 0 !important;
+    }
+
+    .title.visited:not(.badge-notification) {
+      color: var(--title-color--read);
+      font-weight: var(--topic-title-font-weight--visited);
+    }
+
+    .link-bottom-line {
+      // Hide core tags/categories when our inline tags are rendered to avoid duplicates
+      display: none;
+    }
+
+    .topic-card {
+      &__category {
+        grid-area: category;
+      }
+
+      &__tags {
+        grid-area: tags;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        font-size: var(--font-down-1);
+
+        .badge-category__wrapper {
+          display: inline-flex;
+        }
+
+        .discourse-tag {
+          margin-right: var(--space-1);
+        }
+      }
+
+      &__byline {
+        grid-area: byline;
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-1);
+        flex-wrap: wrap;
+        font-size: var(--font-down-1);
+        color: var(--metadata-color);
+        align-self: end;
+      }
+
+      &__op {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+      }
+
+      &__meta-sep {
+        color: var(--primary-medium);
+        user-select: none;
+      }
+
+      &__actions {
+        grid-area: actions;
+        display: flex;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        align-items: center;
+
+        .btn {
+          flex: 0 1 auto;
+          min-width: 0;
+        }
+      }
+
+      &__details-btn {
+        // Secondary button styling (default btn)
+      }
+
+      &__featured-link-btn {
+        // Primary button styling (btn-primary)
+      }
+
+      &__metadata {
+        grid-area: metadata;
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-2);
+        line-height: var(--line-height-large);
+        flex-wrap: wrap;
+        align-items: center;
+        min-width: 0;
+
+        .number {
+          font-weight: bold;
+          font-size: var(--font-down-1);
+          color: var(--metadata-color);
+        }
+
+        .d-icon {
+          color: var(--primary-medium);
+        }
+
+        .activity a {
+          font-weight: bold;
+          font-size: var(--font-down-1);
+          color: var(--metadata-color);
+        }
+
+        &-items {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+
+        .item {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          flex: 0 0 auto;
+          white-space: nowrap;
+          min-width: 0;
+        }
+
+        .topic__like-button {
+          background-color: transparent;
+          border: none;
+          border-radius: var(--d-border-radius);
+          transition: all 200ms ease-in-out;
+
+          .d-icon {
+            color: var(--primary-medium);
+          }
+
+          &:hover {
+            background-color: var(--love-low);
+            color: var(--love);
+
+            .d-icon {
+              color: var(--love);
+            }
+          }
+
+          &.--liked {
+            .d-icon {
+              animation: like-toggle 200ms ease-in-out;
+              color: var(--love);
+            }
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+
+            &:hover {
+              background-color: unset;
+              color: unset;
+            }
+
+            &:hover:not(.--liked) {
+              .d-icon {
+                color: unset;
+              }
+            }
+          }
+        }
+
+        &__most-recent {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          font-size: var(--font-down-1);
+          color: var(--primary-medium);
+          margin-left: auto;
+
+          .avatar {
+            width: 20px;
+            height: 20px;
+          }
+
+          .activity a {
+            color: var(--primary-medium);
+            font-weight: normal;
+          }
+        }
+      }
+
+      &__publish-date {
+        font-size: var(--font-down-1);
+        color: var(--metadata-color);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        white-space: nowrap;
+      }
+
+      &__excerpt {
+        grid-area: excerpt;
+      }
+
+      &__excerpt-text {
+        margin-block: var(--space-1) var(--space-3);
+        font-size: var(--font-down-1);
+        color: var(--excerpt-color);
+        line-height: var(--line-height-large);
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-height: calc(var(--line-height-large) * 3em);
+      }
+
+      &__activity {
+        .num.activity {
+          display: block;
+          padding: 0;
+
+          a {
+            padding: 0;
+          }
+        }
+      }
+    }
+  }
 }
 
 // Shared card styles (common to all layouts and viewports)
@@ -80,6 +338,7 @@
   background-color: var(--secondary);
   box-shadow: var(--shadow-card);
   border: 1px solid transparent;
+  overflow: hidden; // Ensures consistent rounded corners for all child elements
 
   &:hover,
   &.selected {
@@ -126,10 +385,15 @@
 
   // Thumbnail (shared base styles)
   &__thumbnail {
+    aspect-ratio: var(--topic-cards-thumb-aspect, 16 / 9); // Consistent aspect ratio
+
     .main-thumbnail {
       width: 100%;
-      object-fit: cover;
+      height: 100%;
       background: var(--primary-low); // Placeholder while loading
+      object-fit: cover; // Prevent stretching/squishing
+      object-position: center; // Center the image
+      display: block; // Remove inline spacing
     }
 
     .thumbnail-placeholder {
@@ -173,6 +437,7 @@
     .link-top-line {
       grid-area: title;
       display: grid;
+
       // Base: title only (when neither badges nor statuses exist)
       grid-template-columns: 1fr;
       grid-template-areas:
@@ -182,7 +447,7 @@
       gap: 0;
 
       // If an event/date outlet exists, place it below the title (no badges/statuses case)
-      &:not(:has(.topic-post-badges:not(:empty))):not(:has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
+      &:not(:has(.topic-post-badges:not(:empty)), :has(.topic-statuses:not(:empty))):has(.header-topic-title-suffix-outlet:not(:empty)) {
         grid-template-areas:
           "title"
           "event"
@@ -276,6 +541,7 @@
       // Featured link appears below event date (or below title if no event)
       a.topic-featured-link {
         grid-area: featured-link;
+
         // No margin by default (when no event)
         margin-top: 0;
         font-size: var(--font-down-1);
@@ -302,280 +568,12 @@
   }
 }
 
-// Suppress inline featured link in card mode (rely on CTA button instead)
-// This removes the source of the stray &nbsp; text node without DOM surgery
-// IMPORTANT: Only hide the anchor itself, not the container or plugin outlets
-.topic-cards-list {
-  .link-top-line {
-    // Hide inline featured link anchor in card layouts
-    a.topic-featured-link {
-      display: none;
-    }
-
-    // Preserve all plugin outlet content (e.g., topic-list-after-title)
-    // Outlets remain visible and functional
-  }
-}
-
 // Classic (non-card) lists: keep inline featured link visible with proper spacing
 .topic-list:not(.topic-cards-list) {
   .link-top-line {
     a.topic-featured-link {
       // Core spacing via CSS gap/margin, not text nodes
       margin-left: var(--space-1);
-    }
-  }
-}
-
-// Restore card-specific featured link styles for when it's shown via outlet
-.topic-cards-list {
-  .main-link {
-
-    .title {
-      color: var(--title-color);
-      font-weight: var(--topic-title-font-weight);
-      font-size: #{$topic-title-font-size};
-
-      // Better long-word handling
-      word-break: break-word;
-      overflow-wrap: anywhere;
-
-      // limit title to 2 lines
-      line-height: var(--line-height-large);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      max-height: calc(var(--line-height-large) * 2em);
-      padding: 0 !important;
-    }
-
-    .title.visited:not(.badge-notification) {
-      color: var(--title-color--read);
-      font-weight: var(--topic-title-font-weight--visited);
-    }
-
-    .link-bottom-line {
-      // Hide core tags/categories when our inline tags are rendered to avoid duplicates
-      display: none;
-    }
-
-    .topic-card {
-      &__category {
-        grid-area: category;
-      }
-
-      &__tags {
-        grid-area: tags;
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        font-size: var(--font-down-1);
-
-        .badge-category__wrapper {
-          display: inline-flex;
-        }
-
-        .discourse-tag {
-          margin-right: var(--space-1);
-        }
-      }
-
-      &__byline {
-        grid-area: byline;
-        display: flex;
-        align-items: baseline;
-        gap: var(--space-1);
-        flex-wrap: wrap;
-        font-size: var(--font-down-1);
-        color: var(--metadata-color);
-        align-self: end;
-      }
-
-      &__op {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-1);
-      }
-
-      &__meta-sep {
-        color: var(--primary-medium);
-        user-select: none;
-      }
-
-      &__actions {
-        grid-area: actions;
-        display: flex;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        align-items: center;
-
-        .btn {
-          flex: 0 1 auto;
-          min-width: 0;
-        }
-      }
-
-      &__details-btn {
-        // Secondary button styling (default btn)
-      }
-
-      &__featured-link-btn {
-        // Primary button styling (btn-primary)
-      }
-
-      &__metadata {
-        grid-area: metadata;
-        display: flex;
-        justify-content: space-between;
-        gap: var(--space-2);
-        line-height: var(--line-height-large);
-        flex-wrap: wrap;
-        align-items: center;
-
-
-        // Allow shrink inside grid area to avoid horizontal overflow
-        min-width: 0;
-
-        .number {
-          font-weight: bold;
-          font-size: var(--font-down-1);
-          color: var(--metadata-color);
-        }
-
-        .d-icon {
-          color: var(--primary-medium);
-        }
-
-        .activity a {
-          font-weight: bold;
-          font-size: var(--font-down-1);
-          color: var(--metadata-color);
-        }
-
-        // BEM: metadata items container
-        &-items {
-          display: flex;
-          align-items: center;
-          gap: var(--space-4);
-          flex-wrap: wrap;
-          min-width: 0;
-        }
-
-        .item {
-          display: inline-flex;
-          align-items: center;
-          gap: var(--space-1);
-          flex: 0 0 auto;
-          white-space: nowrap;
-          min-width: 0;
-        }
-
-        .topic__like-button {
-          background-color: transparent;
-          border: none;
-          border-radius: var(--d-border-radius);
-          transition: all 200ms ease-in-out;
-
-          .d-icon {
-            color: var(--primary-medium);
-          }
-
-          &:hover {
-            background-color: var(--love-low);
-            color: var(--love);
-
-            .d-icon {
-              color: var(--love);
-            }
-          }
-
-          &.--liked {
-            .d-icon {
-              animation: like-toggle 200ms ease-in-out;
-              color: var(--love);
-            }
-          }
-
-          &:disabled {
-            cursor: not-allowed;
-
-            &:hover {
-              background-color: unset;
-              color: unset;
-            }
-
-            &:hover:not(.--liked) {
-              .d-icon {
-                color: unset;
-              }
-            }
-          }
-        }
-
-        &__most-recent {
-          display: inline-flex;
-          align-items: center;
-          gap: var(--space-1);
-          font-size: var(--font-down-1);
-          color: var(--primary-medium);
-          margin-left: auto; // Push to the right
-
-          .avatar {
-            width: 20px;
-            height: 20px;
-          }
-
-          .activity a {
-            color: var(--primary-medium);
-            font-weight: normal;
-          }
-        }
-      }
-
-      &__publish-date {
-        font-size: var(--font-down-1);
-        color: var(--metadata-color);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-1);
-        white-space: nowrap;
-      }
-
-      &__excerpt {
-        grid-area: excerpt;
-      }
-
-      &__excerpt-text {
-        margin-block: var(--space-1) var(--space-3);
-        font-size: var(--font-down-1);
-        color: var(--excerpt-color);
-        line-height: var(--line-height-large);
-
-
-        // Better long-word handling inside excerpts
-        word-break: break-word;
-        overflow-wrap: anywhere;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        max-height: calc(var(--line-height-large) * 3em);
-      }
-
-      &__activity {
-        .num.activity {
-          display: block;
-          padding: 0;
-
-          a {
-            padding: 0;
-          }
-        }
-      }
     }
   }
 }
@@ -608,5 +606,531 @@
 @if $hide-topic-author-tc-column {
   tr.topic-list-item.topic-card td.custom-author-column {
     display: none;
+  }
+}
+
+// ============================================================================
+// Topic Cards Carousel Styles (Phase 6-10)
+// ============================================================================
+// Namespace: .topic-cards-carousel (distinct from .topic-cards-list)
+//
+// Compatibility Notes:
+// - .topic-cards-list: Used by discourse-topic-list-cards initializer
+// - .topic-card: Used by individual topic cards in topic lists
+// - .carousel-topic-card: Used by carousel cards (separate namespace)
+//
+// The carousel uses its own BEM namespace to avoid conflicts with the
+// existing topic list card system. Both can coexist on the same page.
+// ============================================================================
+
+// Expose carousel settings as CSS variables for live preview updates
+:root {
+  --carousel-spv-cap: #{$carousel-slides-per-view};
+  --carousel-min-slide-width: #{$carousel-min-slide-width-px}px;
+  --carousel-slide-gap: #{$carousel-slide-gap-px}px;
+}
+
+.topic-cards-carousel {
+  margin: var(--space-6) 0;
+  background: var(--secondary);
+  border: none; // Removed border for cleaner look
+  border-radius: var(--d-border-radius);
+
+  // Peek shows a full gap + a sliver of the next slide
+  // edge = portion of next slide to reveal; peek-right = gap + edge
+  --carousel-peek-edge: 8px;
+  --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
+
+  // Token-driven carousel card styling (unified with topic list cards)
+  --carousel-card-radius: var(--topic-cards-border-radius);
+  --carousel-card-border: 1px solid transparent;
+  --carousel-card-border-hover: 1px solid var(--primary-low);
+  --carousel-card-shadow: var(--shadow-card);
+  --carousel-card-bg: var(--secondary);
+  --carousel-title-size: var(--d-topic-list-title-font-size);
+  --carousel-title-color: var(--title-color);
+  --carousel-title-color-visited: var(--title-color--read);
+  --carousel-title-color-hover: var(--tertiary);
+  --carousel-title-weight: var(--topic-title-font-weight);
+  --carousel-title-weight-visited: var(--topic-title-font-weight--visited);
+  --carousel-title-lines: 3; // Match topic list card clamp
+
+  &__header {
+    margin-bottom: var(--space-5);
+  }
+
+  &__title {
+    font-size: var(--font-up-3);
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0 0 var(--space-2);
+    line-height: var(--line-height-medium);
+  }
+
+  &__subtitle {
+    font-size: var(--font-0);
+    color: var(--primary-medium);
+    margin: 0;
+    line-height: var(--line-height-medium);
+  }
+
+  &__container {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column; // Stack viewport and controls vertically
+    align-items: stretch;
+    justify-content: center;
+    padding: 0; // No side padding - arrows moved to bottom control bar
+
+    // Keyboard focus outline for carousel region
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 4px;
+      border-radius: var(--d-border-radius);
+    }
+
+  }
+
+  &__placeholder {
+    font-size: var(--font-0);
+    color: var(--primary-medium);
+    text-align: center;
+    padding: var(--space-6);
+    background: var(--primary-very-low);
+    border-radius: var(--d-border-radius);
+  }
+
+  &__loading,
+  &__error,
+  &__empty {
+    text-align: center;
+    padding: var(--space-6);
+    font-size: var(--font-0);
+    color: var(--primary-medium);
+
+    // Fade in animation
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  &__error {
+    color: var(--danger);
+    background: var(--danger-low);
+    border-radius: var(--d-border-radius);
+  }
+
+  &__viewport {
+    position: relative; // For gradient overlays
+    overflow: hidden;
+    width: 100%;
+    margin: 0;
+
+
+    // Gradient fade overlays (desktop default: no width, only mobile shows a thin hint)
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 0px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 5;
+    }
+
+    // Left gradient fade
+    &::before {
+      left: 0;
+      background: linear-gradient(
+        to right,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.10) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.18) 40%,
+        transparent 100%
+      );
+    }
+
+    // Right gradient fade
+    &::after {
+      right: 0;
+      background: linear-gradient(
+        to left,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.10) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.18) 40%,
+        transparent 100%
+      );
+    }
+
+    // Show left gradient when there's a previous slide
+    &.has-prev::before {
+      opacity: 1;
+    }
+
+    // Show right gradient when there's a next slide
+    &.has-next::after {
+      opacity: 1;
+    }
+  }
+
+  &__slides {
+    display: flex;
+    gap: var(--carousel-slide-gap); // Use flex gap for consistent spacing, including clones
+    padding: var(--space-3);
+        margin-left: var(--space-2);
+
+  }
+
+  &__slide {
+    flex: 0 0 auto;
+
+    // Width is computed dynamically via CSS variable --spv (slides per view)
+    // Leave a small spare width (peek) so the next view's first slide is visible
+    // Formula: (100% - (gap * (spv - 1)) - peek) / spv
+    width: calc(
+      (100% - (var(--carousel-slide-gap) * (var(--spv, var(--carousel-spv-cap)) - 1)) - var(--carousel-peek-right, 24px)) /
+      var(--spv, var(--carousel-spv-cap))
+    );
+
+    // Fade in animation for slides
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Bottom control bar: navigation arrows (left, stacked) + pagination dots (right)
+  &__controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding: 0 var(--space-2);
+
+    @media (width >= 768px) {
+      gap: var(--space-4);
+      padding: 0 var(--space-3);
+    }
+  }
+
+  // Navigation arrows container - horizontal layout on the left
+  &__nav {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-2);
+  }
+
+  // Navigation arrows - static positioning in bottom control bar
+  &__arrow {
+    background: rgb(var(--secondary-rgb, 255, 255, 255), 0.95);
+    backdrop-filter: blur(8px);
+    border: 2px solid var(--primary-medium);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
+    padding: 0;
+    flex-shrink: 0;
+
+    @media (width >= 768px) {
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--tertiary-low);
+      border-color: var(--tertiary);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transition: opacity 0.2s ease;
+    }
+  }
+
+  // Pagination dots - aligned to the right in control bar
+  &__dots {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding: 0;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-low);
+    border: 2px solid var(--primary-medium);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+
+    &:hover {
+      background: var(--primary-medium);
+      transform: scale(1.3);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    &.is-active,
+    &[aria-current="true"] {
+      background: var(--tertiary);
+      border-color: var(--tertiary);
+      width: 12px;
+      height: 12px;
+      transform: scale(1.2);
+    }
+  }
+  // Mobile edge-peek layout (Embla pattern): show next slide's left edge
+  @media (width <= 767px) {
+    // Mobile: smaller edge reveal, peek = gap + edge
+    --carousel-peek-edge: 6px;
+    --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
+
+    &__slides {
+      margin-left: calc(var(--carousel-slide-gap) * 1);
+      gap: 0; // use slide padding instead of flex gap
+    }
+
+    &__slide {
+      width: auto; // override desktop width calc
+      flex: 0 0 var(--carousel-mobile-slide-size, 88%);
+      padding-left: var(--carousel-slide-gap);
+      min-width: 0;
+    }
+
+    // Super-weak gradients on mobile (keep subtle edge hint)
+    &__viewport::before,
+    &__viewport::after {
+      width: 12px;
+    }
+
+    &__viewport::before {
+      background: linear-gradient(
+        to right,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.06) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.12) 40%,
+        transparent 100%
+      );
+    }
+
+    &__viewport::after {
+      background: linear-gradient(
+        to left,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.06) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.12) 40%,
+        transparent 100%
+      );
+    }
+  }
+
+}
+
+.carousel-topic-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%; // Ensure card fills slide width
+  background: var(--carousel-card-bg);
+  border: var(--carousel-card-border);
+  border-radius: var(--space-3);
+  box-shadow: var(--carousel-card-shadow);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer; // Entire card is clickable
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--carousel-card-shadow);
+    border: var(--carousel-card-border-hover);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--tertiary);
+    outline-offset: 2px;
+  }
+
+  &__thumbnail-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+
+    &:focus-visible {
+      outline: none; // Handled by card focus-within
+    }
+  }
+
+  &__title-link {
+    text-decoration: none;
+    color: var(--carousel-title-color);
+
+    &:hover {
+      text-decoration: underline;
+      color: var(--carousel-title-color-hover);
+    }
+
+    &:visited {
+      color: var(--carousel-title-color-visited);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  &__thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--primary-very-low);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (width <= 767px) {
+      aspect-ratio: 16 / 10;
+    }
+
+    .main-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; // Prevent stretching/squishing
+      object-position: center; // Center the image
+      display: block; // Remove inline spacing
+      transition: transform 0.3s ease;
+    }
+
+    .thumbnail-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: var(--primary-medium);
+      font-size: 3rem;
+      opacity: 0.5;
+    }
+  }
+
+  &:hover &__thumbnail .main-thumbnail {
+    transform: scale(1.05);
+  }
+
+  &__content {
+    flex: 1;
+    padding: var(--space-3) var(--space-5) var(--space-3); // Match topic card padding
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
+
+    @media (width <= 767px) {
+      padding: var(--space-3);
+      min-height: 70px;
+    }
+  }
+
+  &__title {
+    font-size: var(--carousel-title-size);
+    font-weight: var(--carousel-title-weight);
+    color: var(--carousel-title-color);
+    margin: 0 0 var(--space-2) 0; // Add bottom margin for spacing before category
+    line-height: var(--line-height-large);
+    display: -webkit-box;
+    -webkit-line-clamp: var(--carousel-title-lines);
+    line-clamp: var(--carousel-title-lines);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+
+    @media (width <= 767px) {
+      font-size: var(--font-0);
+      line-height: 1.5;
+      margin-bottom: var(--space-1); // Tighter spacing on mobile
+    }
+  }
+
+  &__category {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    font-size: var(--font-down-1);
+    margin-top: var(--space-1);
+
+    .badge-category__wrapper {
+      display: inline-flex;
+    }
+
+    @media (width <= 767px) {
+      font-size: var(--font-down-2);
+      gap: var(--space-1);
+    }
+  }
+}
+
+// ============================================================================
+// Carousel Thumbnail Height Settings
+// ============================================================================
+// Control the thumbnail container height via theme settings while retaining
+// content-flex layout for the rest of the card. The image fills the container
+// without distortion via object-fit: cover.
+
+// Desktop fixed thumbnail height
+.carousel-topic-card__thumbnail {
+  height: #{$carousel-desktop-thumbnail-height-px}px;
+  aspect-ratio: auto; // override default 16/9
+}
+
+// Mobile fixed thumbnail height
+@media (width <= 767px) {
+  .carousel-topic-card__thumbnail {
+    height: #{$carousel-mobile-thumbnail-height-px}px;
+    aspect-ratio: auto; // override mobile 16/10
   }
 }
