@@ -385,7 +385,6 @@
   &__thumbnail {
     .main-thumbnail {
       width: 100%;
-      object-fit: #{$thumbnail_object_fit};
       background: var(--primary-low); // Placeholder while loading
     }
 
@@ -1011,7 +1010,6 @@
     .main-thumbnail {
       width: 100%;
       height: 100%;
-      object-fit: #{$thumbnail_object_fit};
       transition: transform 0.3s ease;
     }
 
