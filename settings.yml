@@ -173,6 +173,20 @@ carousel_slide_gap_px:
   max: 64
   description: "Gap between slides in pixels. Valid range: 0-64px. Default: 16px (matches Discourse spacing)."
 
+carousel_desktop_thumbnail_height_px:
+  type: integer
+  default: 360
+  min: 180
+  max: 720
+  description: "Desktop carousel thumbnail height in pixels. Sets the fixed height of the thumbnail inside carousel cards on desktop/tablet. Cards remain flexible in height; images are not distorted (object-fit: cover)."
+
+carousel_mobile_thumbnail_height_px:
+  type: integer
+  default: 240
+  min: 140
+  max: 560
+  description: "Mobile carousel thumbnail height in pixels. Sets the fixed height of the thumbnail inside carousel cards on mobile. Cards remain flexible in height; images are not distorted."
+
 carousel_scroll_by:
   type: enum
   default: "slides_per_view"

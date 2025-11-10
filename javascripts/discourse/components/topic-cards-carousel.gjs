@@ -679,46 +679,50 @@ export default class TopicCardsCarousel extends Component {
               {{/each}}
             </div>
           </div>
-
-          {{! Navigation arrows - positioned at viewport sides }}
-          <button
-            type="button"
-            class="topic-cards-carousel__arrow topic-cards-carousel__arrow--prev"
-            data-test-prev
-            aria-label={{i18n (themePrefix "js.carousel.previous_slide")}}
-            disabled={{not this.canScrollPrev}}
-            {{on "click" this.prev}}
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            class="topic-cards-carousel__arrow topic-cards-carousel__arrow--next"
-            data-test-next
-            aria-label={{i18n (themePrefix "js.carousel.next_slide")}}
-            disabled={{not this.canScrollNext}}
-            {{on "click" this.next}}
-          >
-            ›
-          </button>
         </div>
 
-        {{! Pagination dots - centered below carousel }}
-        <div class="topic-cards-carousel__dots" data-test-dots>
-          {{#each this.dots as |dot|}}
+        {{! Navigation controls - grouped arrows and pagination dots }}
+        <div class="topic-cards-carousel__controls">
+          <div class="topic-cards-carousel__nav">
             <button
               type="button"
-              class="topic-cards-carousel__dot {{if dot.isActive 'is-active'}}"
-              data-index={{dot.idx}}
-              data-test-dot
-              aria-label={{i18n
-                (themePrefix "js.carousel.go_to_slide")
-                number=dot.label
-              }}
-              aria-current={{if dot.isActive "true"}}
-              {{on "click" this.onDotClick}}
-            ></button>
-          {{/each}}
+              class="topic-cards-carousel__arrow topic-cards-carousel__arrow--prev"
+              data-test-prev
+              aria-label={{i18n (themePrefix "js.carousel.previous_slide")}}
+              disabled={{not this.canScrollPrev}}
+              {{on "click" this.prev}}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              class="topic-cards-carousel__arrow topic-cards-carousel__arrow--next"
+              data-test-next
+              aria-label={{i18n (themePrefix "js.carousel.next_slide")}}
+              disabled={{not this.canScrollNext}}
+              {{on "click" this.next}}
+            >
+              ›
+            </button>
+          </div>
+
+          <div class="topic-cards-carousel__dots" data-test-dots>
+            {{#each this.dots as |dot|}}
+              <button
+                type="button"
+                class="topic-cards-carousel__dot
+                  {{if dot.isActive 'is-active'}}"
+                data-index={{dot.idx}}
+                data-test-dot
+                aria-label={{i18n
+                  (themePrefix "js.carousel.go_to_slide")
+                  number=dot.label
+                }}
+                aria-current={{if dot.isActive "true"}}
+                {{on "click" this.onDotClick}}
+              ></button>
+            {{/each}}
+          </div>
         </div>
       {{else}}
         <div class="topic-cards-carousel__empty">

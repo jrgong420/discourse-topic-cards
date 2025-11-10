@@ -23,16 +23,17 @@
 // Topic cards list container
 .topic-cards-list {
   // Map border radius setting to component-scoped CSS variable
+  // Increased by one step for more modern, rounded appearance
   @if $card_border_radius == "none" {
     --topic-cards-border-radius: 0;
   } @else if $card_border_radius == "small" {
-    --topic-cards-border-radius: var(--d-border-radius);
-  } @else if $card_border_radius == "medium" {
     --topic-cards-border-radius: calc(var(--d-border-radius) * 1.5);
-  } @else if $card_border_radius == "large" {
+  } @else if $card_border_radius == "medium" {
     --topic-cards-border-radius: var(--d-border-radius-large);
-  } @else if $card_border_radius == "extra_large" {
+  } @else if $card_border_radius == "large" {
     --topic-cards-border-radius: calc(var(--d-border-radius-large) * 1.5);
+  } @else if $card_border_radius == "extra_large" {
+    --topic-cards-border-radius: calc(var(--d-border-radius-large) * 2);
   }
   display: block;
   margin-top: var(--space-6);
@@ -337,6 +338,7 @@
   background-color: var(--secondary);
   box-shadow: var(--shadow-card);
   border: 1px solid transparent;
+  overflow: hidden; // Ensures consistent rounded corners for all child elements
 
   &:hover,
   &.selected {
@@ -383,9 +385,15 @@
 
   // Thumbnail (shared base styles)
   &__thumbnail {
+    aspect-ratio: var(--topic-cards-thumb-aspect, 16 / 9); // Consistent aspect ratio
+
     .main-thumbnail {
       width: 100%;
+      height: 100%;
       background: var(--primary-low); // Placeholder while loading
+      object-fit: cover; // Prevent stretching/squishing
+      object-position: center; // Center the image
+      display: block; // Remove inline spacing
     }
 
     .thumbnail-placeholder {
@@ -624,7 +632,6 @@
 
 .topic-cards-carousel {
   margin: var(--space-6) 0;
-  padding: var(--space-4); // Reduced from var(--space-5) to maximize card space
   background: var(--secondary);
   border: none; // Removed border for cleaner look
   border-radius: var(--d-border-radius);
@@ -633,6 +640,20 @@
   // edge = portion of next slide to reveal; peek-right = gap + edge
   --carousel-peek-edge: 8px;
   --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
+
+  // Token-driven carousel card styling (unified with topic list cards)
+  --carousel-card-radius: var(--topic-cards-border-radius);
+  --carousel-card-border: 1px solid transparent;
+  --carousel-card-border-hover: 1px solid var(--primary-low);
+  --carousel-card-shadow: var(--shadow-card);
+  --carousel-card-bg: var(--secondary);
+  --carousel-title-size: var(--d-topic-list-title-font-size);
+  --carousel-title-color: var(--title-color);
+  --carousel-title-color-visited: var(--title-color--read);
+  --carousel-title-color-hover: var(--tertiary);
+  --carousel-title-weight: var(--topic-title-font-weight);
+  --carousel-title-weight-visited: var(--topic-title-font-weight--visited);
+  --carousel-title-lines: 3; // Match topic list card clamp
 
   &__header {
     margin-bottom: var(--space-5);
@@ -754,7 +775,8 @@
   &__slides {
     display: flex;
     gap: var(--carousel-slide-gap); // Use flex gap for consistent spacing, including clones
-    padding: var(--space-2);
+    padding: var(--space-3);
+        margin-left: var(--space-2);
 
   }
 
@@ -907,7 +929,7 @@
     --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
 
     &__slides {
-      margin-left: calc(var(--carousel-slide-gap) * -1);
+      margin-left: calc(var(--carousel-slide-gap) * 1);
       gap: 0; // use slide padding instead of flex gap
     }
 
@@ -950,17 +972,18 @@
   flex-direction: column;
   height: 100%;
   width: 100%; // Ensure card fills slide width
-  background: var(--secondary);
-  border: 1px solid var(--primary-low);
-  border-radius: var(--d-border-radius);
+  background: var(--carousel-card-bg);
+  border: var(--carousel-card-border);
+  border-radius: var(--space-3);
+  box-shadow: var(--carousel-card-shadow);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   cursor: pointer; // Entire card is clickable
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgb(0, 0, 0, 0.12);
-    border-color: var(--primary-medium);
+    transform: translateY(-2px);
+    box-shadow: var(--carousel-card-shadow);
+    border: var(--carousel-card-border-hover);
   }
 
   &:focus-within {
@@ -980,10 +1003,15 @@
 
   &__title-link {
     text-decoration: none;
-    color: inherit;
+    color: var(--carousel-title-color);
 
     &:hover {
       text-decoration: underline;
+      color: var(--carousel-title-color-hover);
+    }
+
+    &:visited {
+      color: var(--carousel-title-color-visited);
     }
 
     &:focus-visible {
@@ -1010,6 +1038,9 @@
     .main-thumbnail {
       width: 100%;
       height: 100%;
+      object-fit: cover; // Prevent stretching/squishing
+      object-position: center; // Center the image
+      display: block; // Remove inline spacing
       transition: transform 0.3s ease;
     }
 
@@ -1031,7 +1062,7 @@
 
   &__content {
     flex: 1;
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-5) var(--space-3); // Match topic card padding
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1044,14 +1075,14 @@
   }
 
   &__title {
-    font-size: var(--font-up-1);
-    font-weight: 600;
-    color: var(--primary);
+    font-size: var(--carousel-title-size);
+    font-weight: var(--carousel-title-weight);
+    color: var(--carousel-title-color);
     margin: 0 0 var(--space-2) 0; // Add bottom margin for spacing before category
-    line-height: 1.4;
+    line-height: var(--line-height-large);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: var(--carousel-title-lines);
+    line-clamp: var(--carousel-title-lines);
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1062,10 +1093,6 @@
       line-height: 1.5;
       margin-bottom: var(--space-1); // Tighter spacing on mobile
     }
-  }
-
-  &:hover &__title {
-    color: var(--tertiary);
   }
 
   &__category {
@@ -1084,5 +1111,26 @@
       font-size: var(--font-down-2);
       gap: var(--space-1);
     }
+  }
+}
+
+// ============================================================================
+// Carousel Thumbnail Height Settings
+// ============================================================================
+// Control the thumbnail container height via theme settings while retaining
+// content-flex layout for the rest of the card. The image fills the container
+// without distortion via object-fit: cover.
+
+// Desktop fixed thumbnail height
+.carousel-topic-card__thumbnail {
+  height: #{$carousel-desktop-thumbnail-height-px}px;
+  aspect-ratio: auto; // override default 16/9
+}
+
+// Mobile fixed thumbnail height
+@media (width <= 767px) {
+  .carousel-topic-card__thumbnail {
+    height: #{$carousel-mobile-thumbnail-height-px}px;
+    aspect-ratio: auto; // override mobile 16/10
   }
 }
