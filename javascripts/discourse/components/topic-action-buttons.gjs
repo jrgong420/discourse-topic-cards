@@ -69,4 +69,3 @@ export default class TopicActionButtons extends Component {
     {{/if}}
   </template>
 }
-

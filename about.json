@@ -1,7 +1,9 @@
 {
   "about_url": "https://meta.discourse.org/t/discourse-topic-cards/296048",
   "license_url": "https://github.com/discourse/discourse-topic-cards/blob/main/LICENSE",
-  "assets": {},
+  "assets": {
+    "embla_carousel": "assets/embla-carousel.umd.min.js"
+  },
   "name": "Topic Cards",
   "component": true,
   "theme_version": "2.0.0",

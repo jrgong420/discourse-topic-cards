@@ -90,3 +90,135 @@ topic_title_font_size:
     - "var(--font-up-2)"
     - "var(--font-up-3)"
   description: "Font size for topic titles in topic cards. Uses Discourse's built-in font-size CSS variables."
+
+# ============================================================================
+# Carousel Settings
+# ============================================================================
+# Configure the featured topics carousel that appears on the home page.
+# The carousel displays topic cards in a sliding interface with navigation
+# controls and supports both list and grid layouts.
+
+# Display & Layout
+carousel_display_location:
+  type: enum
+  default: "home"
+  choices:
+    - home
+    - disabled
+  description: "Where to display the carousel. Set to 'home' to show on the home page, or 'disabled' to hide it completely."
+
+carousel_desktop_layout:
+  type: enum
+  default: "grid"
+  choices:
+    - list
+    - grid
+  description: "Desktop layout mode. 'list' shows one card per slide (recommended for detailed view); 'grid' shows multiple cards per slide in a responsive grid layout."
+
+carousel_mobile_layout:
+  type: enum
+  default: "list"
+  choices:
+    - list
+    - grid
+  description: "Mobile layout mode. 'list' shows one card per slide; 'grid' shows multiple cards per slide. List mode is recommended for better mobile readability."
+
+carousel_plugin_outlet:
+  type: string
+  default: "above-main-container"
+  description: "Advanced: Plugin outlet location. Default 'above-main-container' places carousel at the top of the page. Change only if you understand Discourse plugin outlets."
+
+# Topic Source & Filtering
+carousel_filter_tags:
+  type: list
+  list_type: tag
+  default: ""
+  description: "Filter carousel topics by tags. Enter tag names separated by pipes (|). Example: 'featured|announcement'. Leave empty to show all topics. For multiple tags, topics matching ANY tag will be included."
+
+carousel_max_items:
+  type: integer
+  default: 5
+  min: 1
+  max: 20
+  description: "Maximum number of topics to display in the carousel. Valid range: 1-20. Recommended: 5-10 for optimal performance. Higher values may increase load time."
+
+carousel_order:
+  type: enum
+  default: "latest"
+  choices:
+    - latest
+    - random
+    - popular
+  description: "Topic ordering. 'latest' shows newest topics first; 'random' shuffles topics on each page load (good for variety); 'popular' shows top topics from the past week."
+
+# Grid Layout & Sizing
+carousel_slides_per_view:
+  type: integer
+  default: 3
+  min: 1
+  max: 6
+  description: "Maximum number of slides visible at once (cap). Actual count adapts to viewport width and minimum slide width. Valid range: 1-6. Recommended: 3 for desktop."
+
+carousel_min_slide_width_px:
+  type: integer
+  default: 320
+  min: 240
+  max: 480
+  description: "Minimum width (in pixels) per slide. Used to calculate how many slides fit in the viewport. Valid range: 240-480px. Recommended: 320px for balanced layout."
+
+carousel_slide_gap_px:
+  type: integer
+  default: 16
+  min: 0
+  max: 64
+  description: "Gap between slides in pixels. Valid range: 0-64px. Default: 16px (matches Discourse spacing)."
+
+carousel_desktop_thumbnail_height_px:
+  type: integer
+  default: 360
+  min: 180
+  max: 720
+  description: "Desktop carousel thumbnail height in pixels. Sets the fixed height of the thumbnail inside carousel cards on desktop/tablet. Cards remain flexible in height; images are not distorted (object-fit: cover)."
+
+carousel_mobile_thumbnail_height_px:
+  type: integer
+  default: 240
+  min: 140
+  max: 560
+  description: "Mobile carousel thumbnail height in pixels. Sets the fixed height of the thumbnail inside carousel cards on mobile. Cards remain flexible in height; images are not distorted."
+
+carousel_scroll_by:
+  type: enum
+  default: "slides_per_view"
+  choices:
+    - "1"
+    - slides_per_view
+  description: "Number of slides to scroll per navigation step. '1' scrolls one slide at a time; 'slides_per_view' scrolls by the number of visible slides (page-by-page). Maps to Embla's slidesToScroll option."
+
+# Embla Carousel Behavior
+carousel_loop:
+  type: bool
+  default: true
+  description: "Enable infinite looping. When enabled, the carousel wraps around from the last slide to the first (and vice versa). When disabled, navigation stops at the first and last slides."
+
+carousel_align:
+  type: enum
+  default: "start"
+  choices:
+    - start
+    - center
+  description: "Slide alignment within the viewport. 'start' aligns slides to the left edge; 'center' centers the active slide. Start alignment is recommended for grid layouts."
+
+carousel_drag_free:
+  type: bool
+  default: false
+  description: "Enable free-scroll dragging. When enabled, slides can be dragged freely without snapping. When disabled (recommended), slides snap to positions for predictable navigation."
+
+carousel_speed:
+  type: enum
+  default: "normal"
+  choices:
+    - slow
+    - normal
+    - fast
+  description: "Animation speed for slide transitions. 'slow' provides smooth, leisurely transitions; 'normal' is balanced; 'fast' provides snappy, quick transitions."

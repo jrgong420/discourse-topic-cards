@@ -1,4 +1,3 @@
-/* global settings */
 // @ts-nocheck
 
 /**
