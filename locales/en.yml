@@ -29,6 +29,7 @@ en:
       grid_view_categories: "Desktop: Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both list and grid settings, list style takes priority."
       mobile_list_view_categories: "Mobile: Categories that display topic cards in list style (image left, content right). If both mobile settings are empty, topic cards are disabled on mobile. If a category appears in both list and grid settings, list style takes priority."
       mobile_grid_view_categories: "Mobile: Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both list and grid settings, list style takes priority."
+      inherit_layout_to_subcategories: "When enabled, any category chosen in a layout setting (list or grid, desktop or mobile) will apply the same layout to all of its subcategories recursively. Explicit category selections in the settings always take precedence over inherited layouts. For conflicts between inherited layouts, grid takes precedence over list."
       thumbnail_placeholder_icon: "Icon used when a topic has no thumbnail (Font Awesome name, e.g., fa-image, fa-file, fa-newspaper)."
       grid_thumbnail_max_height: "Maximum thumbnail height in pixels for grid-layout topic cards on smartphones (mobile only). Default is 150px."
 

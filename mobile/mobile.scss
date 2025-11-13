@@ -429,3 +429,47 @@
   }
 }
 
+// ============================================================================
+// Carousel Navigation Arrows - Mobile Enhancements
+// ============================================================================
+// Make carousel navigation arrows larger and more touch-friendly on mobile
+// devices. Follows WCAG 2.1 Level AAA guidelines for touch target size
+// (minimum 44×44px) and Apple Human Interface Guidelines.
+// ============================================================================
+
+.topic-cards-carousel {
+  &__arrow {
+    // Increase arrow size for better touch accessibility
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+
+    // Ensure proper touch interaction
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+
+    // Increase border for better visibility
+    border-width: 2px;
+
+    // Add more padding for larger hit area
+    padding: 0;
+
+    // Ensure z-index is above card content
+    z-index: 10;
+    position: relative;
+
+    // Visible focus outline for keyboard navigation
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    // Enhanced hover state for mobile (touch devices)
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+      background: var(--tertiary-low);
+      border-color: var(--tertiary);
+    }
+  }
+}
+

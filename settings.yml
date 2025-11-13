@@ -39,6 +39,10 @@ mobile_grid_view_categories:
   list_type: category
   default: ""
   description: "Mobile: Categories that display topic cards in grid style (image top, content below in responsive grid). If a category appears in both list and grid settings, list style takes priority."
+inherit_layout_to_subcategories:
+  type: bool
+  default: false
+  description: "When enabled, any category chosen in a layout setting (list or grid, desktop or mobile) will apply the same layout to all of its subcategories recursively. Explicit category selections in the settings always take precedence over inherited layouts. For conflicts between inherited layouts, grid takes precedence over list."
 grid_card_min_width:
   type: integer
   default: 260

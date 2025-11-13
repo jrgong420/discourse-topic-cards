@@ -34,16 +34,194 @@ import TopicMetadata from "../components/topic-metadata";
 import TopicTagsInline from "../components/topic-tags-inline";
 import TopicThumbnail from "../components/topic-thumbnail";
 
+// Module-scoped state for effective category sets (view-only, cleared on page change)
+let effectiveCategorySets = null;
+
 export default apiInitializer((api) => {
   const site = api.container.lookup("service:site");
   const router = api.container.lookup("service:router");
+
+  /**
+   * Parses a pipe-delimited category list setting into a Set of numeric IDs.
+   * @param {string} settingValue - Pipe-delimited category IDs (e.g., "1|5|12")
+   * @returns {Set<number>} Set of category IDs
+   */
+  function parseCategoryList(settingValue) {
+    return new Set(
+      (settingValue || "")
+        .split("|")
+        .filter(Boolean)
+        .map((s) => Number(s))
+    );
+  }
+
+  /**
+   * Builds an adjacency map of parent category ID -> array of child categories.
+   * @param {Array} categories - Array of category objects from the store
+   * @returns {Map<number, Array>} Map of parent ID to child categories
+   */
+  function buildCategoryAdjacencyMap(categories) {
+    const childrenByParent = new Map();
+
+    categories.forEach((cat) => {
+      const parentId = cat.parent_category_id;
+      if (parentId !== undefined && parentId !== null) {
+        if (!childrenByParent.has(parentId)) {
+          childrenByParent.set(parentId, []);
+        }
+        childrenByParent.get(parentId).push(cat);
+      }
+    });
+
+    return childrenByParent;
+  }
+
+  /**
+   * Recursively computes all descendant category IDs for a given parent category.
+   * Uses depth-first search to traverse the category tree.
+   * @param {number} parentId - Parent category ID
+   * @param {Map} childrenByParent - Adjacency map from buildCategoryAdjacencyMap
+   * @returns {Set<number>} Set of all descendant category IDs (excluding the parent itself)
+   */
+  function descendantsOf(parentId, childrenByParent) {
+    const descendants = new Set();
+    const stack = [parentId];
+
+    while (stack.length > 0) {
+      const currentId = stack.pop();
+      const children = childrenByParent.get(currentId) || [];
+
+      children.forEach((child) => {
+        if (!descendants.has(child.id)) {
+          descendants.add(child.id);
+          stack.push(child.id);
+        }
+      });
+    }
+
+    return descendants;
+  }
+
+  /**
+   * Computes effective category sets with subcategory inheritance applied.
+   * Implements conflict resolution: Explicit > Inherited; Grid > List for ties.
+   * @returns {Object} Object with desktop and mobile effective sets
+   */
+  function computeEffectiveCategorySets() {
+    // Parse base category sets from settings
+    const desktopList = parseCategoryList(settings.list_view_categories);
+    const desktopGrid = parseCategoryList(settings.grid_view_categories);
+    const mobileList = parseCategoryList(settings.mobile_list_view_categories);
+    const mobileGrid = parseCategoryList(settings.mobile_grid_view_categories);
+
+    // If inheritance is disabled, return base sets
+    if (!settings.inherit_layout_to_subcategories) {
+      return {
+        desktop: { list: desktopList, grid: desktopGrid },
+        mobile: { list: mobileList, grid: mobileGrid },
+      };
+    }
+
+    // Get all categories and build adjacency map
+    // Use site.categories (preloaded, user-permission-aware) instead of store.peekAll
+    const categories = Array.isArray(site.categories) ? site.categories : [];
+
+    // Guard: if no categories available, fall back to base sets (no inheritance)
+    if (!categories.length) {
+      return {
+        desktop: { list: desktopList, grid: desktopGrid },
+        mobile: { list: mobileList, grid: mobileGrid },
+      };
+    }
+
+    const childrenByParent = buildCategoryAdjacencyMap(categories);
+
+    // Helper to expand a base set with descendants
+    function expandWithDescendants(baseSet) {
+      const expanded = new Set(baseSet);
+      baseSet.forEach((parentId) => {
+        const descendants = descendantsOf(parentId, childrenByParent);
+        descendants.forEach((id) => expanded.add(id));
+      });
+      return expanded;
+    }
+
+    // Expand all base sets with descendants
+    const desktopListExpanded = expandWithDescendants(desktopList);
+    const desktopGridExpanded = expandWithDescendants(desktopGrid);
+    const mobileListExpanded = expandWithDescendants(mobileList);
+    const mobileGridExpanded = expandWithDescendants(mobileGrid);
+
+    // Apply conflict resolution for desktop
+    const desktopListFinal = new Set();
+    const desktopGridFinal = new Set();
+
+    desktopListExpanded.forEach((id) => {
+      const explicitList = desktopList.has(id);
+      const explicitGrid = desktopGrid.has(id);
+      const inheritedList = !explicitList && desktopListExpanded.has(id);
+      const inheritedGrid = !explicitGrid && desktopGridExpanded.has(id);
+
+      // Explicit takes precedence
+      if (explicitList) {
+        desktopListFinal.add(id);
+      } else if (explicitGrid) {
+        desktopGridFinal.add(id);
+      } else if (inheritedList && inheritedGrid) {
+        // Both inherited: grid wins
+        desktopGridFinal.add(id);
+      } else if (inheritedList) {
+        desktopListFinal.add(id);
+      }
+    });
+
+    desktopGridExpanded.forEach((id) => {
+      if (!desktopListFinal.has(id) && !desktopGridFinal.has(id)) {
+        desktopGridFinal.add(id);
+      }
+    });
+
+    // Apply conflict resolution for mobile
+    const mobileListFinal = new Set();
+    const mobileGridFinal = new Set();
+
+    mobileListExpanded.forEach((id) => {
+      const explicitList = mobileList.has(id);
+      const explicitGrid = mobileGrid.has(id);
+      const inheritedList = !explicitList && mobileListExpanded.has(id);
+      const inheritedGrid = !explicitGrid && mobileGridExpanded.has(id);
+
+      // Explicit takes precedence
+      if (explicitList) {
+        mobileListFinal.add(id);
+      } else if (explicitGrid) {
+        mobileGridFinal.add(id);
+      } else if (inheritedList && inheritedGrid) {
+        // Both inherited: grid wins
+        mobileGridFinal.add(id);
+      } else if (inheritedList) {
+        mobileListFinal.add(id);
+      }
+    });
+
+    mobileGridExpanded.forEach((id) => {
+      if (!mobileListFinal.has(id) && !mobileGridFinal.has(id)) {
+        mobileGridFinal.add(id);
+      }
+    });
+
+    return {
+      desktop: { list: desktopListFinal, grid: desktopGridFinal },
+      mobile: { list: mobileListFinal, grid: mobileGridFinal },
+    };
+  }
 
   /**
    * Determines the card style for the current category and viewport.
    * Returns "list", "grid", or null (no cards).
    *
    * Logic:
-   * 1. Parse the appropriate settings based on viewport (mobile vs desktop)
+   * 1. Compute effective category sets (with inheritance if enabled)
    * 2. If both settings for the platform are empty -> null (cards disabled)
    * 3. If category is in both list and grid settings -> "list" (list takes precedence)
    * 4. If category is in list settings -> "list"
@@ -51,21 +229,32 @@ export default apiInitializer((api) => {
    * 6. Otherwise -> null (category not assigned, cards disabled)
    */
   function cardStyleFor({ categoryId, isMobile }) {
-    // Parse category settings based on viewport
-    const listSetting = isMobile
-      ? settings.mobile_list_view_categories
-      : settings.list_view_categories;
-    const gridSetting = isMobile
-      ? settings.mobile_grid_view_categories
-      : settings.grid_view_categories;
+    // Compute effective sets if not cached
+    if (!effectiveCategorySets) {
+      try {
+        effectiveCategorySets = computeEffectiveCategorySets();
+      } catch (error) {
+        // Fall back to base sets if computation fails (prevents error loops)
+        console.warn("[Topic Cards] Failed to compute effective category sets:", error);
+        effectiveCategorySets = {
+          desktop: {
+            list: parseCategoryList(settings.list_view_categories),
+            grid: parseCategoryList(settings.grid_view_categories),
+          },
+          mobile: {
+            list: parseCategoryList(settings.mobile_list_view_categories),
+            grid: parseCategoryList(settings.mobile_grid_view_categories),
+          },
+        };
+      }
+    }
 
-    const listCategoryIds =
-      listSetting?.length > 0 ? listSetting.split("|").map(Number) : [];
-    const gridCategoryIds =
-      gridSetting?.length > 0 ? gridSetting.split("|").map(Number) : [];
+    const platform = isMobile ? "mobile" : "desktop";
+    const listCategoryIds = effectiveCategorySets[platform].list;
+    const gridCategoryIds = effectiveCategorySets[platform].grid;
 
     // If both settings are empty for this platform, cards are disabled
-    if (listCategoryIds.length === 0 && gridCategoryIds.length === 0) {
+    if (listCategoryIds.size === 0 && gridCategoryIds.size === 0) {
       return null;
     }
 
@@ -74,8 +263,8 @@ export default apiInitializer((api) => {
       return null;
     }
 
-    const inList = listCategoryIds.includes(categoryId);
-    const inGrid = gridCategoryIds.includes(categoryId);
+    const inList = listCategoryIds.has(categoryId);
+    const inGrid = gridCategoryIds.has(categoryId);
 
     // List takes precedence over grid when category is in both
     if (inList && inGrid) {
@@ -288,6 +477,9 @@ export default apiInitializer((api) => {
   }
 
   api.onPageChange(() => {
+    // Clear cached effective category sets (view-only state)
+    effectiveCategorySets = null;
+
     // Disconnect previous observer
     if (observer) {
       observer.disconnect();
