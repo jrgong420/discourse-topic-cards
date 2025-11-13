@@ -21,6 +21,7 @@
  */
 import { schedule } from "@ember/runloop";
 import { apiInitializer } from "discourse/lib/api";
+import { getURL } from "discourse/lib/get-url";
 import loadScript from "discourse/lib/load-script";
 import { i18n } from "discourse-i18n";
 
@@ -153,17 +154,23 @@ export default apiInitializer((api) => {
       if (window.EmblaCarousel) {
         return true;
       }
-      const cdnUrl = api.container.lookup("service:site-settings").cdn_url || "";
-      const themeId = document
-        .querySelector('meta[name="discourse-theme-id"]')
-        ?.getAttribute("content");
-      const url = `${cdnUrl}/theme-javascripts/embla-carousel.umd.min.js?__ws=${themeId}`;
+
+      // Prefer a configured theme upload if available; otherwise use bundled asset
+      const uploadUrl = settings?.theme_uploads?.embla_carousel;
+      const fallbackUrl = getURL("/theme-javascripts/embla-carousel.umd.min.js");
+      const url = uploadUrl || fallbackUrl;
       log("ensureEmblaLoaded: loading", url);
+
       await loadScript(url);
-      log("ensureEmblaLoaded: loaded, Embla present?", !!window.EmblaCarousel);
-      return !!window.EmblaCarousel;
+
+      const present = !!window.EmblaCarousel;
+      log("ensureEmblaLoaded: loaded, Embla present?", present);
+      if (!present) {
+        warn("ensureEmblaLoaded: script loaded but EmblaCarousel not found on window");
+      }
+      return present;
     } catch (e) {
-      error("ensureEmblaLoaded: error", e);
+      error("ensureEmblaLoaded: error while loading Embla script", e);
       return false;
     }
   }
