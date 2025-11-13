@@ -36,6 +36,7 @@ import { modifier } from "ember-modifier";
 import { not } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import loadScript from "discourse/lib/load-script";
+import getURL from "discourse-common/lib/get-url";
 import { i18n } from "discourse-i18n";
 import CarouselTopicCard from "./carousel-topic-card";
 
@@ -192,15 +193,42 @@ export default class TopicCardsCarousel extends Component {
       return;
     }
     if (!this.emblaScriptPromise) {
-      const url = settings?.theme_uploads?.embla_carousel;
-      if (!url) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          "[Carousel] Missing embla_carousel theme asset. Carousel will not initialize."
-        );
-        return;
-      }
-      this.emblaScriptPromise = loadScript(url);
+      const uploadUrl = settings?.theme_uploads?.embla_carousel;
+      const fallbackUrl =
+        typeof getURL === "function"
+          ? getURL("/theme-javascripts/embla-carousel.umd.min.js")
+          : "/theme-javascripts/embla-carousel.umd.min.js";
+      const url = uploadUrl || fallbackUrl;
+
+      this.emblaScriptPromise = (async () => {
+        // Temporarily disable AMD/CommonJS to force UMD global export
+        const previousDefine = window.define;
+        const previousModule = window.module;
+        const previousExports = window.exports;
+        const hadAMD = typeof previousDefine === "function" && previousDefine.amd;
+        try {
+          if (hadAMD) {
+            window.define = undefined;
+          }
+          if (typeof previousModule !== "undefined") {
+            window.module = undefined;
+          }
+          if (typeof previousExports !== "undefined") {
+            window.exports = undefined;
+          }
+          await loadScript(url);
+        } finally {
+          if (hadAMD) {
+            window.define = previousDefine;
+          }
+          if (typeof previousModule !== "undefined") {
+            window.module = previousModule;
+          }
+          if (typeof previousExports !== "undefined") {
+            window.exports = previousExports;
+          }
+        }
+      })();
     }
     await this.emblaScriptPromise;
   }

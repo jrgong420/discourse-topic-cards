@@ -631,7 +631,7 @@
 }
 
 .topic-cards-carousel {
-  margin: var(--space-6) 0;
+  margin: var(--space-1) 0;
   background: var(--secondary);
   border: none; // Removed border for cleaner look
   border-radius: var(--d-border-radius);
@@ -1133,4 +1133,269 @@
     height: #{$carousel-mobile-thumbnail-height-px}px;
     aspect-ratio: auto; // override mobile 16/10
   }
+}
+
+// ============================================================================
+// Subcategory Carousel Styles
+// ============================================================================
+// Transforms native subcategory lists into Embla carousels on category pages.
+// Inherits sizing/behavior from main carousel settings (CSS variables).
+// Namespace: .subcategory-carousel (distinct from .topic-cards-carousel)
+
+.subcategory-carousel {
+  position: relative;
+  margin: var(--space-4) 0;
+
+  // Peek shows a full gap + a sliver of the next slide
+  // edge = portion of next slide to reveal; peek-right = gap + edge
+  --carousel-peek-edge: 8px;
+  --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
+
+  &__viewport {
+    position: relative; // For gradient overlays
+    overflow: hidden;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    // Gradient fade overlays (desktop default: no width, only mobile shows a thin hint)
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 5;
+    }
+
+    // Left gradient fade
+    &::before {
+      left: 0;
+      background: linear-gradient(
+        to right,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.10) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.18) 40%,
+        transparent 100%
+      );
+    }
+
+    // Right gradient fade
+    &::after {
+      right: 0;
+      background: linear-gradient(
+        to left,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.10) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.18) 40%,
+        transparent 100%
+      );
+    }
+
+    // Show left gradient when there's a previous slide
+    &.has-prev::before {
+      opacity: 1;
+    }
+
+    // Show right gradient when there's a next slide
+    &.has-next::after {
+      opacity: 1;
+    }
+  }
+
+  &__container {
+    display: flex;
+    gap: var(--carousel-slide-gap);
+    backface-visibility: hidden;
+    touch-action: pan-y pinch-zoom;
+    // Horizontal gutters so first/last slides don't touch the edges (same approach as topic-cards-carousel)
+    padding: 0 var(--space-3);
+  }
+
+  &__slide {
+    flex: 0 0 auto;
+    min-width: 0;
+    position: relative;
+
+    // Width is computed dynamically via CSS variable --spv (slides per view)
+    // Leave a small spare width (peek) so the next view's first slide is visible
+    // Formula: (100% - (gap * (spv - 1)) - peek) / spv
+    width: calc(
+      (100% - (var(--carousel-slide-gap) * (var(--spv, var(--carousel-spv-cap)) - 1)) - var(--carousel-peek-right, 24px)) /
+      var(--spv, var(--carousel-spv-cap))
+    );
+
+    @media (max-width: 767px) {
+      width: calc(
+        (100% - (var(--carousel-slide-gap) * (var(--spv, 1) - 1)) - var(--carousel-peek-right, 22px)) /
+        var(--spv, 1)
+      );
+    }
+  }
+
+  // Bottom control bar: navigation arrows (left) + pagination dots (right)
+  &__controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding: 0 var(--space-2);
+
+    @media (width >= 768px) {
+      gap: var(--space-4);
+      padding: 0 var(--space-3);
+    }
+  }
+
+  // Navigation arrows container - horizontal layout on the left
+  &__nav {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-2);
+  }
+
+  // Navigation arrows - static positioning in bottom control bar
+  &__arrow {
+    background: rgb(var(--secondary-rgb, 255, 255, 255), 0.95);
+    backdrop-filter: blur(8px);
+    border: 2px solid var(--primary-medium);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
+    padding: 0;
+    flex-shrink: 0;
+
+    @media (width >= 768px) {
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--tertiary-low);
+      border-color: var(--tertiary);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transition: opacity 0.2s ease;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+
+      @media (width >= 768px) {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  // Pagination dots - aligned to the right in control bar
+  &__dots {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding: 0;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-low);
+    border: 2px solid var(--primary-medium);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+
+    &:hover {
+      background: var(--primary-medium);
+      transform: scale(1.3);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tertiary);
+      outline-offset: 2px;
+    }
+
+    &.is-active,
+    &[aria-current="true"] {
+      background: var(--tertiary);
+      border-color: var(--tertiary);
+      width: 12px;
+      height: 12px;
+      transform: scale(1.2);
+    }
+  }
+
+  // Mobile edge-peek layout: show next slide's right edge
+  @media (width <= 767px) {
+    // Mobile: smaller edge reveal, peek = gap + edge
+    --carousel-peek-edge: var(--space-6);
+    --carousel-peek-right: calc(var(--carousel-slide-gap) + var(--carousel-peek-edge));
+
+    // Super-weak gradients on mobile (keep subtle edge hint)
+    &__viewport::before,
+    &__viewport::after {
+      width: 12px;
+    }
+
+    &__viewport::before {
+      background: linear-gradient(
+        to right,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.06) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.12) 40%,
+        transparent 100%
+      );
+    }
+
+    &__viewport::after {
+      background: linear-gradient(
+        to left,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.06) 0%,
+        rgb(var(--secondary-rgb, 255, 255, 255), 0.12) 40%,
+        transparent 100%
+      );
+    }
+  }
+}
+
+// Ensure category boxes fill the full height of carousel slides
+.subcategory-carousel__container .category.category-box {
+  height: 100%;
 }
