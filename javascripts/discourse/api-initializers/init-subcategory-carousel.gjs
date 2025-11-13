@@ -21,15 +21,13 @@
  */
 import { schedule } from "@ember/runloop";
 import { apiInitializer } from "discourse/lib/api";
-import { getURL } from "discourse/lib/get-url";
+import getURL from "discourse-common/lib/get-url";
 import loadScript from "discourse/lib/load-script";
 import { i18n } from "discourse-i18n";
 
 /* eslint-disable no-console */
 const LOG_PREFIX = "[SubcategoryCarousel]";
-function log(...args) {
-  console.log(LOG_PREFIX, ...args);
-}
+function log() {}
 function warn(...args) {
   console.warn(LOG_PREFIX, ...args);
 }
@@ -157,11 +155,42 @@ export default apiInitializer((api) => {
 
       // Prefer a configured theme upload if available; otherwise use bundled asset
       const uploadUrl = settings?.theme_uploads?.embla_carousel;
-      const fallbackUrl = getURL("/theme-javascripts/embla-carousel.umd.min.js");
+      const fallbackUrl =
+        typeof getURL === "function"
+          ? getURL("/theme-javascripts/embla-carousel.umd.min.js")
+          : "/theme-javascripts/embla-carousel.umd.min.js";
       const url = uploadUrl || fallbackUrl;
       log("ensureEmblaLoaded: loading", url);
 
-      await loadScript(url);
+      // Temporarily disable AMD/CommonJS to force UMD global export
+      const previousDefine = window.define;
+      const previousModule = window.module;
+      const previousExports = window.exports;
+      const hadAMD = typeof previousDefine === "function" && previousDefine.amd;
+      log("ensureEmblaLoaded: env guards", { hadAMD, hasModule: typeof previousModule !== "undefined", hasExports: typeof previousExports !== "undefined" });
+      try {
+        if (hadAMD) {
+          window.define = undefined;
+        }
+        // Some environments expose CommonJS globals; hide them during load
+        if (typeof previousModule !== "undefined") {
+          window.module = undefined;
+        }
+        if (typeof previousExports !== "undefined") {
+          window.exports = undefined;
+        }
+        await loadScript(url);
+      } finally {
+        if (hadAMD) {
+          window.define = previousDefine;
+        }
+        if (typeof previousModule !== "undefined") {
+          window.module = previousModule;
+        }
+        if (typeof previousExports !== "undefined") {
+          window.exports = previousExports;
+        }
+      }
 
       const present = !!window.EmblaCarousel;
       log("ensureEmblaLoaded: loaded, Embla present?", present);
