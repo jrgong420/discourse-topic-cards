@@ -231,3 +231,23 @@ carousel_show_header:
   type: bool
   default: true
   description: "Show the carousel header with 'Featured Topics' title. When disabled, the carousel displays without a header section."
+
+# ============================================================================
+# Subcategory Carousel Settings
+# ============================================================================
+# Display subcategories in a carousel on category pages. Only appears when
+# a category has multiple visible subcategories (configurable minimum).
+# Inherits sizing and behavior from the main carousel settings above.
+
+subcategory_carousel_categories:
+  type: list
+  list_type: category
+  default: ""
+  description: "Enable subcategory carousel for these categories. The carousel will only appear when the category has at least the minimum number of visible subcategories (see subcategory_carousel_min_children)."
+
+subcategory_carousel_min_children:
+  type: integer
+  default: 2
+  min: 2
+  max: 12
+  description: "Minimum number of visible subcategories required to display the carousel. Default is 2. Valid range: 2-12."

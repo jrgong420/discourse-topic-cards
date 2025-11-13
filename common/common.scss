@@ -631,7 +631,7 @@
 }
 
 .topic-cards-carousel {
-  margin: var(--space-6) 0;
+  margin: var(--space-1) 0;
   background: var(--secondary);
   border: none; // Removed border for cleaner look
   border-radius: var(--d-border-radius);
@@ -1132,5 +1132,128 @@
   .carousel-topic-card__thumbnail {
     height: #{$carousel-mobile-thumbnail-height-px}px;
     aspect-ratio: auto; // override mobile 16/10
+  }
+}
+
+// ============================================================================
+// Subcategory Carousel Styles
+// ============================================================================
+// Transforms native subcategory lists into Embla carousels on category pages.
+// Inherits sizing/behavior from main carousel settings (CSS variables).
+// Namespace: .subcategory-carousel (distinct from .topic-cards-carousel)
+
+.subcategory-carousel {
+  position: relative;
+  margin: var(--space-4) 0;
+
+  &__viewport {
+    overflow: hidden;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__container {
+    display: flex;
+    gap: var(--carousel-slide-gap);
+    backface-visibility: hidden;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  &__slide {
+    flex: 0 0 auto;
+    min-width: 0;
+    position: relative;
+
+    // Responsive width calculation (same as topic carousel)
+    width: calc(
+      (100% - (var(--carousel-slide-gap) * (var(--carousel-spv-cap) - 1))) /
+      var(--carousel-spv-cap)
+    );
+
+    @media (max-width: 767px) {
+      width: 100%; // Single slide on mobile
+    }
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  &__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--border-radius);
+    background: var(--secondary);
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-very-low);
+      border-color: var(--primary-medium);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    @media (max-width: 767px) {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  &__dots {
+    display: flex;
+    gap: var(--space-1);
+    align-items: center;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary-low);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+
+    &:hover {
+      background: var(--primary-medium);
+    }
+
+    &.is-active {
+      background: var(--tertiary);
+      width: 10px;
+      height: 10px;
+    }
+
+    @media (max-width: 767px) {
+      width: 10px;
+      height: 10px;
+
+      &.is-active {
+        width: 12px;
+        height: 12px;
+      }
+    }
   }
 }
