@@ -69,24 +69,48 @@ export default apiInitializer((api) => {
     // Remove carousel wrappers and restore original structure
     const wrapper = document.querySelector(".subcategory-carousel");
     if (wrapper) {
+      const layoutVariant = wrapper.getAttribute("data-layout-variant");
       const container = wrapper.querySelector(
         ".subcategory-carousel__container"
       );
+
       if (container) {
-        // Move slides back to original parent
         const slides = container.querySelectorAll(
           ".subcategory-carousel__slide"
         );
-        slides.forEach((slide) => {
-          const originalItem = slide.firstElementChild;
-          if (originalItem && wrapper.parentElement) {
-            wrapper.parentElement.insertBefore(originalItem, wrapper);
+
+        if (layoutVariant === "boxes") {
+          // For boxes layout, move items back to the section (wrapper's parent)
+          const boxSection = wrapper.parentElement;
+          slides.forEach((slide) => {
+            const originalItem = slide.firstElementChild;
+            if (originalItem && boxSection) {
+              boxSection.appendChild(originalItem);
+            }
+          });
+          log("cleanup: restored", slides.length, "items to boxes section");
+        } else {
+          // For legacy list, move items back before wrapper and unhide list
+          slides.forEach((slide) => {
+            const originalItem = slide.firstElementChild;
+            if (originalItem && wrapper.parentElement) {
+              wrapper.parentElement.insertBefore(originalItem, wrapper);
+            }
+          });
+          // Unhide the original list container
+          const legacyList = wrapper.parentElement?.querySelector(
+            ".subcategories, .subcategory-list"
+          );
+          if (legacyList) {
+            legacyList.style.display = "";
+            log("cleanup: unhid legacy list");
           }
-        });
-        log("cleanup: restored", slides.length, "slides");
+          log("cleanup: restored", slides.length, "items to legacy list");
+        }
       }
+
       wrapper.remove();
-      log("cleanup: wrapper removed");
+      log("cleanup: wrapper removed; layoutVariant=", layoutVariant);
     }
 
     isTransformed = false;
@@ -156,34 +180,63 @@ export default apiInitializer((api) => {
         return;
       }
 
-      // Find native subcategory container
-      const selector = ".subcategories, .subcategory-list";
-      const subcategoryContainer = document.querySelector(selector);
-      const altBoxes = document.querySelectorAll(
-        ".category-boxes-with-topics .category.category-box"
-      );
-      log(
-        "transform: container query",
-        selector,
-        "found=",
-        !!subcategoryContainer,
-        "alt category-boxes count=",
-        altBoxes?.length || 0
-      );
+      // Detect layout variant and find container + items
+      let subcategoryContainer = null;
+      let subcategoryItems = [];
+      let layoutVariant = null;
+
+      // Try category-boxes-with-topics layout first (modern)
+      const boxSection = document.querySelector(".category-boxes-with-topics");
+      if (boxSection) {
+        const boxes = [...boxSection.querySelectorAll(".category.category-box")].filter(
+          (el) => el.parentElement === boxSection
+        );
+        if (boxes.length > 0) {
+          subcategoryContainer = boxSection;
+          subcategoryItems = boxes;
+          layoutVariant = "boxes";
+          log(
+            "transform: detected category-boxes layout; container=",
+            !!subcategoryContainer,
+            "items=",
+            subcategoryItems.length
+          );
+        }
+      }
+
+      // Fallback to legacy subcategory list layout
       if (!subcategoryContainer) {
-        warn("transform: subcategory container not found. No-op.");
+        const legacyContainer = document.querySelector(
+          ".subcategories, .subcategory-list"
+        );
+        if (legacyContainer) {
+          const legacyItems = legacyContainer.querySelectorAll(
+            ".subcategory-list-item, .subcategory"
+          );
+          if (legacyItems.length > 0) {
+            subcategoryContainer = legacyContainer;
+            subcategoryItems = [...legacyItems];
+            layoutVariant = "list";
+            log(
+              "transform: detected legacy list layout; container=",
+              !!subcategoryContainer,
+              "items=",
+              subcategoryItems.length
+            );
+          }
+        }
+      }
+
+      // Guard: no container found
+      if (!subcategoryContainer || subcategoryItems.length === 0) {
+        warn(
+          "transform: no subcategory container or items found. No-op. layoutVariant=",
+          layoutVariant
+        );
         return;
       }
 
-      // Find all subcategory items
-      const subcategoryItems = subcategoryContainer.querySelectorAll(
-        ".subcategory-list-item, .subcategory"
-      );
-      log("transform: found subcategory items=", subcategoryItems.length);
-      if (subcategoryItems.length === 0) {
-        warn("transform: no subcategory items found. No-op.");
-        return;
-      }
+      log("transform: proceeding with layoutVariant=", layoutVariant, "items=", subcategoryItems.length);
 
       // Load Embla
       const loaded = await ensureEmblaLoaded();
@@ -200,6 +253,7 @@ export default apiInitializer((api) => {
         "aria-label",
         i18n(themePrefix("js.subcategory_carousel.carousel_label"))
       );
+      carouselWrapper.setAttribute("data-layout-variant", layoutVariant);
 
       const viewport = document.createElement("div");
       viewport.className = "subcategory-carousel__viewport";
@@ -207,14 +261,14 @@ export default apiInitializer((api) => {
       const container = document.createElement("div");
       container.className = "subcategory-carousel__container";
 
-      // Wrap each subcategory item as a slide
+      // Move items into slides (preserves events and data)
       subcategoryItems.forEach((item, idx) => {
         const slide = document.createElement("div");
         slide.className = "subcategory-carousel__slide";
-        slide.appendChild(item.cloneNode(true));
+        slide.appendChild(item); // Move node (not clone)
         container.appendChild(slide);
         if (idx < 3) {
-          log("transform: slide appended for item #", idx + 1);
+          log("transform: moved item #", idx + 1, "into slide");
         }
       });
 
@@ -225,13 +279,22 @@ export default apiInitializer((api) => {
       const controls = createControls();
       carouselWrapper.appendChild(controls);
 
-      // Replace original container with carousel
-      subcategoryContainer.parentElement.insertBefore(
-        carouselWrapper,
-        subcategoryContainer
-      );
-      subcategoryContainer.style.display = "none";
-      log("transform: DOM replaced; initializing Embla");
+      // Insert carousel wrapper into the original container
+      if (layoutVariant === "boxes") {
+        // For boxes layout, prepend wrapper inside the section
+        subcategoryContainer.insertBefore(carouselWrapper, subcategoryContainer.firstChild);
+        log("transform: wrapper inserted at start of boxes section");
+      } else {
+        // For legacy list, insert before and hide original
+        subcategoryContainer.parentElement.insertBefore(
+          carouselWrapper,
+          subcategoryContainer
+        );
+        subcategoryContainer.style.display = "none";
+        log("transform: wrapper inserted before legacy list; list hidden");
+      }
+
+      log("transform: DOM updated; initializing Embla");
 
       // Initialize Embla
       await initializeEmbla(viewport);
