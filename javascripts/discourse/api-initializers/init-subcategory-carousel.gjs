@@ -24,6 +24,18 @@ import { apiInitializer } from "discourse/lib/api";
 import loadScript from "discourse/lib/load-script";
 import { i18n } from "discourse-i18n";
 
+/* eslint-disable no-console */
+const LOG_PREFIX = "[SubcategoryCarousel]";
+function log(...args) {
+  console.log(LOG_PREFIX, ...args);
+}
+function warn(...args) {
+  console.warn(LOG_PREFIX, ...args);
+}
+function error(...args) {
+  console.error(LOG_PREFIX, ...args);
+}
+
 // Module-scoped state (reset on navigation)
 let emblaInstance = null;
 let mutationObserver = null;
@@ -37,11 +49,13 @@ export default apiInitializer((api) => {
    * Cleanup function - destroys Embla, removes wrappers, disconnects observer
    */
   function cleanup() {
+    log("cleanup: start");
     if (emblaInstance) {
       try {
         emblaInstance.destroy();
-      } catch {
-        // Ignore errors during cleanup
+        log("cleanup: embla destroyed");
+      } catch (e) {
+        error("cleanup: embla destroy error", e);
       }
       emblaInstance = null;
     }
@@ -49,6 +63,7 @@ export default apiInitializer((api) => {
     if (mutationObserver) {
       mutationObserver.disconnect();
       mutationObserver = null;
+      log("cleanup: mutation observer disconnected");
     }
 
     // Remove carousel wrappers and restore original structure
@@ -68,11 +83,14 @@ export default apiInitializer((api) => {
             wrapper.parentElement.insertBefore(originalItem, wrapper);
           }
         });
+        log("cleanup: restored", slides.length, "slides");
       }
       wrapper.remove();
+      log("cleanup: wrapper removed");
     }
 
     isTransformed = false;
+    log("cleanup: done");
   }
 
   /**
@@ -106,86 +124,123 @@ export default apiInitializer((api) => {
    * Load Embla script if not already loaded
    */
   async function ensureEmblaLoaded() {
-    if (window.EmblaCarousel) {
-      return;
+    try {
+      log("ensureEmblaLoaded: Embla present?", !!window.EmblaCarousel);
+      if (window.EmblaCarousel) {
+        return true;
+      }
+      const cdnUrl = api.container.lookup("service:site-settings").cdn_url || "";
+      const themeId = document
+        .querySelector('meta[name="discourse-theme-id"]')
+        ?.getAttribute("content");
+      const url = `${cdnUrl}/theme-javascripts/embla-carousel.umd.min.js?__ws=${themeId}`;
+      log("ensureEmblaLoaded: loading", url);
+      await loadScript(url);
+      log("ensureEmblaLoaded: loaded, Embla present?", !!window.EmblaCarousel);
+      return !!window.EmblaCarousel;
+    } catch (e) {
+      error("ensureEmblaLoaded: error", e);
+      return false;
     }
-    const cdnUrl = api.container.lookup("service:site-settings").cdn_url || "";
-    const themeId = document
-      .querySelector('meta[name="discourse-theme-id"]')
-      ?.getAttribute("content");
-    const url = `${cdnUrl}/theme-javascripts/embla-carousel.umd.min.js?__ws=${themeId}`;
-    await loadScript(url);
   }
 
   /**
    * Transform native subcategory list into Embla carousel
    */
   async function transformSubcategoryList() {
-    // Guard: already transformed
-    if (isTransformed) {
-      return;
+    log("transform: start; isTransformed=", isTransformed);
+    try {
+      // Guard: already transformed
+      if (isTransformed) {
+        log("transform: already transformed; skipping");
+        return;
+      }
+
+      // Find native subcategory container
+      const selector = ".subcategories, .subcategory-list";
+      const subcategoryContainer = document.querySelector(selector);
+      const altBoxes = document.querySelectorAll(
+        ".category-boxes-with-topics .category.category-box"
+      );
+      log(
+        "transform: container query",
+        selector,
+        "found=",
+        !!subcategoryContainer,
+        "alt category-boxes count=",
+        altBoxes?.length || 0
+      );
+      if (!subcategoryContainer) {
+        warn("transform: subcategory container not found. No-op.");
+        return;
+      }
+
+      // Find all subcategory items
+      const subcategoryItems = subcategoryContainer.querySelectorAll(
+        ".subcategory-list-item, .subcategory"
+      );
+      log("transform: found subcategory items=", subcategoryItems.length);
+      if (subcategoryItems.length === 0) {
+        warn("transform: no subcategory items found. No-op.");
+        return;
+      }
+
+      // Load Embla
+      const loaded = await ensureEmblaLoaded();
+      if (!loaded) {
+        error("transform: Embla failed to load. Aborting transform.");
+        return;
+      }
+
+      // Create carousel structure
+      const carouselWrapper = document.createElement("div");
+      carouselWrapper.className = "subcategory-carousel";
+      carouselWrapper.setAttribute("role", "region");
+      carouselWrapper.setAttribute(
+        "aria-label",
+        i18n(themePrefix("js.subcategory_carousel.carousel_label"))
+      );
+
+      const viewport = document.createElement("div");
+      viewport.className = "subcategory-carousel__viewport";
+
+      const container = document.createElement("div");
+      container.className = "subcategory-carousel__container";
+
+      // Wrap each subcategory item as a slide
+      subcategoryItems.forEach((item, idx) => {
+        const slide = document.createElement("div");
+        slide.className = "subcategory-carousel__slide";
+        slide.appendChild(item.cloneNode(true));
+        container.appendChild(slide);
+        if (idx < 3) {
+          log("transform: slide appended for item #", idx + 1);
+        }
+      });
+
+      viewport.appendChild(container);
+      carouselWrapper.appendChild(viewport);
+
+      // Create navigation controls
+      const controls = createControls();
+      carouselWrapper.appendChild(controls);
+
+      // Replace original container with carousel
+      subcategoryContainer.parentElement.insertBefore(
+        carouselWrapper,
+        subcategoryContainer
+      );
+      subcategoryContainer.style.display = "none";
+      log("transform: DOM replaced; initializing Embla");
+
+      // Initialize Embla
+      await initializeEmbla(viewport);
+
+      isTransformed = true;
+      log("transform: done; isTransformed=", isTransformed);
+    } catch (e) {
+      error("transform: error", e);
     }
-
-    // Find native subcategory container
-    const subcategoryContainer = document.querySelector(
-      ".subcategories, .subcategory-list"
-    );
-    if (!subcategoryContainer) {
-      return;
-    }
-
-    // Find all subcategory items
-    const subcategoryItems = subcategoryContainer.querySelectorAll(
-      ".subcategory-list-item, .subcategory"
-    );
-    if (subcategoryItems.length === 0) {
-      return;
-    }
-
-    // Load Embla
-    await ensureEmblaLoaded();
-
-    // Create carousel structure
-    const carouselWrapper = document.createElement("div");
-    carouselWrapper.className = "subcategory-carousel";
-    carouselWrapper.setAttribute("role", "region");
-    carouselWrapper.setAttribute(
-      "aria-label",
-      i18n(themePrefix("js.subcategory_carousel.carousel_label"))
-    );
-
-    const viewport = document.createElement("div");
-    viewport.className = "subcategory-carousel__viewport";
-
-    const container = document.createElement("div");
-    container.className = "subcategory-carousel__container";
-
-    // Wrap each subcategory item as a slide
-    subcategoryItems.forEach((item) => {
-      const slide = document.createElement("div");
-      slide.className = "subcategory-carousel__slide";
-      slide.appendChild(item.cloneNode(true));
-      container.appendChild(slide);
-    });
-
-    viewport.appendChild(container);
-    carouselWrapper.appendChild(viewport);
-
-    // Create navigation controls
-    const controls = createControls();
-    carouselWrapper.appendChild(controls);
-
-    // Replace original container with carousel
-    subcategoryContainer.parentElement.insertBefore(
-      carouselWrapper,
-      subcategoryContainer
-    );
-    subcategoryContainer.style.display = "none";
-
-    // Initialize Embla
-    await initializeEmbla(viewport);
-
-    isTransformed = true;
   }
 
   /**
@@ -233,45 +288,52 @@ export default apiInitializer((api) => {
    * Initialize Embla carousel instance
    */
   async function initializeEmbla(viewport) {
-    if (!window.EmblaCarousel) {
-      return;
+    try {
+      if (!window.EmblaCarousel) {
+        warn("initializeEmbla: Embla not present");
+        return;
+      }
+
+      // Map speed setting to duration
+      const speedMap = { slow: 35, normal: 25, fast: 15 };
+      const duration = speedMap[settings.carousel_speed] || 25;
+
+      // Compute slides per view from CSS
+      const computeSlidesPerView = () => {
+        const cap = settings.carousel_slides_per_view || 3;
+        const minWidth = settings.carousel_min_slide_width_px || 320;
+        const gap = settings.carousel_slide_gap_px || 16;
+        const viewportWidth = viewport.offsetWidth;
+        const spv = Math.floor((viewportWidth + gap) / (minWidth + gap));
+        return Math.max(1, Math.min(spv, cap));
+      };
+
+      const slidesPerView = computeSlidesPerView();
+      log("initializeEmbla: duration=", duration, "slidesPerView=", slidesPerView);
+
+      emblaInstance = window.EmblaCarousel(viewport, {
+        align: settings.carousel_align || "start",
+        containScroll: "trimSnaps",
+        loop: settings.carousel_loop !== false,
+        dragFree: settings.carousel_drag_free || false,
+        duration,
+        skipSnaps: false,
+        slidesToScroll: settings.carousel_scroll_by === "1" ? 1 : slidesPerView,
+      });
+
+      // Update dots and button states
+      const updateUI = () => {
+        updateDots();
+        updateArrows();
+      };
+
+      emblaInstance.on("select", updateUI);
+      emblaInstance.on("reInit", updateUI);
+      updateUI();
+      log("initializeEmbla: success");
+    } catch (e) {
+      error("initializeEmbla: error", e);
     }
-
-    // Map speed setting to duration
-    const speedMap = { slow: 35, normal: 25, fast: 15 };
-    const duration = speedMap[settings.carousel_speed] || 25;
-
-    // Compute slides per view from CSS
-    const computeSlidesPerView = () => {
-      const cap = settings.carousel_slides_per_view || 3;
-      const minWidth = settings.carousel_min_slide_width_px || 320;
-      const gap = settings.carousel_slide_gap_px || 16;
-      const viewportWidth = viewport.offsetWidth;
-      const spv = Math.floor((viewportWidth + gap) / (minWidth + gap));
-      return Math.max(1, Math.min(spv, cap));
-    };
-
-    const slidesPerView = computeSlidesPerView();
-
-    emblaInstance = window.EmblaCarousel(viewport, {
-      align: settings.carousel_align || "start",
-      containScroll: "trimSnaps",
-      loop: settings.carousel_loop !== false,
-      dragFree: settings.carousel_drag_free || false,
-      duration,
-      skipSnaps: false,
-      slidesToScroll: settings.carousel_scroll_by === "1" ? 1 : slidesPerView,
-    });
-
-    // Update dots and button states
-    const updateUI = () => {
-      updateDots();
-      updateArrows();
-    };
-
-    emblaInstance.on("select", updateUI);
-    emblaInstance.on("reInit", updateUI);
-    updateUI();
   }
 
   /**
@@ -342,38 +404,63 @@ export default apiInitializer((api) => {
    * Main page change handler
    */
   api.onPageChange(() => {
+    log("onPageChange: triggered", window.location.pathname + window.location.search);
     // Always cleanup previous state
     cleanup();
 
     // Guard: only on category route
     const routeName = router.currentRouteName;
+    log("onPageChange: routeName=", routeName);
     if (!routeName?.startsWith("discovery.category")) {
+      warn("onPageChange: not a category route; skipping");
       return;
     }
 
     // Get current category
     const category = router.currentRoute?.attributes?.category;
+    log("onPageChange: category id=", category?.id);
     if (!category?.id) {
+      warn("onPageChange: no category id; skipping");
       return;
     }
 
     // Guard: feature not enabled for this category
-    if (!isEnabledForCategory(category.id)) {
+    const enabled = isEnabledForCategory(category.id);
+    log("onPageChange: enabled for category?", enabled, "enabled list=", settings.subcategory_carousel_categories);
+    if (!enabled) {
+      warn("onPageChange: feature disabled for category; skipping");
       return;
     }
 
     // Get visible subcategories
     const subcategories = getVisibleSubcategories(category.id);
     const minChildren = settings.subcategory_carousel_min_children || 2;
+    log(
+      "onPageChange: visible subcategories=",
+      subcategories.length,
+      "minChildren=",
+      minChildren
+    );
 
     // Guard: not enough subcategories
     if (subcategories.length < minChildren) {
+      warn("onPageChange: below minimum children; skipping");
       return;
     }
 
     // Transform after render
+    log("onPageChange: scheduling transform afterRender");
     schedule("afterRender", () => {
-      transformSubcategoryList();
+      try {
+        log("afterRender: attempting transform");
+        const p = transformSubcategoryList();
+        if (p && typeof p.then === "function") {
+          p.then(() => log("afterRender: transform resolved"))
+            .catch((e) => error("afterRender: transform rejected", e));
+        }
+      } catch (e) {
+        error("afterRender: transform threw", e);
+      }
     });
   });
 });
