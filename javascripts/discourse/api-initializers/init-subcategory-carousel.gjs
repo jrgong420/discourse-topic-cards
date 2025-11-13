@@ -349,6 +349,10 @@ export default apiInitializer((api) => {
     const controls = document.createElement("div");
     controls.className = "subcategory-carousel__controls";
 
+    // Arrows wrapper (keeps prev/next side-by-side in the first grid column)
+    const nav = document.createElement("div");
+    nav.className = "subcategory-carousel__nav";
+
     // Previous button
     const prevBtn = document.createElement("button");
     prevBtn.className = "subcategory-carousel__arrow subcategory-carousel__arrow--prev";
@@ -371,14 +375,18 @@ export default apiInitializer((api) => {
     nextBtn.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>';
     nextBtn.addEventListener("click", () => emblaInstance?.scrollNext());
 
+    // Append arrows to nav container
+    nav.appendChild(prevBtn);
+    nav.appendChild(nextBtn);
+
     // Dots container
     const dotsContainer = document.createElement("div");
     dotsContainer.className = "subcategory-carousel__dots";
     dotsContainer.setAttribute("role", "tablist");
 
-    controls.appendChild(prevBtn);
+    // Assemble: nav (left), dots (right)
+    controls.appendChild(nav);
     controls.appendChild(dotsContainer);
-    controls.appendChild(nextBtn);
 
     return controls;
   }
