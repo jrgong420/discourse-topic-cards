@@ -55,6 +55,7 @@ en:
       carousel_align: "Slide alignment within the viewport. 'start' aligns slides to the left edge; 'center' centers the active slide. Start alignment is recommended for grid layouts."
       carousel_drag_free: "Enable free-scroll dragging. When enabled, slides can be dragged freely without snapping. When disabled (recommended), slides snap to positions for predictable navigation."
       carousel_speed: "Animation speed for slide transitions. 'slow' provides smooth, leisurely transitions; 'normal' is balanced; 'fast' provides snappy, quick transitions."
+      carousel_show_header: "Show the carousel header with 'Featured Topics' title. When disabled, the carousel displays without a header section."
   published: "Published"
   like_toggle:
     like: "Like"

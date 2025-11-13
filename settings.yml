@@ -226,3 +226,8 @@ carousel_speed:
     - normal
     - fast
   description: "Animation speed for slide transitions. 'slow' provides smooth, leisurely transitions; 'normal' is balanced; 'fast' provides snappy, quick transitions."
+
+carousel_show_header:
+  type: bool
+  default: true
+  description: "Show the carousel header with 'Featured Topics' title. When disabled, the carousel displays without a header section."

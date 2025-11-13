@@ -634,11 +634,13 @@ export default class TopicCardsCarousel extends Component {
 
   <template>
     <div class="topic-cards-carousel" {{this.captureElement}}>
-      <div class="topic-cards-carousel__header">
-        <h2 class="topic-cards-carousel__title">{{i18n
-            (themePrefix "js.carousel.featured_topics")
-          }}</h2>
-      </div>
+      {{#if settings.carousel_show_header}}
+        <div class="topic-cards-carousel__header">
+          <h2 class="topic-cards-carousel__title">{{i18n
+              (themePrefix "js.carousel.featured_topics")
+            }}</h2>
+        </div>
+      {{/if}}
 
       {{#if this.isLoading}}
         <div class="topic-cards-carousel__loading">
