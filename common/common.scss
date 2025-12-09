@@ -1021,6 +1021,38 @@
     }
   }
 
+  // Event date / header suffix injected by plugins (e.g. Discourse Events)
+  // via the `header-topic-title-suffix` plugin outlet. In the topic list
+  // layout this outlet is positioned via CSS grid under .link-top-line; here
+  // we just give it its own block and some breathing room below the title so
+  // the same markup (including span.event-date) renders cleanly.
+  .header-topic-title-suffix-outlet {
+    margin-top: var(--space-1);
+    margin-bottom: var(--space-1);
+    display: block;
+
+    // Inside the outlet, match the look of the core topic-list event pill
+    // but scope it to the carousel so we don't change regular lists.
+    .event-date-container-wrapper {
+      display: inline-block;
+    }
+
+    .event-date {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 0.15em 0.5em;
+      border-radius: 999px;
+      background: var(--primary-very-low);
+      color: var(--primary);
+      font-size: var(--font-down-1);
+    }
+
+    .event-date .text {
+      white-space: nowrap;
+    }
+  }
+
   &__thumbnail {
     position: relative;
     width: 100%;

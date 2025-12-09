@@ -161,6 +161,13 @@ export default class CarouselTopicCard extends Component {
           <h3 class="carousel-topic-card__title">{{this.topic.title}}</h3>
         </a>
 
+        {{! Render the same header title suffix outlet used in topic lists so
+            plugins like Discourse Events can inject span.event-date markup. }}
+        <PluginOutlet
+          @name="header-topic-title-suffix"
+          @outletArgs={{lazyHash topic=this.topic}}
+        />
+
         {{#if this.topic.category}}
           <div class="carousel-topic-card__category">
             {{categoryLink this.topic.category}}
