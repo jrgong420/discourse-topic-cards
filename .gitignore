@@ -5,3 +5,9 @@ HELP
 
 # Ignore Augment local artifacts
 .augment/
+
+# Ignore Serena local artifacts
+.serena/
+
+# Ignore macOS metadata files
+.DS_Store
