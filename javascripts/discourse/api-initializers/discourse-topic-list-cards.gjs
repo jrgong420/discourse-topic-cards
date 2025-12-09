@@ -235,7 +235,11 @@ export default apiInitializer((api) => {
         effectiveCategorySets = computeEffectiveCategorySets();
       } catch (error) {
         // Fall back to base sets if computation fails (prevents error loops)
-        console.warn("[Topic Cards] Failed to compute effective category sets:", error);
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[Topic Cards] Failed to compute effective category sets:",
+          error
+        );
         effectiveCategorySets = {
           desktop: {
             list: parseCategoryList(settings.list_view_categories),

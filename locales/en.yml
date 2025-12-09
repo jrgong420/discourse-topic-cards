@@ -52,6 +52,8 @@ en:
       carousel_filter_tags: "Filter carousel topics by tags. Enter tag names separated by pipes (|). Example: 'featured|announcement'. Leave empty to show all topics. Topics matching ANY tag will be included."
       carousel_max_items: "Maximum number of topics to display in the carousel. Valid range: 1-20. Recommended: 5-10 for optimal performance. Higher values may increase load time."
       carousel_order: "Topic ordering for the carousel. 'latest' shows newest topics first; 'random' shuffles topics on each page load; 'popular' shows top topics from the past week."
+      carousel_display_expired_events: "When enabled, the featured topics carousel includes topics whose events have already ended (ends_at is in the past). Topics without events are always shown, regardless of this setting."
+      carousel_display_upcoming_events: "When enabled, the featured topics carousel includes topics whose events have not yet started (starts_at is in the future). Topics without events are always shown, regardless of this setting."
       carousel_slides_per_view: "Maximum number of slides visible at once (cap). Actual count adapts to viewport width and minimum slide width. Valid range: 1-6. Recommended: 3 for desktop."
       carousel_min_slide_width_px: "Minimum width (in pixels) per slide. Used to calculate how many slides fit in the viewport. Valid range: 240-480px. Recommended: 320px."
       carousel_slide_gap_px: "Gap between slides in pixels. Valid range: 0-64px. Default: 16px (matches Discourse spacing)."

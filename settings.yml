@@ -155,6 +155,16 @@ carousel_order:
     - popular
   description: "Topic ordering. 'latest' shows newest topics first; 'random' shuffles topics on each page load (good for variety); 'popular' shows top topics from the past week."
 
+carousel_display_expired_events:
+  type: bool
+  default: false
+  description: "When enabled, the featured topics carousel includes topics whose events have already ended (event ends_at is in the past). Topics without events are always shown."
+
+carousel_display_upcoming_events:
+  type: bool
+  default: false
+  description: "When enabled, the featured topics carousel includes topics whose events have not yet started (event starts_at is in the future). Topics without events are always shown."
+
 # Grid Layout & Sizing
 carousel_slides_per_view:
   type: integer

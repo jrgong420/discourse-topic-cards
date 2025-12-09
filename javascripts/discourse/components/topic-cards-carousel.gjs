@@ -26,6 +26,7 @@
  * @class TopicCardsCarousel
  * @extends Component
  */
+/* eslint-disable simple-import-sort/imports */
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { on } from "@ember/modifier";
@@ -36,7 +37,7 @@ import { modifier } from "ember-modifier";
 import { not } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import loadScript from "discourse/lib/load-script";
-import getURL from "discourse-common/lib/get-url";
+import getURL from "discourse/lib/get-url";
 import { i18n } from "discourse-i18n";
 import CarouselTopicCard from "./carousel-topic-card";
 
@@ -205,7 +206,8 @@ export default class TopicCardsCarousel extends Component {
         const previousDefine = window.define;
         const previousModule = window.module;
         const previousExports = window.exports;
-        const hadAMD = typeof previousDefine === "function" && previousDefine.amd;
+        const hadAMD =
+          typeof previousDefine === "function" && previousDefine.amd;
         try {
           if (hadAMD) {
             window.define = undefined;
@@ -629,7 +631,17 @@ export default class TopicCardsCarousel extends Component {
         fetchedTopics = this.shuffleArray([...fetchedTopics]);
       }
 
-      // Limit to max items
+      // Apply optional event date filtering before limiting to max items
+      if (
+        settings.carousel_display_expired_events === false ||
+        settings.carousel_display_upcoming_events === false
+      ) {
+        fetchedTopics = fetchedTopics.filter((topic) =>
+          this.topicPassesEventFilter(topic)
+        );
+      }
+
+      // Limit to max items after all filtering
       this.topics = fetchedTopics.slice(0, maxItems);
 
       // Initialize Embla for one-topic-per-slide layout
@@ -658,6 +670,26 @@ export default class TopicCardsCarousel extends Component {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  topicPassesEventFilter(topic) {
+    // Topics without events are always visible
+    if (!topic.hasCarouselEvent) {
+      return true;
+    }
+
+    const isExpired = topic.isCarouselEventExpired;
+    const isUpcoming = topic.isCarouselEventUpcoming;
+
+    if (settings.carousel_display_expired_events === false && isExpired) {
+      return false;
+    }
+
+    if (settings.carousel_display_upcoming_events === false && isUpcoming) {
+      return false;
+    }
+
+    return true;
   }
 
   <template>

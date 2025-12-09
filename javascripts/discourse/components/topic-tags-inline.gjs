@@ -1,8 +1,7 @@
-import { hash } from "@ember/helper";
 import PluginOutlet from "discourse/components/plugin-outlet";
 import categoryLink from "discourse/helpers/category-link";
 import discourseTags from "discourse/helpers/discourse-tags";
-
+import lazyHash from "discourse/helpers/lazy-hash";
 
 /**
  * TopicTagsInline Component
@@ -22,7 +21,7 @@ const TopicTagsInline = <template>
       {{categoryLink @topic.category}}
       <PluginOutlet
         @name="topic-list-after-category"
-        @outletArgs={{hash topic=@topic category=@topic.category}}
+        @outletArgs={{lazyHash topic=@topic category=@topic.category}}
       />
       {{#if @topic.tags}}
         {{discourseTags @topic mode="list"}}
